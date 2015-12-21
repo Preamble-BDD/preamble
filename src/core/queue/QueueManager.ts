@@ -8,7 +8,7 @@
 class QueueManager {
     static queue: {}[] = [];
     constructor(private timerInterval: number, private stableRetryCount: number, private Q) {}
-    run(): Q.Promise<{}> {
+    run(): Q.Promise<string> {
         let deferred = this.Q.defer()
         let retryCount: number = 0;
         let prevCount: number = 0;
