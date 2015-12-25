@@ -7,6 +7,7 @@ import mix = require("../queue/mix");
 interface IDescribe {
     id: string;
     label: string;
+    excluded: boolean;
     scope: {};
     callback: () => void;
     items: (mix)[];

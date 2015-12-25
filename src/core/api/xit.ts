@@ -17,7 +17,7 @@ function it(label: string, callback: (done?: () => void) => void) {
     }
 
     // an It object
-    _it = new It(cs.uniqueId.toString(), label, callback, cs.getTopOfStack().excluded);
+    _it = new It(cs.uniqueId.toString(), label, callback, true);
     
     // add It to the parent Describe's items collection
     cs.getTopOfStack().items.push(_it);2}

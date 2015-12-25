@@ -4,7 +4,9 @@
 
 import QueueManager = require("./core/queue/QueueManager");
 import describe = require("./core/api/describe");
+import xdescribe = require("./core/api/xdescribe");
 import it = require("./core/api/it");
+import xit = require("./core/api/xit");
 import beforeEach = require("./core/api/beforeEach");
 import afterEach = require("./core/api/afterEach");
 import Q = require("q");
@@ -13,7 +15,9 @@ import environment = require("./core/environment/environment");
 // add callable apis to the window object
 if(environment.windows){
     window["describe"] = describe;
+    window["xdescribe"] = xdescribe;
     window["it"] = it;
+    window["xit"] = xit;
     window["beforeEach"] = beforeEach;
     window["afterEach"] = afterEach;
 }

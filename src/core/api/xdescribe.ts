@@ -1,6 +1,7 @@
 /**
  * Callable API
- * describe("description", callback)
+ * xdescribe("description", callback)
+ * excluded suite
  */
 
 // import IQueueItem = require("../queue/IQueueItem");
@@ -13,7 +14,7 @@ let cs = callStack.callStack;
 /** 
  * counter is used to maintain of recursion counter
  */
-function describe(label: string, callback: () => void) {
+function xdescribe(label: string, callback: () => void) {
     let _describe: Describe;
 
     if(arguments.length !== 2 || typeof(arguments[0])
@@ -22,8 +23,7 @@ function describe(label: string, callback: () => void) {
     }
 
     // a Description object
-    _describe = new Describe(cs.uniqueId.toString(), label, callback,
-    cs.length && cs.getTopOfStack().excluded || false);
+    _describe = new Describe(cs.uniqueId.toString(), label, callback, true);
 
     // push Describe onto the queue only if it is a top level Describe
     if(cs.length === 0){
@@ -45,4 +45,4 @@ function describe(label: string, callback: () => void) {
     }
 }
 
-export = describe;
+export = xdescribe;
