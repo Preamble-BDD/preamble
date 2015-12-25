@@ -3,7 +3,6 @@
  * beforeEach(function([done]))
  */
 
-import Describe = require("../queue/Describe");
 import BeforeEach = require("../queue/BeforeEach");
 import callStack = require("./CallStack");
 

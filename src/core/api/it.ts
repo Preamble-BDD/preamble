@@ -3,7 +3,6 @@
  * it("description", callback)
  */
 
-import Describe = require("../queue/Describe");
 import It = require("../queue/It");
 import callStack = require("./CallStack");
 

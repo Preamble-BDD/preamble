@@ -3,7 +3,6 @@
  * afterEach(function([done]))
  */
 
-import Describe = require("../queue/Describe");
 import AfterEach = require("../queue/AfterEach");
 import callStack = require("./CallStack");
 
