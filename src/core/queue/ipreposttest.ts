@@ -1,6 +1,8 @@
 interface IPrePostTest {
-    scope: {}
-    callback(): any
+    id: string;
+    label: string;
+    scope: {};
+    callback: (done: () => void) => void;
 }
 
 export = IPrePostTest;

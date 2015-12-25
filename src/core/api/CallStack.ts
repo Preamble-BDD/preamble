@@ -7,24 +7,36 @@ import Describe = require("../queue/Describe");
 import It = require("../queue/It");
 import BeforeEach = require("../queue/BeforeEach");
 import AfterEach = require("../queue/AfterEach");
+import mix = require("../queue/mix");
+
 
 export interface ICallStack {
-    push(Describe): number;
-    push(BeforeEach): number;
-    push(AfterEach): number;
-    push(It): number;
-    clear(): void;
-    iterate(callback: (IQueueItem) => void): void;
-    length(): number;
+    push: (item : mix) => number;
+    pop:() => mix;
+    clear: () => void;
+    iterate: (callback: (qi: IQueueItem) => void) => void;
+    length: number;
+    getTopOfStack: () => Describe;
+    // makePath: (id: number) => string;
+    // resetUniqueId: () => void;
 }
 
-type mix = Describe & BeforeEach & AfterEach & It;
+let _uniqueId: number = 1;
 
 class CallStack implements ICallStack {
-    private callStack: (Describe & BeforeEach & AfterEach & It)[];
+    private _callStack: mix[];
     constructor(){
-        this.callStack = [];
+        this._callStack = [];
     }
+    // makePath(id: number): string {
+    //     if(!this._callStack.length) {
+    //         return id + "/";
+    //     }
+    //     let result = this._callStack.reduce((p: string, c: mix) => {
+    //         return p + c.id; 
+    //     }, "");
+    //     return result + id + "/";
+    // }
     push(queueItem){
         let describe: mix;
         // reject call if queitem isn't an IQueueItem
@@ -32,37 +44,43 @@ class CallStack implements ICallStack {
         && !(queueItem instanceof BeforeEach) && !(queueItem instanceof AfterEach)){
             throw new TypeError("callstack.push called with invalid parameter");
         }
-        if(queueItem instanceof Describe){
-            return this.callStack.push(queueItem);
-        }
-        describe = this.callStack[this.callStack.length - 1];    
-        if(queueItem instanceof BeforeEach){
-            describe.befores.push(queueItem); 
-        } else if(queueItem instanceof AfterEach){
-            describe.afters.push(queueItem); 
-        } else if(queueItem instanceof It){
-            describe.its.push(queueItem); 
-        }
+        return this._callStack.push(queueItem);
     }
     pop() {
-        if(this.callStack.length){
-            return this.callStack.pop();
+        if(this._callStack.length){
+            return this._callStack.pop();
         } else {
             return null;
         }
     }
     clear(): void {
-        this.callStack = [];
+        console.log("callStack._callStack =", this._callStack);
+        this._callStack = [];
     }
     iterate(callback: (item: IQueueItem) => void) {
-        console.log("callStack:", this.callStack);
-        this.callStack.forEach(function(item){
+        console.log("_callStack:", this._callStack);
+        this._callStack.forEach(function(item){
             callback(item);
         });
     }
-    length(): number {
-        return this.callStack.length;
+    // resetUniqueId(): void {
+    //     _uniqueId = 1;
+    // }
+    get length(): number {
+        return this._callStack.length;
+    }
+    get uniqueId(): number{
+        return _uniqueId++; 
+    }
+    getTopOfStack(): Describe {
+        return this._callStack.length && this._callStack[this._callStack.length - 1] || null;
     }
 }
 
 export let callStack = new CallStack();
+
+
+let a = ["a"];
+a.reduce((p: string, c: string): string => {
+    return p + "1";
+});

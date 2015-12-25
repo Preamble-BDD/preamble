@@ -3,16 +3,24 @@
  * it("description", callback)
  */
 
-import QueueManager = require("../queue/QueueManager");
+import Describe = require("../queue/Describe");
+import It = require("../queue/It");
+import callStack = require("./CallStack");
 
-function it(desc: string, callback: () => void){
+let cs = callStack.callStack;
+
+function it(label: string, callback: (done?: () => void) => void) {
+    let _it;
+    
     if(arguments.length !== 2 || typeof(arguments[0])
     !== "string" || typeof(arguments[1]) !== 'function'){
         throw new TypeError("it called with invalid parameters");
     }
-    QueueManager.queue.push({path: "it:" + desc + "/", callback: callback});
-    console.log("QueManager.queue item =", {path: "it:" + desc + "/", callback: callback});
-    callback.call(QueueManager.queue[QueueManager.queue.length - 1]);
-}
+
+    // an It object
+    _it = new It(cs.uniqueId.toString(), label, callback)
+    
+    // add It to the parent Describe's items collection
+    cs.getTopOfStack().items.push(_it);2}
 
 export = it;

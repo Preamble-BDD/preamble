@@ -1,9 +1,9 @@
-import IQueueItem = require("./iqueueitem");
+import IIt = require("./IIt");
 
-class It implements IQueueItem{
-    public scope;
-    public expectations;
-    constructor(path, callback){
+class It implements IIt{
+    scope: {};
+    expectations: any[];
+    constructor(public id: string, public label: string, public callback){
         this.expectations = [];
         this.scope = {};
     }

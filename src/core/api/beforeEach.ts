@@ -3,31 +3,24 @@
  * beforeEach(function([done]))
  */
 
+import Describe = require("../queue/Describe");
 import BeforeEach = require("../queue/BeforeEach");
-import QueueManager = require("../queue/QueueManager");
 import callStack = require("./CallStack");
 
 let cs = callStack.callStack;
 
-function afterEach(callback: (done?: () => void) => void) {
-
-
-    let _beforeEach: BeforeEach;
-
+function beforeEach(callback: (done?: () => void) => void) {
+    let  _beforeEach;
+    
     if(arguments.length !== 1 || typeof(arguments[0]) !== "function"){
         throw new TypeError("beforeEach called with invalid parameters");
     }
 
-    // // create callstack if doesn't exist
-    // cs = cs && cs || new callStack.CallStack();
-
-    // a Description object
-    _beforeEach = new BeforeEach(callback)
-
-    // push Description object onto the callstack
-    cs.push(_beforeEach);
-
-    _beforeEach.callback.call(_beforeEach.callback);
+    // a BeforeEach object
+    _beforeEach = new BeforeEach(cs.uniqueId.toString(), "beforeEach", callback)
+    
+    // add BeforeEach to the parent Describe's items collection
+    cs.getTopOfStack().items.push(_beforeEach);
 }
 
-export = afterEach;
+export = beforeEach;

@@ -3,31 +3,24 @@
  * afterEach(function([done]))
  */
 
+import Describe = require("../queue/Describe");
 import AfterEach = require("../queue/AfterEach");
-import QueueManager = require("../queue/QueueManager");
 import callStack = require("./CallStack");
 
 let cs = callStack.callStack;
 
 function afterEach(callback: (done?: () => void) => void) {
-
-
-    let _afterEach: AfterEach;
-
+    let _afterEach;
+    
     if(arguments.length !== 1 || typeof(arguments[0]) !== "function"){
         throw new TypeError("afterEach called with invalid parameters");
     }
 
-    // // create callstack if doesn't exist
-    // cs = cs && cs || new callStack.CallStack();
-
-    // a Description object
-    _afterEach = new AfterEach(callback)
-
-    // push Description object onto the callstack
-    cs.push(_afterEach);
-
-    _afterEach.callback.call(_afterEach.callback);
+    // an AfterEach object
+    _afterEach = new AfterEach(cs.uniqueId.toString(), "afterEach", callback)
+    
+    // add AfterEach to the parent Describe's items collection
+    cs.getTopOfStack().items.push(_afterEach);
 }
 
 export = afterEach;

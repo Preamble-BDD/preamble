@@ -22,8 +22,10 @@ if(environment.windows){
 let queueManager = new QueueManager(100, 2, Q);
 queueManager.run().then(
     (msg) => {
-        console.log("queue loaded.", msg)
-        console.log("QueueManager.queue =", QueueManager.queue)
+        console.log(msg);
+        console.log("QueueManager.queue =", QueueManager.queue);
     },
-    (msg) => console.log(msg)
+    (msg) => {
+        console.log(msg);
+    }
 );

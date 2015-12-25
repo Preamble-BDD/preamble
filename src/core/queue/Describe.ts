@@ -1,19 +1,16 @@
-import IQueueItem = require("./iqueueitem");
-import It = require("./It");
-import BeforeEach = require("./BeforeEach");
-import AfterEach = require("./AfterEach");
+import IDescribe = require("./IDescribe")
+import BeforeEach = require("./BeforeEach")
+import AfterEach = require("./AfterEach")
+import It = require("./It")
+import mix = require("./mix");
 
-class Describe implements IQueueItem {
-    befores: BeforeEach[];
-    afters: AfterEach[];
-    its: It[];
+class Describe implements IDescribe {
     scope: {};
-    constructor(public path: string, public callback: () => any){
-        this.befores = [];
-        this.afters = [];
-        this.its = [];
+    items: (Describe | BeforeEach | AfterEach | It)[];
+    constructor(public id: string, public label: string, public callback: () => any){
         this.scope = {};
-    }
+        this.items = [];
+    } 
 }
 
 export = Describe;

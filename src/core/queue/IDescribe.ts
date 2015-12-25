@@ -1,14 +1,15 @@
-import it = require("./It");
-import BeforeEach = require("./BeforeEach");
-import AfterEach = require("./AfterEach");
+import Describe = require("./Describe")
+import BeforeEach = require("./BeforeEach")
+import AfterEach = require("./AfterEach")
+import It = require("./It")
+import mix = require("../queue/mix");
 
 interface IDescribe {
-    path: string;
-    callback: () => void;
-    setups: BeforeEach[];
-    teardowns: AfterEach[];
-    its: it[];
+    id: string;
+    label: string;
     scope: {};
+    callback: () => void;
+    items: (Describe | BeforeEach | AfterEach | It)[];
 }
 
 export = IDescribe;

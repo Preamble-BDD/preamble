@@ -3,16 +3,17 @@
  * describe("description", callback)
  */
 
-import IQueueItem = require("../queue/IQueueItem");
+// import IQueueItem = require("../queue/IQueueItem");
 import callStack = require("./CallStack");
 import Describe = require("../queue/Describe");
+import QueueManager = require("../queue/QueueManager");
 
 let cs = callStack.callStack;
 
-/** counter is used to maintain of recursion count */
-let recursionCounter: number;
-
-function describe(desc: string, callback: () => void) {
+/** 
+ * counter is used to maintain of recursion counter
+ */
+function describe(label: string, callback: () => void) {
     let _describe: Describe;
 
     if(arguments.length !== 2 || typeof(arguments[0])
@@ -20,28 +21,26 @@ function describe(desc: string, callback: () => void) {
         throw new TypeError("describe called with invalid parameters");
     }
 
-    // // create callstack if doesn't exist
-    // cs = cs && cs || new callStack.CallStack();
-
     // a Description object
-    _describe = new Describe(desc, callback)
+    _describe = new Describe(cs.uniqueId.toString(), label, callback);
 
-    // push Description object onto the callstack
+    // push Describe onto the queue only if it is a top level Describe
+    if(cs.length === 0){
+        QueueManager.queue.push(_describe);
+    } else {
+        cs.getTopOfStack().items.push(_describe);
+    }
+    
+    // push Describe object onto the callstack
     cs.push(_describe);
-
-    recursionCounter = recursionCounter && ++recursionCounter || 1;
-
+    
     _describe.callback.call(_describe.scope);
+    
+    // pop Describe object off of the callstack
+    cs.pop();
 
-    recursionCounter--;
-
-    if(recursionCounter === 0){
-        //exiting the topmost describe - load the callstack into the QueueManager.queue
-        //and then clear the stack
-        cs.iterate((item: IQueueItem) => {
-            console.log("Callstack item:", item);
-        });
-        cs.clear();
+    if(cs.length === 0){
+        console.log("QueueManager queue", QueueManager.queue);
     }
 }
 

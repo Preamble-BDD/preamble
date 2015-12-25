@@ -12,36 +12,9 @@
         "removeComments": true,
         "noLib": false,
         "preserveConstEnums": true,
-        "suppressImplicitAnyIndexErrors": true
-    },
-    "filesGlob": [
-        "**/*.ts",
-        "**/*.tsx",
-        "!node_modules/**"
-    ],
-    "compileOnSave": true,
-    "buildOnSave": true,
-    "atom": {
-        "rewriteTsconfig": true
-    },
-    "files": [
-        "src/core/api/afterEach.ts",
-        "src/core/api/beforeEach.ts",
-        "src/core/api/CallStack.ts",
-        "src/core/api/describe.ts",
-        "src/core/api/it.ts",
-        "src/core/environment/environment.ts",
-        "src/core/queue/AfterEach.ts",
-        "src/core/queue/BeforeEach.ts",
-        "src/core/queue/Describe.ts",
-        "src/core/queue/IDescribe.ts",
-        "src/core/queue/ipreposttest.ts",
-        "src/core/queue/iqueueitem.ts",
-        "src/core/queue/iscope.ts",
-        "src/core/queue/It.ts",
-        "src/core/queue/QueueManager.ts",
-        "src/main.ts",
-        "typings/q/Q.d.ts",
-        "typings/tsd.d.ts"
-    ]
-}
+        "suppressImplicitAnyIndexErrors": true,
+        "sourceMap": false,
+        "inlineSourceMap": true,
+        "outDir": "dist"
+    }
+  }

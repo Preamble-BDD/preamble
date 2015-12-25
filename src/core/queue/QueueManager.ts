@@ -13,15 +13,17 @@ class QueueManager {
         let retryCount: number = 0;
         let prevCount: number = 0;
         let intervalId = setInterval(() => {
-            console.log("checking queue length stability");
+            console.log("QueueManager checking queue length stability");
             if(QueueManager.queue.length === prevCount){
                 retryCount++;
                 if(retryCount > this.stableRetryCount){
                     clearInterval(intervalId);
                     if(QueueManager.queue.length === 0){
                         deferred.reject(new Error("Nothing to test!"));
+                    } else {
+                        console.log("QueueManager queue stable.")
+                        deferred.resolve("QueueManager.queue loaded. Count = " + QueueManager.queue.length + ".");
                     }
-                    deferred.resolve("QueueManager.queue count = " + QueueManager.queue.length);
                 }
             } else if(QueueManager.queue.length > prevCount){
                 prevCount = QueueManager.queue.length;
