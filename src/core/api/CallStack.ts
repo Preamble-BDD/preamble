@@ -17,26 +17,15 @@ export interface ICallStack {
     iterate: (callback: (qi: IQueueItem) => void) => void;
     length: number;
     getTopOfStack: () => Describe;
-    // makePath: (id: number) => string;
-    // resetUniqueId: () => void;
 }
 
 let _uniqueId: number = 1;
 
 class CallStack implements ICallStack {
-    private _callStack: mix[];
+    private _callStack: Describe[];
     constructor(){
         this._callStack = [];
     }
-    // makePath(id: number): string {
-    //     if(!this._callStack.length) {
-    //         return id + "/";
-    //     }
-    //     let result = this._callStack.reduce((p: string, c: mix) => {
-    //         return p + c.id; 
-    //     }, "");
-    //     return result + id + "/";
-    // }
     push(queueItem){
         let describe: mix;
         // reject call if queitem isn't an IQueueItem
@@ -63,9 +52,6 @@ class CallStack implements ICallStack {
             callback(item);
         });
     }
-    // resetUniqueId(): void {
-    //     _uniqueId = 1;
-    // }
     get length(): number {
         return this._callStack.length;
     }

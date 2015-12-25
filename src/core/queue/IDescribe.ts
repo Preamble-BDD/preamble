@@ -9,7 +9,7 @@ interface IDescribe {
     label: string;
     scope: {};
     callback: () => void;
-    items: (Describe | BeforeEach | AfterEach | It)[];
+    items: (mix)[];
 }
 
 export = IDescribe;
