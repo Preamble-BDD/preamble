@@ -11,6 +11,7 @@ import beforeEach = require("./core/api/beforeEach");
 import afterEach = require("./core/api/afterEach");
 import Q = require("q");
 import environment = require("./core/environment/environment");
+import userConfig = require("./core/configuration/configuration");
 
 // add callable apis to the window object
 if(environment.windows){

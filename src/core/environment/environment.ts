@@ -2,7 +2,7 @@
  * environment
  */
 
- let windows: boolean = typeof(window) !== "undefined" && true || false;
+ let windows: boolean = typeof(window) !== "undefined" && window.document && true || false;
 
 interface IEnvironment { windows: boolean }
 
