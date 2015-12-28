@@ -8,6 +8,7 @@ import It = require("../queue/It");
 import BeforeEach = require("../queue/BeforeEach");
 import AfterEach = require("../queue/AfterEach");
 import mix = require("../queue/mix");
+import UniqueNumber = require("../UniqueNumber");
 
 
 export interface ICallStack {
@@ -19,12 +20,12 @@ export interface ICallStack {
     getTopOfStack: () => Describe;
 }
 
-let _uniqueId: number = 1;
-
 class CallStack implements ICallStack {
     private _callStack: Describe[];
+    private _uniqueNumber: UniqueNumber;
     constructor(){
         this._callStack = [];
+        this._uniqueNumber = new UniqueNumber();
     }
     push(queueItem){
         let describe: mix;
@@ -56,7 +57,7 @@ class CallStack implements ICallStack {
         return this._callStack.length;
     }
     get uniqueId(): number{
-        return _uniqueId++; 
+        return this._uniqueNumber.next; 
     }
     getTopOfStack(): Describe {
         return this._callStack.length && this._callStack[this._callStack.length - 1] || null;
@@ -64,9 +65,3 @@ class CallStack implements ICallStack {
 }
 
 export let callStack = new CallStack();
-
-
-let a = ["a"];
-a.reduce((p: string, c: string): string => {
-    return p + "1";
-});
