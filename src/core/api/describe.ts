@@ -35,7 +35,13 @@ function describe(label: string, callback: () => void) {
     // push Describe object onto the callstack
     cs.push(_describe);
     
-    _describe.callback.call(_describe.scope);
+    try {
+        _describe.callback.call(_describe.scope);
+    } catch (error) {
+        console.log(error);
+        alert("Error caught when calling Describe callback. See console for more information");
+        throw new Error("Terminating test!");
+    }
     
     // pop Describe object off of the callstack
     cs.pop();
