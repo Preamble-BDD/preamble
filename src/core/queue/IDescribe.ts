@@ -1,10 +1,10 @@
-import Describe = require("./Describe")
-import BeforeEach = require("./BeforeEach")
-import AfterEach = require("./AfterEach")
-import It = require("./It")
-import mix = require("../queue/mix");
+import {Describe} from "./Describe"
+import {BeforeEach} from "./BeforeEach"
+import {AfterEach} from "./AfterEach"
+import {It} from "./It"
+import {mix} from "../queue/mix";
 
-interface IDescribe {
+export interface IDescribe {
     id: string;
     label: string;
     excluded: boolean;
@@ -12,5 +12,3 @@ interface IDescribe {
     callback: () => void;
     items: (mix)[];
 }
-
-export = IDescribe;

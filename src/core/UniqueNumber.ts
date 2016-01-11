@@ -5,7 +5,7 @@
  * Useful for IDs.
  */
 
-class UniqueNumber {
+export class UniqueNumber {
     private unique: number;
     constructor() {
         this.unique = 0;
@@ -14,6 +14,3 @@ class UniqueNumber {
         return this.unique++;
     }
 }
-
-
-export = UniqueNumber;

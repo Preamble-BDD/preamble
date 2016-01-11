@@ -2,9 +2,9 @@
  * Environment Dependent Configuration
  */
 
-import environment = require("../environment/environment");
+import {environment} from "../environment/environment";
 
-let userConfig: JSON;
+export let userConfig: JSON;
 
 interface windowP extends Window {
     preambleUserConfig: any
@@ -29,5 +29,3 @@ if(environment.windows) {
 } else {
     nodeConfiguration();
 }
-
-export = userConfig;

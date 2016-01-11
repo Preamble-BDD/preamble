@@ -2,16 +2,16 @@
  * Main entry point module
  */
 
-import QueueManager = require("./core/queue/QueueManager");
-import describe = require("./core/api/describe");
-import xdescribe = require("./core/api/xdescribe");
-import it = require("./core/api/it");
-import xit = require("./core/api/xit");
-import beforeEach = require("./core/api/beforeEach");
-import afterEach = require("./core/api/afterEach");
 import Q = require("q");
-import environment = require("./core/environment/environment");
-import userConfig = require("./core/configuration/configuration");
+import {QueueManager} from "./core/queue/QueueManager";
+import {describe} from "./core/api/describe";
+import {xdescribe} from "./core/api/xdescribe";
+import {it} from "./core/api/it";
+import {xit} from "./core/api/xit";
+import {beforeEach} from "./core/api/beforeEach";
+import {afterEach} from "./core/api/afterEach";
+import {environment} from "./core/environment/environment";
+import {userConfig} from "./core/configuration/configuration";
 
 // add callable apis to the window object
 if(environment.windows){

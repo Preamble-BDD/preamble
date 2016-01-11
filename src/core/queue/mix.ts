@@ -1,8 +1,6 @@
-import Describe = require("./Describe");
-import BeforeEach = require("./BeforeEach");
-import AfterEach = require("./AfterEach");
-import It = require("./It");
+import {Describe} from "./Describe";
+import {BeforeEach} from "./BeforeEach";
+import {AfterEach} from "./AfterEach";
+import {It} from "./It";
 
-type mix = Describe | BeforeEach | AfterEach | It;
-
-export = mix;
+export type mix = Describe | BeforeEach | AfterEach | It;

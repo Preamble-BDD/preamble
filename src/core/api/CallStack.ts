@@ -2,25 +2,15 @@
  * CallStack
  */
 
-import IQueueItem = require("../queue/iqueueitem");
-import Describe = require("../queue/Describe");
-import It = require("../queue/It");
-import BeforeEach = require("../queue/BeforeEach");
-import AfterEach = require("../queue/AfterEach");
-import mix = require("../queue/mix");
-import UniqueNumber = require("../UniqueNumber");
+import {IQueueItem} from "../queue/iqueueitem";
+import {Describe} from "../queue/Describe";
+import {It} from "../queue/It";
+import {BeforeEach} from "../queue/BeforeEach";
+import {AfterEach} from "../queue/AfterEach";
+import {mix} from "../queue/mix";
+import {UniqueNumber} from "../UniqueNumber";
 
-
-export interface ICallStack {
-    push: (item : mix) => number;
-    pop:() => mix;
-    clear: () => void;
-    iterate: (callback: (qi: IQueueItem) => void) => void;
-    length: number;
-    getTopOfStack: () => Describe;
-}
-
-class CallStack implements ICallStack {
+export class CallStack {
     private _callStack: Describe[];
     private _uniqueNumber: UniqueNumber;
     constructor(){
@@ -28,7 +18,6 @@ class CallStack implements ICallStack {
         this._uniqueNumber = new UniqueNumber();
     }
     push(queueItem){
-        let describe: mix;
         // reject call if queitem isn't an IQueueItem
         if (!(queueItem instanceof Describe) && !(queueItem instanceof It)
         && !(queueItem instanceof BeforeEach) && !(queueItem instanceof AfterEach)){
@@ -57,7 +46,7 @@ class CallStack implements ICallStack {
         return this._callStack.length;
     }
     get uniqueId(): number{
-        return this._uniqueNumber.next; 
+        return this._uniqueNumber.next;
     }
     getTopOfStack(): Describe {
         return this._callStack.length && this._callStack[this._callStack.length - 1] || null;

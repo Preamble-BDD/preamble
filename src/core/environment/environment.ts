@@ -2,12 +2,8 @@
  * environment
  */
 
- let windows: boolean = typeof(window) !== "undefined" && window.document && true || false;
+let windows: boolean = typeof(window) !== "undefined" && window.document && true || false;
 
-interface IEnvironment { windows: boolean }
-
-let environment: IEnvironment = {
+export let environment = {
     windows: windows
 }
-
-export = environment;

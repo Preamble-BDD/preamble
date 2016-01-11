@@ -5,16 +5,16 @@
  */
 
 // import IQueueItem = require("../queue/IQueueItem");
-import callStack = require("./CallStack");
-import Describe = require("../queue/Describe");
-import QueueManager = require("../queue/QueueManager");
+import {callStack} from "./CallStack";
+import {Describe} from "../queue/Describe";
+import {QueueManager} from "../queue/QueueManager";
 
-let cs = callStack.callStack;
+let cs = callStack;
 
-/** 
+/**
  * counter is used to maintain of recursion counter
  */
-function xdescribe(label: string, callback: () => void) {
+export function xdescribe(label: string, callback: () => void) {
     let _describe: Describe;
 
     if(arguments.length !== 2 || typeof(arguments[0])
@@ -31,12 +31,12 @@ function xdescribe(label: string, callback: () => void) {
     } else {
         cs.getTopOfStack().items.push(_describe);
     }
-    
+
     // push Describe object onto the callstack
     cs.push(_describe);
-    
+
     _describe.callback.call(_describe.scope);
-    
+
     // pop Describe object off of the callstack
     cs.pop();
 
@@ -44,5 +44,3 @@ function xdescribe(label: string, callback: () => void) {
         console.log("QueueManager queue", QueueManager.queue);
     }
 }
-
-export = xdescribe;

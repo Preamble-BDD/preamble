@@ -1,15 +1,22 @@
 /**
- * Queue
+ * QueueManager
  * Periodically checks the length of the queue.
  * If it remains stable over a period of time it
  * signals that the queue is ready to be processed.
  */
 
-class QueueManager {
+/**
+ * Note: ts compiler will elide this import because q is only being
+ * used as a type guard. See QueueManager construcor, particularly its
+ * declaration of Q.
+ */
+import q = require("q");
+
+export class QueueManager {
     static queue: {}[] = [];
-    constructor(private timerInterval: number, private stableRetryCount: number, private Q) {}
-    run(): Q.Promise<string> {
-        let deferred = this.Q.defer()
+    constructor(private timerInterval: number, private stableRetryCount: number, private Q: typeof q /** see Note above */) {}
+    run(): Q.Promise<string | Error> {
+        let deferred = this.Q.defer<string | Error>();
         let retryCount: number = 0;
         let prevCount: number = 0;
         let intervalId = setInterval(() => {
@@ -32,5 +39,3 @@ class QueueManager {
         return deferred.promise;
     }
 }
-
-export = QueueManager;

@@ -1,5 +1,3 @@
-interface IScope {
+export interface IScope {
     scope: {}
 }
-
-export = IScope;

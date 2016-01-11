@@ -1,10 +1,8 @@
-import IPrePostTest = require("./ipreposttest");
+import {IPrePostTest} from "./ipreposttest";
 
-class BeforeEach implements IPrePostTest {
+export class BeforeEach implements IPrePostTest {
     scope: {};
     constructor(public id: string, public label: string, public callback: () => any){
         this.scope = {};
     }
 }
-
-export = BeforeEach;

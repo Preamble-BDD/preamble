@@ -2,3 +2,4 @@
 !preamble.user.config.js
 node_modules
 *.map
+*.d.ts

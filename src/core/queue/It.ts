@@ -1,6 +1,6 @@
-import IIt = require("./IIt");
+import {IIt} from "./IIt";
 
-class It implements IIt{
+export class It implements IIt{
     scope: {};
     expectations: any[];
     constructor(public id: string, public label: string, public callback, public excluded = false){
@@ -8,5 +8,3 @@ class It implements IIt{
         this.scope = {};
     }
 }
-
-export = It;
