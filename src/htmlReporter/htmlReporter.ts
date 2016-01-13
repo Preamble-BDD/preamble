@@ -1,12 +1,12 @@
 import Q = require("q");
-import {Describe} from "../core/queue/Describe.ts"
-import {BeforeEach} from "../core/queue/BeforeEach"
-import {AfterEach} from "../core/queue/AfterEach"
-import {It} from "../core/queue/It"
+import {Describe} from "../core/queue/Describe.ts";
+import {BeforeEach} from "../core/queue/BeforeEach";
+import {AfterEach} from "../core/queue/AfterEach";
+import {It} from "../core/queue/It";
 
-(function(){
+(function() {
     class HtmlReporter {
-        constructor(private suites: typeof Describe[]) {};
+        constructor(private suites: typeof Describe[]) { };
         run(): Q.IPromise<string | Error> {
             let deferred = Q.defer<string | Error>();
             setTimeout(() => {
@@ -20,4 +20,4 @@ import {It} from "../core/queue/It"
         let deferred = Q.defer();
         new HtmlReporter(suites).run();
     };
-}());
+} ());

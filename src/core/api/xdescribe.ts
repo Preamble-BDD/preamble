@@ -17,8 +17,8 @@ let cs = callStack;
 export function xdescribe(label: string, callback: () => void) {
     let _describe: Describe;
 
-    if(arguments.length !== 2 || typeof(arguments[0])
-    !== "string" || typeof(arguments[1]) !== 'function'){
+    if (arguments.length !== 2 || typeof (arguments[0])
+        !== "string" || typeof (arguments[1]) !== "function") {
         throw new TypeError("describe called with invalid parameters");
     }
 
@@ -26,7 +26,7 @@ export function xdescribe(label: string, callback: () => void) {
     _describe = new Describe(cs.uniqueId.toString(), label, callback, true);
 
     // push Describe onto the queue only if it is a top level Describe
-    if(cs.length === 0){
+    if (cs.length === 0) {
         QueueManager.queue.push(_describe);
     } else {
         cs.getTopOfStack().items.push(_describe);
@@ -40,7 +40,7 @@ export function xdescribe(label: string, callback: () => void) {
     // pop Describe object off of the callstack
     cs.pop();
 
-    if(cs.length === 0){
+    if (cs.length === 0) {
         console.log("QueueManager queue", QueueManager.queue);
     }
 }

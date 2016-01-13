@@ -14,7 +14,7 @@ import {environment} from "./core/environment/environment";
 import {userConfig} from "./core/configuration/configuration";
 
 // add callable apis to the window object
-if(environment.windows){
+if (environment.windows) {
     window["describe"] = describe;
     window["xdescribe"] = xdescribe;
     window["it"] = it;

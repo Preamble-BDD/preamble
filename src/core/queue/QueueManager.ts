@@ -14,25 +14,25 @@ import q = require("q");
 
 export class QueueManager {
     static queue: {}[] = [];
-    constructor(private timerInterval: number, private stableRetryCount: number, private Q: typeof q /** see Note above */) {}
+    constructor(private timerInterval: number, private stableRetryCount: number, private Q: typeof q /** see Note above */) { }
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
         let retryCount: number = 0;
         let prevCount: number = 0;
         let intervalId = setInterval(() => {
             console.log("QueueManager checking queue length stability");
-            if(QueueManager.queue.length === prevCount){
+            if (QueueManager.queue.length === prevCount) {
                 retryCount++;
-                if(retryCount > this.stableRetryCount){
+                if (retryCount > this.stableRetryCount) {
                     clearInterval(intervalId);
-                    if(QueueManager.queue.length === 0){
+                    if (QueueManager.queue.length === 0) {
                         deferred.reject(new Error("Nothing to test!"));
                     } else {
-                        console.log("QueueManager queue stable.")
+                        console.log("QueueManager queue stable.");
                         deferred.resolve("QueueManager.queue loaded. Count = " + QueueManager.queue.length + ".");
                     }
                 }
-            } else if(QueueManager.queue.length > prevCount){
+            } else if (QueueManager.queue.length > prevCount) {
                 prevCount = QueueManager.queue.length;
             }
         }, this.timerInterval);

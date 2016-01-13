@@ -11,8 +11,8 @@ let cs = callStack;
 export function it(label: string, callback: (done?: () => void) => void) {
     let _it;
 
-    if(arguments.length !== 2 || typeof(arguments[0])
-    !== "string" || typeof(arguments[1]) !== 'function'){
+    if (arguments.length !== 2 || typeof (arguments[0])
+        !== "string" || typeof (arguments[1]) !== "function") {
         throw new TypeError("it called with invalid parameters");
     }
 

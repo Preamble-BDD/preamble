@@ -12,5 +12,5 @@ export interface IQueueItem {
     describe?: Describe;
     it?: It;
     BeforeEach?: BeforeEach;
-    AfterEach?: AfterEach
+    AfterEach?: AfterEach;
 }

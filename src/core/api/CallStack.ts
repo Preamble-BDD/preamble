@@ -13,20 +13,20 @@ import {UniqueNumber} from "../UniqueNumber";
 export class CallStack {
     private _callStack: Describe[];
     private _uniqueNumber: UniqueNumber;
-    constructor(){
+    constructor() {
         this._callStack = [];
         this._uniqueNumber = new UniqueNumber();
     }
-    push(queueItem){
+    push(queueItem) {
         // reject call if queitem isn't an IQueueItem
         if (!(queueItem instanceof Describe) && !(queueItem instanceof It)
-        && !(queueItem instanceof BeforeEach) && !(queueItem instanceof AfterEach)){
+            && !(queueItem instanceof BeforeEach) && !(queueItem instanceof AfterEach)) {
             throw new TypeError("callstack.push called with invalid parameter");
         }
         return this._callStack.push(queueItem);
     }
     pop() {
-        if(this._callStack.length){
+        if (this._callStack.length) {
             return this._callStack.pop();
         } else {
             return null;
@@ -38,14 +38,14 @@ export class CallStack {
     }
     iterate(callback: (item: IQueueItem) => void) {
         console.log("_callStack:", this._callStack);
-        this._callStack.forEach(function(item){
+        this._callStack.forEach(function(item) {
             callback(item);
         });
     }
     get length(): number {
         return this._callStack.length;
     }
-    get uniqueId(): number{
+    get uniqueId(): number {
         return this._uniqueNumber.next;
     }
     getTopOfStack(): Describe {
