@@ -1,4 +1,4 @@
-export interface ObjectConstructor {
+interface ObjectConstructor {
     assign(target: any, ...sources: any[]): any;
 }
 

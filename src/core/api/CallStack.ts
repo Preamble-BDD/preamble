@@ -2,7 +2,6 @@
  * CallStack
  */
 
-import {IQueueItem} from "../queue/iqueueitem";
 import {Describe} from "../queue/Describe";
 import {It} from "../queue/It";
 import {BeforeEach} from "../queue/BeforeEach";
@@ -17,15 +16,13 @@ export class CallStack {
         this._callStack = [];
         this._uniqueNumber = new UniqueNumber();
     }
-    push(queueItem) {
-        // reject call if queitem isn't an IQueueItem
-        if (!(queueItem instanceof Describe) && !(queueItem instanceof It)
-            && !(queueItem instanceof BeforeEach) && !(queueItem instanceof AfterEach)) {
+    pushDescribe(describe: Describe): number {
+        if (!(describe instanceof Describe)) {
             throw new TypeError("callstack.push called with invalid parameter");
         }
-        return this._callStack.push(queueItem);
+        return this._callStack.push(describe);
     }
-    pop() {
+    popDescribe(): Describe {
         if (this._callStack.length) {
             return this._callStack.pop();
         } else {
@@ -35,12 +32,6 @@ export class CallStack {
     clear(): void {
         console.log("callStack._callStack =", this._callStack);
         this._callStack = [];
-    }
-    iterate(callback: (item: IQueueItem) => void) {
-        console.log("_callStack:", this._callStack);
-        this._callStack.forEach(function(item) {
-            callback(item);
-        });
     }
     get length(): number {
         return this._callStack.length;

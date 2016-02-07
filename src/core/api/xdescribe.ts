@@ -33,12 +33,12 @@ export function xdescribe(label: string, callback: () => void) {
     }
 
     // push Describe object onto the callstack
-    cs.push(_describe);
+    cs.pushDescribe(_describe);
 
     _describe.callback.call(_describe.scope);
 
     // pop Describe object off of the callstack
-    cs.pop();
+    cs.popDescribe();
 
     if (cs.length === 0) {
         console.log("QueueManager queue", QueueManager.queue);

@@ -29,7 +29,7 @@ export function describe(label: string, callback: () => void) {
     }
 
     // push Describe object onto the callstack
-    cs.push(_describe);
+    cs.pushDescribe(_describe);
 
     try {
         _describe.callback.call(_describe.scope);
@@ -40,7 +40,7 @@ export function describe(label: string, callback: () => void) {
     }
 
     // pop Describe object off of the callstack
-    cs.pop();
+    cs.popDescribe();
 
     if (cs.length === 0) {
         console.log("QueueManager queue", QueueManager.queue);

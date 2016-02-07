@@ -18,6 +18,6 @@ export function beforeEach(callback: (done?: () => void) => void) {
     // a BeforeEach object
     _beforeEach = new BeforeEach(cs.uniqueId.toString(), "beforeEach", callback);
 
-    // add BeforeEach to the parent Describe's items collection
-    cs.getTopOfStack().items.push(_beforeEach);
+    // add the BeforeEach to the parent Describe
+    cs.getTopOfStack().beforeEach = _beforeEach;
 }

@@ -7,8 +7,13 @@ import {mix} from "./mix";
 export class Describe {
     scope: {};
     items: (mix)[];
-    constructor(public id: string, public label: string, public callback: () => any, public excluded:boolean = false) {
+    beforeEach: BeforeEach;
+    afterEach: AfterEach;
+    constructor(public id: string, public label: string,
+        public callback: () => any, public excluded: boolean = false) {
         this.scope = {};
         this.items = [];
+        this.beforeEach = null;
+        this.afterEach = null;
     }
 }

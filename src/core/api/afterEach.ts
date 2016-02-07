@@ -16,6 +16,6 @@ export function afterEach(callback: (done?: () => void) => void) {
     // an AfterEach object
     _afterEach = new AfterEach(callStack.uniqueId.toString(), "afterEach", callback);
 
-    // add AfterEach to the parent Describe's items collection
-    callStack.getTopOfStack().items.push(_afterEach);
+    // add the AfterEach to the parent Describe
+    callStack.getTopOfStack().afterEach = _afterEach;
 }
