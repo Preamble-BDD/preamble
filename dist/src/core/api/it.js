@@ -1,0 +1,15 @@
+"use strict";
+var It_1 = require("../queue/It");
+var CallStack_1 = require("./CallStack");
+var cs = CallStack_1.callStack;
+function it(label, callback) {
+    var _it;
+    if (arguments.length !== 2 || typeof (arguments[0])
+        !== "string" || typeof (arguments[1]) !== "function") {
+        throw new TypeError("it called with invalid parameters");
+    }
+    _it = new It_1.It(cs.uniqueId.toString(), label, callback, cs.getTopOfStack().excluded);
+    cs.getTopOfStack().items.push(_it);
+}
+exports.it = it;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaXQuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvY29yZS9hcGkvaXQudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUtBLG1CQUFpQixhQUFhLENBQUMsQ0FBQTtBQUMvQiwwQkFBd0IsYUFBYSxDQUFDLENBQUE7QUFFdEMsSUFBSSxFQUFFLEdBQUcscUJBQVMsQ0FBQztBQUVuQixZQUFtQixLQUFhLEVBQUUsUUFBcUM7SUFDbkUsSUFBSSxHQUFHLENBQUM7SUFFUixFQUFFLENBQUMsQ0FBQyxTQUFTLENBQUMsTUFBTSxLQUFLLENBQUMsSUFBSSxPQUFPLENBQUMsU0FBUyxDQUFDLENBQUMsQ0FBQyxDQUFDO1lBQzNDLFFBQVEsSUFBSSxPQUFPLENBQUMsU0FBUyxDQUFDLENBQUMsQ0FBQyxDQUFDLEtBQUssVUFBVSxDQUFDLENBQUMsQ0FBQztRQUN2RCxNQUFNLElBQUksU0FBUyxDQUFDLG1DQUFtQyxDQUFDLENBQUM7SUFDN0QsQ0FBQztJQUdELEdBQUcsR0FBRyxJQUFJLE9BQUUsQ0FBQyxFQUFFLENBQUMsUUFBUSxDQUFDLFFBQVEsRUFBRSxFQUFFLEtBQUssRUFBRSxRQUFRLEVBQUUsRUFBRSxDQUFDLGFBQWEsRUFBRSxDQUFDLFFBQVEsQ0FBQyxDQUFDO0lBR25GLEVBQUUsQ0FBQyxhQUFhLEVBQUUsQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0FBQ3ZDLENBQUM7QUFiZSxVQUFFLEtBYWpCLENBQUEifQ==
