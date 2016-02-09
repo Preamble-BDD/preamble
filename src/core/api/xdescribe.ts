@@ -4,7 +4,6 @@
  * excluded suite
  */
 
-// import IQueueItem = require("../queue/IQueueItem");
 import {callStack} from "./CallStack";
 import {Describe} from "../queue/Describe";
 import {QueueManager} from "../queue/QueueManager";
