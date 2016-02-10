@@ -9,7 +9,7 @@ import {It} from "../queue/It";
 
 let cs = callStack;
 
-export function xit(label: string, callback: (done?: () => void) => void) {
+export function xit(label: string, callback: (done?: () => void) => void, timeoutInterval = 0) {
     let _it;
 
     if (arguments.length !== 2 || typeof (arguments[0])
@@ -18,7 +18,7 @@ export function xit(label: string, callback: (done?: () => void) => void) {
     }
 
     // an It object
-    _it = new It(cs.uniqueId.toString(), label, callback, true);
+    _it = new It(cs.uniqueId.toString(), label, callback, true, timeoutInterval);
 
     // add It to the parent Describe's items collection
     cs.getTopOfStack().items.push(_it);

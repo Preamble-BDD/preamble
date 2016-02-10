@@ -8,7 +8,7 @@ import {callStack} from "./CallStack";
 
 let cs = callStack;
 
-export function it(label: string, callback: (done?: () => void) => void) {
+export function it(label: string, callback: (done?: () => void) => void, timeoutInterval = 0): void {
     let _it;
 
     if (arguments.length !== 2 || typeof (arguments[0])
@@ -17,7 +17,7 @@ export function it(label: string, callback: (done?: () => void) => void) {
     }
 
     // an It object
-    _it = new It(cs.uniqueId.toString(), label, callback, cs.getTopOfStack().excluded);
+    _it = new It(cs.uniqueId.toString(), label, callback, cs.getTopOfStack().excluded, timeoutInterval);
 
     // add It to the parent Describe's items collection
     cs.getTopOfStack().items.push(_it);

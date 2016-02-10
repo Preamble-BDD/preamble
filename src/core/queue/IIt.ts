@@ -4,4 +4,5 @@ export interface IIt {
     excluded: boolean;
     scope: {};
     callback: () => void;
+    timeoutInterval: number;
 }
