@@ -4,7 +4,8 @@ export declare class It implements IIt {
     label: string;
     callback: any;
     excluded: boolean;
+    timeoutInterval: number;
     scope: {};
     expectations: any[];
-    constructor(id: string, label: string, callback: any, excluded?: boolean);
+    constructor(id: string, label: string, callback: any, excluded: boolean, timeoutInterval: number);
 }

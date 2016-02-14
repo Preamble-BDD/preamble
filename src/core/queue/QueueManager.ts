@@ -14,6 +14,8 @@ import q = require("q");
 
 export class QueueManager {
     static queue: {}[] = [];
+    static totIts: number = 0;
+    static totExclIts: number = 0;
     constructor(private timerInterval: number, private stableRetryCount: number, private Q: typeof q /** see Note above */) { }
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
@@ -36,6 +38,10 @@ export class QueueManager {
                 prevCount = QueueManager.queue.length;
             }
         }, this.timerInterval);
+        return deferred.promise;
+    }
+    runTests(): Q.Promise<string | Error> {
+        let deferred = this.Q.defer<string | Error>();
         return deferred.promise;
     }
 }

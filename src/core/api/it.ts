@@ -5,6 +5,7 @@
 
 import {It} from "../queue/It";
 import {callStack} from "./CallStack";
+import {QueueManager} from "../queue/QueueManager";
 
 let cs = callStack;
 
@@ -21,4 +22,7 @@ export function it(label: string, callback: (done?: () => void) => void, timeout
 
     // add It to the parent Describe's items collection
     cs.getTopOfStack().items.push(_it);
+
+    // Increment totIts count
+    QueueManager.totIts++;
 }

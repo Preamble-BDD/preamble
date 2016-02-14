@@ -13,7 +13,7 @@ import {afterEach} from "./core/api/afterEach";
 import {environment} from "./core/environment/environment";
 import "./core/configuration/configuration"; // prevent eliding import
 
-let reporter: any;
+let reporter: {};
 
 // Configure based on environment
 if (environment.windows) {
@@ -25,8 +25,11 @@ if (environment.windows) {
     window["beforeEach"] = beforeEach;
     window["afterEach"] = afterEach;
     // reporter
-    reporter = window["Reporter"];
-    if (reporter === void 0) {
+    if (window.hasOwnProperty("preamble") &&
+        window.preamble.hasOwnProperty("reporter")) {
+        reporter = window.preamble.reporter;
+    }
+    if (!reporter) {
         console.log("No reporter found");
         throw new Error("No reporter found");
     }
@@ -38,10 +41,13 @@ if (environment.windows) {
 let queueManager = new QueueManager(100, 2, Q);
 queueManager.run().then(
     (msg) => {
+        // fulfilled/success
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
+        // process the queue
     },
     (msg) => {
+        // rejected/failure
         console.log(msg);
     }
 );
