@@ -1,4 +1,4 @@
-import {Describe} from "./Describe";
-import {It} from "./It";
+import {IDescribe} from "./IDescribe";
+import {IIt} from "./IIt";
 
-export type mix = Describe | It;
+export type mix = IDescribe | IIt;

@@ -8,7 +8,9 @@ export interface IDescribe {
     id: string;
     label: string;
     excluded: boolean;
-    scope: {};
+    context: {};
     callback: () => void;
     items: (mix)[];
+    beforeEach: BeforeEach;
+    afterEach: AfterEach;
 }

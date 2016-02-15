@@ -4,14 +4,14 @@ import {AfterEach} from "./AfterEach";
 import {It} from "./It";
 import {mix} from "./mix";
 
-export class Describe {
-    scope: {};
+export class Describe implements IDescribe {
+    context: {};
     items: (mix)[];
     beforeEach: BeforeEach;
     afterEach: AfterEach;
     constructor(public id: string, public label: string,
         public callback: () => any, public excluded: boolean = false) {
-        this.scope = {};
+        this.context = {};
         this.items = [];
         this.beforeEach = null;
         this.afterEach = null;

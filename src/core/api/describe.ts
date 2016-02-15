@@ -32,7 +32,7 @@ export function describe(label: string, callback: () => void) {
     cs.pushDescribe(_describe);
 
     try {
-        _describe.callback.call(_describe.scope);
+        _describe.callback.call(_describe.context);
     } catch (error) {
         console.log(error);
         alert("Error caught when calling Describe callback. See console for more information");

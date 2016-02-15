@@ -1,6 +1,6 @@
 export interface IPrePostTest {
     id: string;
-    label: string;
-    scope: {};
+    context: {};
     callback: (done: () => void) => void;
+    timeoutInterval: number;
 }

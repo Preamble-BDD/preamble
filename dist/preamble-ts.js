@@ -89,12 +89,19 @@ exports.callStack = new CallStack();
 "use strict";
 var AfterEach_1 = require("../queue/AfterEach");
 var CallStack_1 = require("./CallStack");
-function afterEach(callback) {
+function afterEach(callback, timeoutInterval) {
+    if (timeoutInterval === void 0) { timeoutInterval = 0; }
     var _afterEach;
-    if (arguments.length !== 1 || typeof (arguments[0]) !== "function") {
+    if (arguments.length !== 1 && arguments.length !== 2) {
         throw new TypeError("afterEach called with invalid parameters");
     }
-    _afterEach = new AfterEach_1.AfterEach(CallStack_1.callStack.uniqueId.toString(), "afterEach", callback);
+    if (typeof (arguments[0]) !== "function") {
+        throw new TypeError("afterEach called with invalid parameters");
+    }
+    if (arguments.length === 2 && typeof (arguments[1]) !== "number") {
+        throw new TypeError("afterEach called with invalid parameters");
+    }
+    _afterEach = new AfterEach_1.AfterEach(CallStack_1.callStack.uniqueId.toString(), callback, timeoutInterval);
     CallStack_1.callStack.getTopOfStack().afterEach = _afterEach;
 }
 exports.afterEach = afterEach;
@@ -103,12 +110,19 @@ exports.afterEach = afterEach;
 var BeforeEach_1 = require("../queue/BeforeEach");
 var CallStack_1 = require("./CallStack");
 var cs = CallStack_1.callStack;
-function beforeEach(callback) {
+function beforeEach(callback, timeoutInterval) {
+    if (timeoutInterval === void 0) { timeoutInterval = 0; }
     var _beforeEach;
-    if (arguments.length !== 1 || typeof (arguments[0]) !== "function") {
+    if (arguments.length !== 1 && arguments.length !== 2) {
         throw new TypeError("beforeEach called with invalid parameters");
     }
-    _beforeEach = new BeforeEach_1.BeforeEach(cs.uniqueId.toString(), "beforeEach", callback);
+    if (typeof (arguments[0]) !== "function") {
+        throw new TypeError("beforeEach called with invalid parameters");
+    }
+    if (arguments.length === 2 && typeof (arguments[1]) !== "number") {
+        throw new TypeError("beforeEach called with invalid parameters");
+    }
+    _beforeEach = new BeforeEach_1.BeforeEach(cs.uniqueId.toString(), callback, timeoutInterval);
     cs.getTopOfStack().beforeEach = _beforeEach;
 }
 exports.beforeEach = beforeEach;
@@ -133,7 +147,7 @@ function describe(label, callback) {
     }
     cs.pushDescribe(_describe);
     try {
-        _describe.callback.call(_describe.scope);
+        _describe.callback.call(_describe.context);
     }
     catch (error) {
         console.log(error);
@@ -155,8 +169,13 @@ var cs = CallStack_1.callStack;
 function it(label, callback, timeoutInterval) {
     if (timeoutInterval === void 0) { timeoutInterval = 0; }
     var _it;
-    if (arguments.length !== 2 || typeof (arguments[0])
-        !== "string" || typeof (arguments[1]) !== "function") {
+    if (arguments.length !== 2 && arguments.length !== 3) {
+        throw new TypeError("it called with invalid parameters");
+    }
+    if (typeof (arguments[0]) !== "string" || typeof (arguments[1]) !== "function") {
+        throw new TypeError("it called with invalid parameters");
+    }
+    if (arguments.length === 3 && typeof (arguments[2]) !== "number") {
         throw new TypeError("it called with invalid parameters");
     }
     _it = new It_1.It(cs.uniqueId.toString(), label, callback, cs.getTopOfStack().excluded, timeoutInterval);
@@ -184,7 +203,7 @@ function xdescribe(label, callback) {
         cs.getTopOfStack().items.push(_describe);
     }
     cs.pushDescribe(_describe);
-    _describe.callback.call(_describe.scope);
+    _describe.callback.call(_describe.context);
     cs.popDescribe();
     if (cs.length === 0) {
         console.log("QueueManager queue", QueueManager_1.QueueManager.queue);
@@ -200,8 +219,13 @@ var cs = CallStack_1.callStack;
 function xit(label, callback, timeoutInterval) {
     if (timeoutInterval === void 0) { timeoutInterval = 0; }
     var _it;
-    if (arguments.length !== 2 || typeof (arguments[0])
-        !== "string" || typeof (arguments[1]) !== "function") {
+    if (arguments.length !== 2 && arguments.length !== 3) {
+        throw new TypeError("it called with invalid parameters");
+    }
+    if (typeof (arguments[0]) !== "string" || typeof (arguments[1]) !== "function") {
+        throw new TypeError("it called with invalid parameters");
+    }
+    if (arguments.length === 3 && typeof (arguments[2]) !== "number") {
         throw new TypeError("it called with invalid parameters");
     }
     _it = new It_1.It(cs.uniqueId.toString(), label, callback, true, timeoutInterval);
@@ -248,11 +272,11 @@ exports.environment = {
 },{}],12:[function(require,module,exports){
 "use strict";
 var AfterEach = (function () {
-    function AfterEach(id, label, callback) {
+    function AfterEach(id, callback, timeoutInterval) {
         this.id = id;
-        this.label = label;
         this.callback = callback;
-        this.scope = [];
+        this.timeoutInterval = timeoutInterval;
+        this.context = {};
     }
     return AfterEach;
 }());
@@ -260,11 +284,11 @@ exports.AfterEach = AfterEach;
 },{}],13:[function(require,module,exports){
 "use strict";
 var BeforeEach = (function () {
-    function BeforeEach(id, label, callback) {
+    function BeforeEach(id, callback, timeoutInterval) {
         this.id = id;
-        this.label = label;
         this.callback = callback;
-        this.scope = {};
+        this.timeoutInterval = timeoutInterval;
+        this.context = {};
     }
     return BeforeEach;
 }());
@@ -278,7 +302,7 @@ var Describe = (function () {
         this.label = label;
         this.callback = callback;
         this.excluded = excluded;
-        this.scope = {};
+        this.context = {};
         this.items = [];
         this.beforeEach = null;
         this.afterEach = null;
@@ -304,6 +328,8 @@ var It = (function () {
 exports.It = It;
 },{}],16:[function(require,module,exports){
 "use strict";
+var It_1 = require("./It");
+var configuration_1 = require("../configuration/configuration");
 var QueueManager = (function () {
     function QueueManager(timerInterval, stableRetryCount, Q) {
         this.timerInterval = timerInterval;
@@ -336,8 +362,71 @@ var QueueManager = (function () {
         }, this.timerInterval);
         return deferred.promise;
     };
+    QueueManager.prototype.runBeforeAfter = function (fn, ms, context) {
+        var deferred = this.Q.defer();
+        var completed = false;
+        var timedOut = false;
+        var timerId = setTimeout(function () {
+            if (!completed) {
+                timedOut = true;
+                deferred.reject(new Error("Function failed to complete within {ms}"));
+            }
+        }, ms);
+        if (fn.length) {
+            setTimeout(function () {
+                fn.call(context, function () {
+                    if (!timedOut) {
+                        clearTimeout(timerId);
+                        completed = true;
+                        deferred.resolve();
+                    }
+                });
+            }, 1);
+        }
+        else {
+            setTimeout(function () {
+                fn.call(context);
+                if (!timedOut) {
+                    clearTimeout(timerId);
+                    completed = true;
+                    deferred.resolve();
+                }
+            }, 1);
+        }
+        return deferred.promise;
+    };
     QueueManager.prototype.runTests = function () {
         var deferred = this.Q.defer();
+        var timeoutInterval;
+        var item;
+        var _loop_1 = function(i) {
+            var describe = QueueManager.queue[i];
+            for (var ii = 0; ii < describe.items.length; ii++) {
+                item = describe.items[ii];
+                if (item instanceof It_1.It) {
+                    console.log("item instance of It");
+                    if (describe.beforeEach) {
+                        timeoutInterval = describe.beforeEach.timeoutInterval > 0 &&
+                            describe.beforeEach.timeoutInterval || configuration_1.configuration.timeoutInterval;
+                        this_1.runBeforeAfter(describe.beforeEach.callback, timeoutInterval, describe.context)
+                            .then(function () {
+                            console.log("runBeforeAfter success!");
+                            console.log("describe.context", describe.context);
+                        }, function (err) {
+                            console.log("runBeforeAfter failed!");
+                            console.log(err.message);
+                        });
+                    }
+                }
+                else {
+                    console.log("item instance of Describe");
+                }
+            }
+        };
+        var this_1 = this;
+        for (var i = 0; i < QueueManager.length; i++) {
+            _loop_1(i);
+        }
         return deferred.promise;
     };
     QueueManager.queue = [];
@@ -346,7 +435,7 @@ var QueueManager = (function () {
     return QueueManager;
 }());
 exports.QueueManager = QueueManager;
-},{}],17:[function(require,module,exports){
+},{"../configuration/configuration":10,"./It":15}],17:[function(require,module,exports){
 "use strict";
 var Q = require("q");
 var QueueManager_1 = require("./core/queue/QueueManager");
@@ -382,6 +471,7 @@ var queueManager = new QueueManager_1.QueueManager(100, 2, Q);
 queueManager.run().then(function (msg) {
     console.log(msg);
     console.log("QueueManager.queue =", QueueManager_1.QueueManager.queue);
+    queueManager.runTests();
 }, function (msg) {
     console.log(msg);
 });

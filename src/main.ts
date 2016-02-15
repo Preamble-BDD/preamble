@@ -45,6 +45,7 @@ queueManager.run().then(
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
         // process the queue
+        queueManager.runTests();
     },
     (msg) => {
         // rejected/failure

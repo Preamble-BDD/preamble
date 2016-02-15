@@ -34,7 +34,7 @@ export function xdescribe(label: string, callback: () => void) {
     // push Describe object onto the callstack
     cs.pushDescribe(_describe);
 
-    _describe.callback.call(_describe.scope);
+    _describe.callback.call(_describe.context);
 
     // pop Describe object off of the callstack
     cs.popDescribe();
