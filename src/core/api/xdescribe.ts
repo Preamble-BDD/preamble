@@ -4,7 +4,7 @@
  * excluded suite
  */
 
-import {callStack} from "./CallStack";
+import {callStack} from "./callstack";
 import {Describe} from "../queue/Describe";
 import {QueueManager} from "../queue/QueueManager";
 

@@ -1,8 +1,8 @@
 "use strict";
 var It_1 = require("../queue/It");
-var CallStack_1 = require("./CallStack");
+var callstack_1 = require("./callstack");
 var QueueManager_1 = require("../queue/QueueManager");
-var cs = CallStack_1.callStack;
+var cs = callstack_1.callStack;
 function it(label, callback, timeoutInterval) {
     if (timeoutInterval === void 0) { timeoutInterval = 0; }
     var _it;

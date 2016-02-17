@@ -4,8 +4,6 @@
 
 import {Describe} from "../queue/Describe";
 import {It} from "../queue/It";
-import {BeforeEach} from "../queue/BeforeEach";
-import {AfterEach} from "../queue/AfterEach";
 import {mix} from "../queue/mix";
 import {UniqueNumber} from "../UniqueNumber";
 
@@ -43,5 +41,3 @@ export class CallStack {
         return this._callStack.length && this._callStack[this._callStack.length - 1] || null;
     }
 }
-
-export let callStack = new CallStack();

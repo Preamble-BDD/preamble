@@ -1,8 +1,8 @@
 "use strict";
-var CallStack_1 = require("./CallStack");
+var callstack_1 = require("./callstack");
 var Describe_1 = require("../queue/Describe");
 var QueueManager_1 = require("../queue/QueueManager");
-var cs = CallStack_1.callStack;
+var cs = callstack_1.callStack;
 function xdescribe(label, callback) {
     var _describe;
     if (arguments.length !== 2 || typeof (arguments[0])

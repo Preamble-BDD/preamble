@@ -1,7 +1,7 @@
 "use strict";
 var BeforeEach_1 = require("../queue/BeforeEach");
-var CallStack_1 = require("./CallStack");
-var cs = CallStack_1.callStack;
+var callstack_1 = require("./callstack");
+var cs = callstack_1.callStack;
 function beforeEach(callback, timeoutInterval) {
     if (timeoutInterval === void 0) { timeoutInterval = 0; }
     var _beforeEach;

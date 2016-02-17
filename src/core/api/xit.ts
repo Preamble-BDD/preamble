@@ -4,7 +4,7 @@
  * exlude test
  */
 
-import {callStack} from "./CallStack";
+import {callStack} from "./callstack";
 import {It} from "../queue/It";
 import {QueueManager} from "../queue/QueueManager";
 

@@ -4,7 +4,7 @@
  */
 
 import {AfterEach} from "../queue/AfterEach";
-import {callStack} from "./CallStack";
+import {callStack} from "./callstack";
 
 export function afterEach(callback: (done?: () => void) => void, timeoutInterval = 0): void {
     let _afterEach;

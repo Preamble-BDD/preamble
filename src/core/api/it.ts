@@ -4,7 +4,7 @@
  */
 
 import {It} from "../queue/It";
-import {callStack} from "./CallStack";
+import {callStack} from "./callstack";
 import {QueueManager} from "../queue/QueueManager";
 
 let cs = callStack;

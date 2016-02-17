@@ -4,7 +4,7 @@
  */
 
 import {BeforeEach} from "../queue/BeforeEach";
-import {callStack} from "./CallStack";
+import {callStack} from "./callstack";
 
 let cs = callStack;
 
