@@ -5,14 +5,12 @@
 import {Describe} from "../queue/Describe";
 import {It} from "../queue/It";
 import {mix} from "../queue/mix";
-import {UniqueNumber} from "../UniqueNumber";
+import {IUniqueNumber} from "../uniquenumber/IUniqueNumber";
 
 export class CallStack {
     private _callStack: Describe[];
-    private _uniqueNumber: UniqueNumber;
-    constructor() {
+    constructor(private _uniqueNumber: IUniqueNumber) {
         this._callStack = [];
-        this._uniqueNumber = new UniqueNumber();
     }
     pushDescribe(describe: Describe): number {
         if (!(describe instanceof Describe)) {

@@ -1,11 +1,13 @@
 /**
  * UniqueNumber
- * 
+ *
  * Unique sequential number generator.
  * Useful for IDs.
  */
 
-export class UniqueNumber {
+import {IUniqueNumber} from "./IUniqueNumber";
+
+export class UniqueNumber implements IUniqueNumber {
     private unique: number;
     constructor() {
         this.unique = 0;
