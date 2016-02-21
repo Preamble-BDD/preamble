@@ -5,12 +5,15 @@
  */
 import q = require("q");
 import {IDescribe} from "./IDescribe";
+import {IPrePostTest} from "./ipreposttest";
 import {IIt} from "./IIt";
 import {It} from "./It";
 import {mix} from "./mix";
+import {ICallStack} from "../callstack/ICallStack";
 
 export class QueueRunner {
-    constructor(private queue: IDescribe[], private configTimeoutInterval: number, private Q: typeof q) { }
+    constructor(private queue: IDescribe[], private configTimeoutInterval: number,
+        private Q: typeof q, private callStack: ICallStack) { }
     /**
      * Call a function which must complete within a set amount of time asynchronously.
      * If the function fails to complete within its given time limit then its promise
@@ -63,33 +66,53 @@ export class QueueRunner {
         // Immediately return a promise to the caller.
         return deferred.promise;
     }
+    runIt(it: It, beforeEach: IPrePostTest, afterEach: IPrePostTest,
+        context: {}): Q.Promise<string | Error> {
+        let deferred = this.Q.defer<string | Error>();
+        let timeoutInterval: number;
+        setTimeout(() => {
+            if (beforeEach) {
+                timeoutInterval = beforeEach.timeoutInterval > 0 &&
+                    beforeEach.timeoutInterval || this.configTimeoutInterval;
+                this.runBeforeAfter(beforeEach.callback, timeoutInterval, context)
+                    .then(function() {
+                        console.log("runBeforeAfter success!");
+                        console.log("describe.context", context);
+                    }, function(err: Error) {
+                        console.log("runBeforeAfter failed!");
+                        console.log(err.message);
+                    });
+            }
+        }, 1);
+        return deferred.promise;
+    }
+    runDescribe(describe: IDescribe): Q.Promise<string | Error> {
+        let deferred = this.Q.defer<string | Error>();
+        let timeoutInterval: number;
+        let item: mix;
+        setTimeout(() => {
+            for (let i = 0; i < describe.items.length; i++) {
+                item = describe.items[i];
+                if (item instanceof It) {
+                    console.log("item instance of It");
+                    this.runIt(item, describe.beforeEach, describe.afterEach, describe.context);
+                } else {
+                    console.log("item instance of Describe");
+                }
+            }
+        }, 1);
+        return deferred.promise;
+    }
+    /**
+     * Iterate through all the queue's top level Describes
+     */
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
         let timeoutInterval: number;
         let item: mix;
-        setTimeout(function() {
+        setTimeout(() => {
             for (let i = 0; i < this.queue.length; i++) {
-                let describe: IDescribe = this.queue[i];
-                for (let ii = 0; ii < describe.items.length; ii++) {
-                    item = describe.items[ii];
-                    if (item instanceof It) {
-                        console.log("item instance of It");
-                        if (describe.beforeEach) {
-                            timeoutInterval = describe.beforeEach.timeoutInterval > 0 &&
-                                describe.beforeEach.timeoutInterval || this.configTimeoutInterval;
-                            this.runBeforeAfter(describe.beforeEach.callback, timeoutInterval, describe.context)
-                                .then(function() {
-                                    console.log("runBeforeAfter success!");
-                                    console.log("describe.context", describe.context);
-                                }, function(err: Error) {
-                                    console.log("runBeforeAfter failed!");
-                                    console.log(err.message);
-                                });
-                        }
-                    } else {
-                        console.log("item instance of Describe");
-                    }
-                }
+                this.runDescribe(this.queue[i]);
             }
         }, 1);
         return deferred.promise;

@@ -6,8 +6,9 @@ import {Describe} from "../queue/Describe";
 import {It} from "../queue/It";
 import {mix} from "../queue/mix";
 import {IUniqueNumber} from "../uniquenumber/IUniqueNumber";
+import {ICallStack} from "./ICallStack";
 
-export class CallStack {
+export class CallStack implements ICallStack {
     private _callStack: Describe[];
     constructor(private _uniqueNumber: IUniqueNumber) {
         this._callStack = [];

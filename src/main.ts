@@ -13,6 +13,8 @@ import {beforeEach} from "./core/api/beforeEach";
 import {afterEach} from "./core/api/afterEach";
 import {environment} from "./core/environment/environment";
 import {configuration} from "./core/configuration/configuration";
+import {CallStack} from "./core/callstack/CallStack";
+import {UniqueNumber} from "./core/uniquenumber/UniqueNumber";
 import "./core/configuration/configuration"; // prevent eliding import
 
 let reporter: {};
@@ -46,7 +48,7 @@ new QueueManager(100, 2, Q).run().then(
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
         // run the specs in the queueManager.queue
-        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run();
+        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q, new CallStack(new UniqueNumber())).run();
     },
     (msg) => {
         // rejected/failure
