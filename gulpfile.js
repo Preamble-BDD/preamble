@@ -10,7 +10,7 @@ watcher.on("change", function(event) {
 });
 
 gulp.task("bundle", function () {
-    return browserify("dist/src/main.js", "debug")
+    return browserify("dist/main.js", "debug")
     .bundle()
     .pipe(vinylSource("preamble-ts.js"))
     .pipe(gulp.dest("./dist/"));

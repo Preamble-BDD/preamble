@@ -30,6 +30,9 @@ export class CallStack implements ICallStack {
         console.log("callStack._callStack =", this._callStack);
         this._callStack = [];
     }
+    get stack(): Describe[] {
+        return this._callStack;
+    }
     get length(): number {
         return this._callStack.length;
     }

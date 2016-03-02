@@ -13,4 +13,5 @@ export interface IDescribe {
     items: (mix)[];
     beforeEach: BeforeEach;
     afterEach: AfterEach;
+    parent: IDescribe;
 }

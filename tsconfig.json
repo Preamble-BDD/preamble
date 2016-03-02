@@ -13,8 +13,7 @@
         "noLib": false,
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
-        "sourceMap": false,
-        "inlineSourceMap": true,
+        "sourceMap": true,
         "outDir": "dist"
     }
 }

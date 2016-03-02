@@ -3,7 +3,7 @@
  */
 
 import {environment} from "../environment/environment";
-import "../../../polyfills/Object.assign"; // prevent eliding import
+import "../../polyfills/Object.assign"; // prevent eliding import
 
 export interface IPreambleWindowConfiguration {
     windowGlobals?: boolean;

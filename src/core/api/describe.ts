@@ -19,6 +19,7 @@ export function describe(label: string, callback: () => void) {
 
     // a Description object
     _describe = new Describe(cs.uniqueId.toString(), label, callback,
+        cs.length && cs.getTopOfStack() || null,
         cs.length && cs.getTopOfStack().excluded || false);
 
     // push Describe onto the queue only if it is a top level Describe

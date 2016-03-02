@@ -48,7 +48,7 @@ new QueueManager(100, 2, Q).run().then(
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
         // run the specs in the queueManager.queue
-        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q, new CallStack(new UniqueNumber())).run();
+        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run(0);
     },
     (msg) => {
         // rejected/failure

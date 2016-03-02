@@ -10,7 +10,8 @@ export class Describe implements IDescribe {
     beforeEach: BeforeEach;
     afterEach: AfterEach;
     constructor(public id: string, public label: string,
-        public callback: () => any, public excluded: boolean = false) {
+        public callback: () => any, public parent: IDescribe,
+        public excluded: boolean = false) {
         this.context = {};
         this.items = [];
         this.beforeEach = null;
