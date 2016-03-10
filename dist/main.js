@@ -34,7 +34,8 @@ else {
 new QueueManager_1.QueueManager(100, 2, Q).run().then(function (msg) {
     console.log(msg);
     console.log("QueueManager.queue =", QueueManager_1.QueueManager.queue);
-    new QueueRunner_1.QueueRunner(QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, Q).run();
+    new QueueRunner_1.QueueRunner(QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, Q).run()
+        .then(function () { return console.log("queue ran successfully"); }, function () { return console.log("queue failed to run"); });
 }, function (msg) {
     console.log(msg);
 });

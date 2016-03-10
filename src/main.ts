@@ -47,8 +47,9 @@ new QueueManager(100, 2, Q).run().then(
         // fulfilled/success
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
-        // run the specs in the queueManager.queue
-        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run();
+        // run the queue
+        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run()
+            .then(() => console.log("queue ran successfully"), () => console.log("queue failed to run"));
     },
     (msg) => {
         // rejected/failure

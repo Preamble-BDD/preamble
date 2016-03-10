@@ -25,11 +25,12 @@ export class QueueRunner {
      * Example:
      * beforeEach(function(done) {...}, 1);
      */
-    private runBeforeAfter(fn: (done?: () => void) => any, ms: number, context: {}): () => Q.Promise<string | Error> {
+    private runBeforeAfterIt(fn: (done?: () => void) => any, ms: number, context: {}): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
-        return function() {
-            let completed = false;
-            let timedOut = false;
+        let completed = false;
+        let timedOut = false;
+
+        setTimeout(() => {
             // A timer whose callback is triggered after ms have expired
             // and which rejects the promise if the promise isn't already
             // resolved.
@@ -66,66 +67,108 @@ export class QueueRunner {
                     }
                 }, 1);
             }
-            // Immediately return a promise to the caller.
-            return deferred.promise;
-        };
+        }, 1);
+        // Immediately return a promise to the caller.
+        return deferred.promise;
     }
+    /**
+     * runs ancestor hierarchy of BeforeEach with inherited contexts
+     */
     private runBefores(hierarchy: IDescribe[]): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
-        let result: Q.Promise<string | Error> = Q("");
-        let timeoutInterval: number;
-        let befores = [];
-        // build array of functions that return promises
-        hierarchy.forEach((describe) => {
-            if (describe.beforeEach) {
-                befores.push(this.runBeforeAfter(
-                    describe.beforeEach.callback,
-                    describe.beforeEach.timeoutInterval > 0 &&
-                    describe.beforeEach.timeoutInterval || this.configTimeoutInterval,
-                    describe.parent && Object.assign({}, describe.parent.context) || describe.context
-                ));
-            }
-        });
-        // run the functions in sequence and return a single promise for all of them
-        return befores.reduce(Q.when);
+
+        let runner = (ndx) => {
+            setTimeout(() => {
+                if (ndx < hierarchy.length) {
+                    // setup the context for calling BeforeEach.callback
+                    // if it is not the 1st ([0]) item in the array
+                    if (ndx) {
+                        hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
+                        console.log("context for " + hierarchy[ndx].label, hierarchy[ndx].context);
+                    } else {
+                        hierarchy[ndx].context = {};
+                    }
+                    if (hierarchy[ndx].beforeEach) {
+                        let ms = hierarchy[ndx].beforeEach.timeoutInterval > 0
+                            && hierarchy[ndx].beforeEach.timeoutInterval || this.configTimeoutInterval;
+                        this.runBeforeAfterIt(hierarchy[ndx].beforeEach.callback, ms, hierarchy[ndx].context).then(() => {
+                            runner(++ndx);
+                        });
+                    } else {
+                        runner(++ndx);
+                    }
+                } else {
+                    deferred.resolve();
+                }
+            }, 1);
+        };
+
+        runner(0);
+
+        return deferred.promise;
     }
-    private runAfters(): void {
-        // will be same as runBefores but use Describe.AfterEach instead
+    /**
+     * runs ancestor hierarchy of AfterEach with inherited contexts
+     */
+    private runAfters(hierarchy: IDescribe[]): Q.Promise<string | Error> {
+        let deferred = this.Q.defer<string | Error>();
+
+        let runner = (ndx) => {
+            setTimeout(() => {
+                if (ndx < hierarchy.length) {
+                    // setup the context for calling afterEach.callback
+                    // if it is not the 1st ([0]) item in the array
+                    if (ndx) {
+                        hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
+                        console.log("context for " + hierarchy[ndx].label, hierarchy[ndx].context);
+                    } else {
+                        hierarchy[ndx].context = {};
+                    }
+                    if (hierarchy[ndx].afterEach) {
+                        let ms = hierarchy[ndx].afterEach.timeoutInterval > 0
+                            && hierarchy[ndx].afterEach.timeoutInterval || this.configTimeoutInterval;
+                        this.runBeforeAfterIt(hierarchy[ndx].afterEach.callback, ms, hierarchy[ndx].context).then(() => {
+                            runner(++ndx);
+                        });
+                    } else {
+                        runner(++ndx);
+                    }
+                } else {
+                    deferred.resolve();
+                }
+            }, 1);
+        };
+
+        runner(0);
+
+        return deferred.promise;
     }
-    // private runIt(it: It, beforeEach: IPrePostTest, afterEach: IPrePostTest,
-    //     context: {}): Q.Promise<string | Error> {
-    //     let deferred = this.Q.defer<string | Error>();
-    //     let timeoutInterval: number;
-    //     // run the BeforeEach chain - setup the context for each
-    //     // run the It - pass it the context
-    //     // run the AfterEach chain
-    //     setTimeout(() => {
-    //         if (beforeEach) {
-    //             timeoutInterval = beforeEach.timeoutInterval > 0 &&
-    //                 beforeEach.timeoutInterval || this.configTimeoutInterval;
-    //             this.runBeforeAfter(beforeEach.callback, timeoutInterval, context)
-    //                 .then(() => {
-    //                     console.log("runBeforeAfter success!");
-    //                     console.log("describe.context", context);
-    //                 }, (err: Error) => {
-    //                     console.log("runBeforeAfter failed!");
-    //                     console.log(err.message);
-    //                 });
-    //         }
-    //     }, 1);
-    //     return deferred.promise;
-    // }
+    /**
+     * runs an It
+     */
     private runIt(it: IIt) {
         let deferred = this.Q.defer<string | Error>();
         let hierarchy = this.getAncestorHierarchy(it.parent);
+        let ms: number;
+
         setTimeout(() => {
             this.runBefores(hierarchy)
                 .then(() => {
-                    deferred.resolve();
+                    console.log("It's parent context", it.parent.context);
+                    ms = it.timeoutInterval > 0
+                        && it.timeoutInterval || this.configTimeoutInterval;
+                    this.runBeforeAfterIt(it.callback, ms, it.parent.context)
+                        .then(() => {
+                            deferred.resolve();
+                        },
+                        () => {
+                            deferred.reject(new Error("it failed"));
+                        });
                 }, () => {
                     deferred.reject(new Error("beforeEach failed"));
                 });
         }, 1);
+
         return deferred.promise;
     }
     /**
@@ -135,9 +178,9 @@ export class QueueRunner {
         let parent = describe;
         let hierarchy: IDescribe[] = [];
 
-        // build ancestor hierarchy
+        // build ancestor hierarchy adding parent to the top of the hierarcy
         while (parent) {
-            hierarchy.push(parent);
+            hierarchy.unshift(parent);
             parent = parent.parent;
         }
 
@@ -145,12 +188,12 @@ export class QueueRunner {
         return hierarchy;
     }
     /**
-     * recursively iterates through all the queue's top-level Describes
+     * recursively iterates through all the queue's Its
      * asynchronously and returns a promise
      */
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
-        let its = <IIt[]> this.queue.filter((element) => {
+        let its = <IIt[]>this.queue.filter((element) => {
             return element.isA === "It";
         });
         console.log("its", its);
@@ -159,7 +202,7 @@ export class QueueRunner {
         let runner = (i: number) => {
             setTimeout(() => {
                 if (i < its.length) {
-                    this.runIt(its[i]).then( () => runner(i++));
+                    this.runIt(its[i]).then(() => runner(++i));
                 } else {
                     deferred.resolve();
                 }

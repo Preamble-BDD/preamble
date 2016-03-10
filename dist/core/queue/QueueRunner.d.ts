@@ -8,7 +8,7 @@ export declare class QueueRunner {
     constructor(queue: mix[], configTimeoutInterval: number, Q: typeof q);
     private runBeforeAfter(fn, ms, context);
     private runBefores(hierarchy);
-    private runAfters();
+    private runAfters(hierarchy);
     private runIt(it);
     private getAncestorHierarchy(describe);
     run(): Q.Promise<string | Error>;
