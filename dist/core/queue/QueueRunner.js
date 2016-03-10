@@ -1,5 +1,4 @@
 "use strict";
-var It_1 = require("./It");
 require("../../polyfills/Object.assign");
 var QueueRunner = (function () {
     function QueueRunner(queue, configTimeoutInterval, Q) {
@@ -58,9 +57,10 @@ var QueueRunner = (function () {
     };
     QueueRunner.prototype.runAfters = function () {
     };
-    QueueRunner.prototype.runIt = function (hierarchy, it, describe) {
+    QueueRunner.prototype.runIt = function (it) {
         var _this = this;
         var deferred = this.Q.defer();
+        var hierarchy = this.getAncestorHierarchy(it.parent);
         setTimeout(function () {
             _this.runBefores(hierarchy)
                 .then(function () {
@@ -71,59 +71,33 @@ var QueueRunner = (function () {
         }, 1);
         return deferred.promise;
     };
-    QueueRunner.prototype.runDescribe = function (describe, ndx) {
-        var deferred = this.Q.defer();
-        var timeoutInterval;
+    QueueRunner.prototype.getAncestorHierarchy = function (describe) {
         var parent = describe;
         var hierarchy = [];
         while (parent) {
             hierarchy.push(parent);
             parent = parent.parent;
         }
-        var runner = function (d) {
-            var _this = this;
-            setTimeout(function () {
-                var item;
-                if (ndx < describe.items.length) {
-                    item = describe.items[ndx];
-                    if (item instanceof It_1.It) {
-                        console.log("item instance of It");
-                        _this.runIt(hierarchy, item, describe).then(function () {
-                            _this.runDescribe(describe, ndx + 1);
-                        });
-                    }
-                    else {
-                        console.log("item instance of Describe");
-                        _this.runDescribe(item, 0).then(function () {
-                            _this.runDescribe(describe, ndx + 1);
-                        });
-                    }
-                }
-                else {
-                    deferred.resolve();
-                }
-            }, 1);
-        };
-        runner(describe);
-        return deferred.promise;
+        return hierarchy;
     };
-    QueueRunner.prototype.run = function (ndx) {
+    QueueRunner.prototype.run = function () {
+        var _this = this;
         var deferred = this.Q.defer();
+        var its = this.queue.filter(function (element) {
+            return element.isA === "It";
+        });
+        console.log("its", its);
         var runner = function (i) {
-            var _this = this;
             setTimeout(function () {
-                if (i < _this.queue.length) {
-                    _this.runDescribe(_this.queue[i], 0)
-                        .then(function () {
-                        _this.runner(i + 1);
-                    });
+                if (i < its.length) {
+                    _this.runIt(its[i]).then(function () { return runner(i++); });
                 }
                 else {
                     deferred.resolve();
                 }
             }, 1);
         };
-        runner(ndx);
+        runner(0);
         return deferred.promise;
     };
     return QueueRunner;

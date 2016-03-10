@@ -13,7 +13,7 @@ function afterEach(callback, timeoutInterval) {
     if (arguments.length === 2 && typeof (arguments[1]) !== "number") {
         throw new TypeError("afterEach called with invalid parameters");
     }
-    _afterEach = new AfterEach_1.AfterEach(callstack_1.callStack.uniqueId.toString(), callback, timeoutInterval);
+    _afterEach = new AfterEach_1.AfterEach(callstack_1.callStack.getTopOfStack(), callstack_1.callStack.uniqueId.toString(), callback, timeoutInterval);
     callstack_1.callStack.getTopOfStack().afterEach = _afterEach;
 }
 exports.afterEach = afterEach;

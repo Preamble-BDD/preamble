@@ -1,7 +1,8 @@
 "use strict";
 var It = (function () {
-    function It(id, label, callback, excluded, timeoutInterval) {
+    function It(parent, id, label, callback, excluded, timeoutInterval) {
         if (excluded === void 0) { excluded = false; }
+        this.parent = parent;
         this.id = id;
         this.label = label;
         this.callback = callback;
@@ -9,6 +10,7 @@ var It = (function () {
         this.timeoutInterval = timeoutInterval;
         this.expectations = [];
         this.scope = {};
+        this.isA = "It";
     }
     return It;
 }());

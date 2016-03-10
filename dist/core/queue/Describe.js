@@ -8,9 +8,9 @@ var Describe = (function () {
         this.parent = parent;
         this.excluded = excluded;
         this.context = {};
-        this.items = [];
         this.beforeEach = null;
         this.afterEach = null;
+        this.isA = "Describe";
     }
     return Describe;
 }());

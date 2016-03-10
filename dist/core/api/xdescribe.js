@@ -2,26 +2,24 @@
 var callstack_1 = require("./callstack");
 var Describe_1 = require("../queue/Describe");
 var QueueManager_1 = require("../queue/QueueManager");
-var cs = callstack_1.callStack;
 function xdescribe(label, callback) {
     var _describe;
     if (arguments.length !== 2 || typeof (arguments[0])
         !== "string" || typeof (arguments[1]) !== "function") {
         throw new TypeError("describe called with invalid parameters");
     }
-    _describe = new Describe_1.Describe(cs.uniqueId.toString(), label, callback, cs.length && cs.getTopOfStack() || null, true);
-    if (cs.length === 0) {
-        QueueManager_1.QueueManager.queue.push(_describe);
+    _describe = new Describe_1.Describe(callstack_1.callStack.uniqueId.toString(), label, callback, callstack_1.callStack.length && callstack_1.callStack.getTopOfStack() || null, true);
+    QueueManager_1.QueueManager.queue.push(_describe);
+    callstack_1.callStack.pushDescribe(_describe);
+    try {
+        _describe.callback();
     }
-    else {
-        cs.getTopOfStack().items.push(_describe);
+    catch (error) {
+        console.log(error);
+        alert("Error caught when calling Describe callback. See console for more information");
+        throw new Error("Terminating test!");
     }
-    cs.pushDescribe(_describe);
-    _describe.callback.call(_describe.context);
-    cs.popDescribe();
-    if (cs.length === 0) {
-        console.log("QueueManager queue", QueueManager_1.QueueManager.queue);
-    }
+    callstack_1.callStack.popDescribe();
 }
 exports.xdescribe = xdescribe;
 //# sourceMappingURL=xdescribe.js.map

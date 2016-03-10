@@ -4,6 +4,7 @@
  * declaration of Q.
  */
 import q = require("q");
+import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
 import {IPrePostTest} from "./ipreposttest";
 import {IIt} from "./IIt";
@@ -13,7 +14,7 @@ import {ICallStack} from "../callstack/ICallStack";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
 export class QueueRunner {
-    constructor(private queue: IDescribe[], private configTimeoutInterval: number,
+    constructor(private queue: mix[], private configTimeoutInterval: number,
         private Q: typeof q) { }
     /**
      * Returns a function (closure) which must complete within a set amount of time
@@ -114,87 +115,51 @@ export class QueueRunner {
     //     }, 1);
     //     return deferred.promise;
     // }
-    private runIt(hierarchy: IDescribe[], it: IIt, describe: IDescribe) {
+    private runIt(it: IIt) {
         let deferred = this.Q.defer<string | Error>();
+        let hierarchy = this.getAncestorHierarchy(it.parent);
         setTimeout(() => {
             this.runBefores(hierarchy)
-                .then(function() {
+                .then(() => {
                     deferred.resolve();
-                }, function() {
+                }, () => {
                     deferred.reject(new Error("beforeEach failed"));
                 });
         }, 1);
         return deferred.promise;
     }
     /**
-     *
+     * build and return an ancestor hierarchy
      */
-    /**
-     * recursively iterates through the Describe.items array, asynchronously runing all the Describe
-     * and It entries in it and returns a promise
-     */
-    private runDescribe(describe: IDescribe, ndx: number): Q.Promise<string | Error> {
-        let deferred = this.Q.defer<string | Error>();
-        let timeoutInterval: number;
+    private getAncestorHierarchy(describe: IDescribe): IDescribe[] {
         let parent = describe;
         let hierarchy: IDescribe[] = [];
 
-        // build ancestor ancestor hierarchy
+        // build ancestor hierarchy
         while (parent) {
             hierarchy.push(parent);
             parent = parent.parent;
         }
 
-        // recursive runner
-        let runner = function(d: IDescribe) {
-            setTimeout(() => {
-                let item: mix;
-                if (ndx < describe.items.length) {
-                    item = describe.items[ndx];
-                    if (item instanceof It) {
-                        // item is an nstance of It
-                        console.log("item instance of It");
-                        // run It
-                        this.runIt(hierarchy, item, describe).then(() => {
-                                this.runDescribe(describe, ndx + 1);
-                            });
-                    } else {
-                        // item is an instance of Describe
-                        console.log("item instance of Describe");
-                        // run Describe by calling this method recursively passing it the Describe
-                        this.runDescribe(<IDescribe>item, 0).then(() => {
-                            this.runDescribe(describe, ndx + 1); // <= !!!BAM no good
-                        });
-                    }
-                } else {
-                    deferred.resolve();
-                }
-            }, 1);
-        };
-
-        // call recursive runner
-        runner(describe);
-
-        // return a promise to caller
-        return deferred.promise;
+        // return ancestor hierarchy
+        return hierarchy;
     }
     /**
      * recursively iterates through all the queue's top-level Describes
      * asynchronously and returns a promise
      */
-    run(ndx: number): Q.Promise<string | Error> {
+    run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
+        let its = <IIt[]> this.queue.filter((element) => {
+            return element.isA === "It";
+        });
+        console.log("its", its);
 
         // recursive iterator
-        let runner = function(i: number) {
+        let runner = (i: number) => {
             setTimeout(() => {
-                if (i < this.queue.length) {
-                    // Run the top-level Describe
-                    this.runDescribe(this.queue[i], 0)
-                        .then(() => {
-                            // recursively call runner
-                            this.runner(i + 1);
-                        });
+                if (i < its.length) {
+                    this.runIt(its[i]).then( () => runner(i++));
                 } else {
                     deferred.resolve();
                 }
@@ -202,7 +167,7 @@ export class QueueRunner {
         };
 
         // call recursive runner to begin iterating through the queue
-        runner(ndx);
+        runner(0);
 
         // return a promise to caller
         return deferred.promise;

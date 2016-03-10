@@ -1,6 +1,7 @@
 "use strict";
 var BeforeEach = (function () {
-    function BeforeEach(id, callback, timeoutInterval) {
+    function BeforeEach(parent, id, callback, timeoutInterval) {
+        this.parent = parent;
         this.id = id;
         this.callback = callback;
         this.timeoutInterval = timeoutInterval;
