@@ -25,7 +25,7 @@ export class QueueRunner {
      * Example:
      * beforeEach(function(done) {...}, 1);
      */
-    private runBeforeAfterIt(fn: (done?: () => void) => any, ms: number, context: {}): Q.Promise<string | Error> {
+    private runBeforeItAfter(fn: (done?: () => void) => any, ms: number, context: {}): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
         let completed = false;
         let timedOut = false;
@@ -38,7 +38,7 @@ export class QueueRunner {
                 if (!completed) {
                     timedOut = true;
                     deferred.reject(
-                        new Error(`Function failed to complete within {ms}`)
+                        new Error(`function failed to complete within {ms}`)
                     );
                 }
             }, ms);
@@ -83,17 +83,20 @@ export class QueueRunner {
                     // setup the context for calling BeforeEach.callback
                     // if it is not the 1st ([0]) item in the array
                     if (ndx) {
+                        // the current context is a result of applying its parent's context values to a blank object
                         hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
-                        console.log("context for " + hierarchy[ndx].label, hierarchy[ndx].context);
+                        console.log("beforeEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
                     } else {
                         hierarchy[ndx].context = {};
                     }
                     if (hierarchy[ndx].beforeEach) {
                         let ms = hierarchy[ndx].beforeEach.timeoutInterval > 0
                             && hierarchy[ndx].beforeEach.timeoutInterval || this.configTimeoutInterval;
-                        this.runBeforeAfterIt(hierarchy[ndx].beforeEach.callback, ms, hierarchy[ndx].context).then(() => {
-                            runner(++ndx);
-                        });
+                        this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, ms, hierarchy[ndx].context)
+                            .then(
+                            () => runner(++ndx),
+                            () => deferred.reject(new Error("runBefore failed to run"))
+                            );
                     } else {
                         runner(++ndx);
                     }
@@ -119,17 +122,18 @@ export class QueueRunner {
                     // setup the context for calling afterEach.callback
                     // if it is not the 1st ([0]) item in the array
                     if (ndx) {
-                        hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
-                        console.log("context for " + hierarchy[ndx].label, hierarchy[ndx].context);
-                    } else {
-                        hierarchy[ndx].context = {};
+                        // the current context is a result of applying its parent's context values ontop of its own current values
+                        Object.assign(hierarchy[ndx].context, hierarchy[ndx - 1].context);
+                        console.log("afterEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
                     }
                     if (hierarchy[ndx].afterEach) {
                         let ms = hierarchy[ndx].afterEach.timeoutInterval > 0
                             && hierarchy[ndx].afterEach.timeoutInterval || this.configTimeoutInterval;
-                        this.runBeforeAfterIt(hierarchy[ndx].afterEach.callback, ms, hierarchy[ndx].context).then(() => {
-                            runner(++ndx);
-                        });
+                        this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, ms, hierarchy[ndx].context)
+                            .then(
+                            () => runner(++ndx),
+                            () => deferred.reject(new Error("runAfter failed to run"))
+                            );
                     } else {
                         runner(++ndx);
                     }
@@ -149,24 +153,13 @@ export class QueueRunner {
     private runIt(it: IIt) {
         let deferred = this.Q.defer<string | Error>();
         let hierarchy = this.getAncestorHierarchy(it.parent);
-        let ms: number;
+        let ms = it.timeoutInterval > 0 && it.timeoutInterval || this.configTimeoutInterval;
 
         setTimeout(() => {
             this.runBefores(hierarchy)
-                .then(() => {
-                    console.log("It's parent context", it.parent.context);
-                    ms = it.timeoutInterval > 0
-                        && it.timeoutInterval || this.configTimeoutInterval;
-                    this.runBeforeAfterIt(it.callback, ms, it.parent.context)
-                        .then(() => {
-                            deferred.resolve();
-                        },
-                        () => {
-                            deferred.reject(new Error("it failed"));
-                        });
-                }, () => {
-                    deferred.reject(new Error("beforeEach failed"));
-                });
+            .then(() => this.runBeforeItAfter(it.callback, ms, it.parent.context))
+            .then(() => this.runAfters(hierarchy))
+            .then(() => deferred.resolve(), (error) => deferred.reject(error));
         }, 1);
 
         return deferred.promise;
@@ -196,13 +189,15 @@ export class QueueRunner {
         let its = <IIt[]>this.queue.filter((element) => {
             return element.isA === "It";
         });
-        console.log("its", its);
+        // console.log("its", its);
 
         // recursive iterator
         let runner = (i: number) => {
             setTimeout(() => {
                 if (i < its.length) {
-                    this.runIt(its[i]).then(() => runner(++i));
+                    this.runIt(its[i])
+                        .then(() => runner(++i))
+                        .fail((e) => deferred.reject(e));
                 } else {
                     deferred.resolve();
                 }

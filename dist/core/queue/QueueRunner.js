@@ -6,7 +6,7 @@ var QueueRunner = (function () {
         this.configTimeoutInterval = configTimeoutInterval;
         this.Q = Q;
     }
-    QueueRunner.prototype.runBeforeAfterIt = function (fn, ms, context) {
+    QueueRunner.prototype.runBeforeItAfter = function (fn, ms, context) {
         var deferred = this.Q.defer();
         var completed = false;
         var timedOut = false;
@@ -14,7 +14,7 @@ var QueueRunner = (function () {
             var timerId = setTimeout(function () {
                 if (!completed) {
                     timedOut = true;
-                    deferred.reject(new Error("Function failed to complete within {ms}"));
+                    deferred.reject(new Error("function failed to complete within {ms}"));
                 }
             }, ms);
             if (fn.length) {
@@ -49,7 +49,7 @@ var QueueRunner = (function () {
                 if (ndx < hierarchy.length) {
                     if (ndx) {
                         hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
-                        console.log("context for " + hierarchy[ndx].label, hierarchy[ndx].context);
+                        console.log("beforeEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
                     }
                     else {
                         hierarchy[ndx].context = {};
@@ -57,9 +57,8 @@ var QueueRunner = (function () {
                     if (hierarchy[ndx].beforeEach) {
                         var ms = hierarchy[ndx].beforeEach.timeoutInterval > 0
                             && hierarchy[ndx].beforeEach.timeoutInterval || _this.configTimeoutInterval;
-                        _this.runBeforeAfterIt(hierarchy[ndx].beforeEach.callback, ms, hierarchy[ndx].context).then(function () {
-                            runner(++ndx);
-                        });
+                        _this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, ms, hierarchy[ndx].context)
+                            .then(function () { return runner(++ndx); }, function () { return deferred.reject(new Error("runBefore failed to run")); });
                     }
                     else {
                         runner(++ndx);
@@ -80,18 +79,14 @@ var QueueRunner = (function () {
             setTimeout(function () {
                 if (ndx < hierarchy.length) {
                     if (ndx) {
-                        hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
-                        console.log("context for " + hierarchy[ndx].label, hierarchy[ndx].context);
-                    }
-                    else {
-                        hierarchy[ndx].context = {};
+                        Object.assign(hierarchy[ndx].context, hierarchy[ndx - 1].context);
+                        console.log("afterEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
                     }
                     if (hierarchy[ndx].afterEach) {
                         var ms = hierarchy[ndx].afterEach.timeoutInterval > 0
                             && hierarchy[ndx].afterEach.timeoutInterval || _this.configTimeoutInterval;
-                        _this.runBeforeAfterIt(hierarchy[ndx].afterEach.callback, ms, hierarchy[ndx].context).then(function () {
-                            runner(++ndx);
-                        });
+                        _this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, ms, hierarchy[ndx].context)
+                            .then(function () { return runner(++ndx); }, function () { return deferred.reject(new Error("runAfter failed to run")); });
                     }
                     else {
                         runner(++ndx);
@@ -109,22 +104,12 @@ var QueueRunner = (function () {
         var _this = this;
         var deferred = this.Q.defer();
         var hierarchy = this.getAncestorHierarchy(it.parent);
-        var ms;
+        var ms = it.timeoutInterval > 0 && it.timeoutInterval || this.configTimeoutInterval;
         setTimeout(function () {
             _this.runBefores(hierarchy)
-                .then(function () {
-                console.log("It's parent context", it.parent.context);
-                ms = it.timeoutInterval > 0
-                    && it.timeoutInterval || _this.configTimeoutInterval;
-                _this.runBeforeAfterIt(it.callback, ms, it.parent.context)
-                    .then(function () {
-                    deferred.resolve();
-                }, function () {
-                    deferred.reject(new Error("it failed"));
-                });
-            }, function () {
-                deferred.reject(new Error("beforeEach failed"));
-            });
+                .then(function () { return _this.runBeforeItAfter(it.callback, ms, it.parent.context); })
+                .then(function () { return _this.runAfters(hierarchy); })
+                .then(function () { return deferred.resolve(); }, function (error) { return deferred.reject(error); });
         }, 1);
         return deferred.promise;
     };
@@ -143,11 +128,12 @@ var QueueRunner = (function () {
         var its = this.queue.filter(function (element) {
             return element.isA === "It";
         });
-        console.log("its", its);
         var runner = function (i) {
             setTimeout(function () {
                 if (i < its.length) {
-                    _this.runIt(its[i]).then(function () { return runner(++i); });
+                    _this.runIt(its[i])
+                        .then(function () { return runner(++i); })
+                        .fail(function (e) { return deferred.reject(e); });
                 }
                 else {
                     deferred.resolve();
