@@ -31,11 +31,24 @@ if (environment_1.environment.windows) {
 else {
     throw new Error("Unsuported environment");
 }
-new QueueManager_1.QueueManager(100, 2, Q).run().then(function (msg) {
+var timeKeeper = {
+    startTime: Date.now(),
+    endTime: 0,
+    totTime: 0
+};
+new QueueManager_1.QueueManager(100, 2, Q)
+    .run()
+    .then(function (msg) {
     console.log(msg);
     console.log("QueueManager.queue =", QueueManager_1.QueueManager.queue);
     new QueueRunner_1.QueueRunner(QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, Q).run()
-        .then(function () { return console.log("queue ran successfully"); }, function () { return console.log("queue failed to run"); });
+        .then(function () {
+        timeKeeper.endTime = Date.now();
+        timeKeeper.totTime = timeKeeper.endTime - timeKeeper.startTime;
+        console.log("queue ran successfully in " + timeKeeper.totTime + " miliseconds");
+    }, function () {
+        console.log("queue failed to run");
+    });
 }, function (msg) {
     console.log(msg);
 });

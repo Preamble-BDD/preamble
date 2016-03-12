@@ -41,18 +41,29 @@ if (environment.windows) {
     throw new Error("Unsuported environment");
 }
 
+let timeKeeper = {
+    startTime: Date.now(),
+    endTime: 0,
+    totTime: 0
+};
+
 // get a queue manager and call its run method to run the test suite
-new QueueManager(100, 2, Q).run().then(
-    (msg) => {
+new QueueManager(100, 2, Q)
+    .run()
+    .then((msg) => {
         // fulfilled/success
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
         // run the queue
         new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run()
-            .then(() => console.log("queue ran successfully"), () => console.log("queue failed to run"));
-    },
-    (msg) => {
+            .then(() => {
+                timeKeeper.endTime = Date.now();
+                timeKeeper.totTime = timeKeeper.endTime - timeKeeper.startTime;
+                console.log(`queue ran successfully in ${timeKeeper.totTime} miliseconds`);
+            }, () => {
+                console.log("queue failed to run");
+            });
+    }, (msg) => {
         // rejected/failure
         console.log(msg);
-    }
-);
+    });
