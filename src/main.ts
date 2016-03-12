@@ -30,8 +30,8 @@ if (environment.windows) {
     window["afterEach"] = afterEach;
     // reporter
     if (window.hasOwnProperty("preamble") &&
-        window.preamble.hasOwnProperty("reporter")) {
-        reporter = window.preamble.reporter;
+        window["preamble"].hasOwnProperty("reporter")) {
+        reporter = window["preamble"].reporter;
     }
     if (!reporter) {
         console.log("No reporter found");
