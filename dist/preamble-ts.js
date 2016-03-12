@@ -350,36 +350,20 @@ var QueueRunner = (function () {
         this.configTimeoutInterval = configTimeoutInterval;
         this.Q = Q;
     }
-    QueueRunner.prototype.runBeforeItAfter = function (fn, ms, context) {
+    QueueRunner.prototype.runBeforeItAfter = function (fn, context) {
         var deferred = this.Q.defer();
-        var completed = false;
-        var timedOut = false;
         setTimeout(function () {
-            var timerId = setTimeout(function () {
-                if (!completed) {
-                    timedOut = true;
-                    deferred.reject(new Error("function failed to complete within {ms}"));
-                }
-            }, ms);
             if (fn.length) {
                 setTimeout(function () {
                     fn.call(context, function () {
-                        if (!timedOut) {
-                            clearTimeout(timerId);
-                            completed = true;
-                            deferred.resolve();
-                        }
+                        deferred.resolve();
                     });
                 }, 1);
             }
             else {
                 setTimeout(function () {
                     fn.call(context);
-                    if (!timedOut) {
-                        clearTimeout(timerId);
-                        completed = true;
-                        deferred.resolve();
-                    }
+                    deferred.resolve();
                 }, 1);
             }
         }, 1);
@@ -401,8 +385,9 @@ var QueueRunner = (function () {
                     if (hierarchy[ndx].beforeEach) {
                         var ms = hierarchy[ndx].beforeEach.timeoutInterval > 0
                             && hierarchy[ndx].beforeEach.timeoutInterval || _this.configTimeoutInterval;
-                        _this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, ms, hierarchy[ndx].context)
-                            .then(function () { return runner(++ndx); }, function () { return deferred.reject(new Error("runBefore failed to run")); });
+                        _this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, hierarchy[ndx].context)
+                            .timeout(ms, "beforeEach timed out after " + ms + " miliseconds")
+                            .then(function () { return runner(++ndx); }, function (error) { return deferred.reject(error); });
                     }
                     else {
                         runner(++ndx);
@@ -429,8 +414,9 @@ var QueueRunner = (function () {
                     if (hierarchy[ndx].afterEach) {
                         var ms = hierarchy[ndx].afterEach.timeoutInterval > 0
                             && hierarchy[ndx].afterEach.timeoutInterval || _this.configTimeoutInterval;
-                        _this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, ms, hierarchy[ndx].context)
-                            .then(function () { return runner(++ndx); }, function () { return deferred.reject(new Error("runAfter failed to run")); });
+                        _this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, hierarchy[ndx].context)
+                            .timeout(ms, "afterEach timed out after " + ms + " miliseconds")
+                            .then(function () { return runner(++ndx); }, function (error) { return deferred.reject(error); });
                     }
                     else {
                         runner(++ndx);
@@ -451,7 +437,10 @@ var QueueRunner = (function () {
         var ms = it.timeoutInterval > 0 && it.timeoutInterval || this.configTimeoutInterval;
         setTimeout(function () {
             _this.runBefores(hierarchy)
-                .then(function () { return _this.runBeforeItAfter(it.callback, ms, it.parent.context); })
+                .then(function () {
+                return _this.runBeforeItAfter(it.callback, it.parent.context)
+                    .timeout(ms, "it." + it.label + " timed out after " + ms + " miliseconds");
+            })
                 .then(function () { return _this.runAfters(hierarchy); })
                 .then(function () { return deferred.resolve(); }, function (error) { return deferred.reject(error); });
         }, 1);
@@ -477,7 +466,10 @@ var QueueRunner = (function () {
                 if (i < its.length) {
                     _this.runIt(its[i])
                         .then(function () { return runner(++i); })
-                        .fail(function (e) { return deferred.reject(e); });
+                        .fail(function (e) {
+                        console.log(e);
+                        deferred.reject(e);
+                    });
                 }
                 else {
                     deferred.resolve();

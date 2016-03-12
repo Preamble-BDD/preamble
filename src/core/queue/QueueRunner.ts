@@ -25,49 +25,26 @@ export class QueueRunner {
      * Example:
      * beforeEach(function(done) {...}, 1);
      */
-    private runBeforeItAfter(fn: (done?: () => void) => any, ms: number, context: {}): Q.Promise<string | Error> {
+    private runBeforeItAfter(fn: (done?: () => void) => any, context: {}): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
-        let completed = false;
-        let timedOut = false;
 
-        setTimeout(() => {
-            // A timer whose callback is triggered after ms have expired
-            // and which rejects the promise if the promise isn't already
-            // resolved.
-            let timerId = setTimeout(() => {
-                if (!completed) {
-                    timedOut = true;
-                    deferred.reject(
-                        new Error(`function failed to complete within {ms}`)
-                    );
-                }
-            }, ms);
-            // A timer whose callback is triggered after 1 ms has expired which
-            // calls fn passing it a callback that when called resolves the promise
-            // if timedOut is false.
+        setTimeout(function(){
             if (fn.length) {
-                // Asynchronous - call fn passing it done
+                // Asynchronously calls fn passing callback for done parameter
                 setTimeout(function() {
                     fn.call(context, () => {
-                        if (!timedOut) {
-                            clearTimeout(timerId);
-                            completed = true;
-                            deferred.resolve();
-                        }
+                        deferred.resolve();
                     });
                 }, 1);
             } else {
-                // Synchronous
+                // Synchronously calls fn
                 setTimeout(function() {
                     fn.call(context);
-                    if (!timedOut) {
-                        clearTimeout(timerId);
-                        completed = true;
-                        deferred.resolve();
-                    }
+                    deferred.resolve();
                 }, 1);
             }
         }, 1);
+
         // Immediately return a promise to the caller.
         return deferred.promise;
     }
@@ -92,10 +69,11 @@ export class QueueRunner {
                     if (hierarchy[ndx].beforeEach) {
                         let ms = hierarchy[ndx].beforeEach.timeoutInterval > 0
                             && hierarchy[ndx].beforeEach.timeoutInterval || this.configTimeoutInterval;
-                        this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, ms, hierarchy[ndx].context)
+                        this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, hierarchy[ndx].context)
+                            .timeout(ms, `beforeEach timed out after ${ms} miliseconds`)
                             .then(
                             () => runner(++ndx),
-                            () => deferred.reject(new Error("runBefore failed to run"))
+                            (error) => deferred.reject(error)
                             );
                     } else {
                         runner(++ndx);
@@ -129,10 +107,11 @@ export class QueueRunner {
                     if (hierarchy[ndx].afterEach) {
                         let ms = hierarchy[ndx].afterEach.timeoutInterval > 0
                             && hierarchy[ndx].afterEach.timeoutInterval || this.configTimeoutInterval;
-                        this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, ms, hierarchy[ndx].context)
+                        this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, hierarchy[ndx].context)
+                            .timeout(ms, `afterEach timed out after ${ms} miliseconds`)
                             .then(
                             () => runner(++ndx),
-                            () => deferred.reject(new Error("runAfter failed to run"))
+                            (error) => deferred.reject(error)
                             );
                     } else {
                         runner(++ndx);
@@ -157,9 +136,12 @@ export class QueueRunner {
 
         setTimeout(() => {
             this.runBefores(hierarchy)
-            .then(() => this.runBeforeItAfter(it.callback, ms, it.parent.context))
-            .then(() => this.runAfters(hierarchy))
-            .then(() => deferred.resolve(), (error) => deferred.reject(error));
+                .then(() => {
+                    return this.runBeforeItAfter(it.callback, it.parent.context)
+                        .timeout(ms, `it.${it.label} timed out after ${ms} miliseconds`);
+                })
+                .then(() => this.runAfters(hierarchy))
+                .then(() => deferred.resolve(), (error) => deferred.reject(error));
         }, 1);
 
         return deferred.promise;
@@ -197,7 +179,10 @@ export class QueueRunner {
                 if (i < its.length) {
                     this.runIt(its[i])
                         .then(() => runner(++i))
-                        .fail((e) => deferred.reject(e));
+                        .fail((e) => {
+                            console.log(e);
+                            deferred.reject(e);
+                        });
                 } else {
                     deferred.resolve();
                 }
