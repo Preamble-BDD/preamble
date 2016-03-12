@@ -7,29 +7,13 @@
         "jsx": "react",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "declaration": false,
+        "declaration": true,
         "noImplicitAny": false,
         "removeComments": true,
         "noLib": false,
         "preserveConstEnums": true,
-        "suppressImplicitAnyIndexErrors": true
-    },
-    "filesGlob": [
-        "**/*.ts",
-        "**/*.tsx",
-        "!node_modules/**"
-    ],
-    "compileOnSave": true,
-    "buildOnSave": true,
-    "atom": {
-        "rewriteTsconfig": true
-    },
-    "files": [
-        "src/core/api/describe.ts",
-        "src/core/api/it.ts",
-        "src/core/queue/QueueManager.ts",
-        "src/main.ts",
-        "typings/q/Q.d.ts",
-        "typings/tsd.d.ts"
-    ]
+        "suppressImplicitAnyIndexErrors": true,
+        "sourceMap": true,
+        "outDir": "dist"
+    }
 }

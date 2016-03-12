@@ -45,7 +45,8 @@
 	// Show the output window only if unrecognized errors occur.
 	"showOutput": "silent",
 
-	// Tell the tsc compiler to use the tsconfig.json from the open folder.
+	// Tell the tsc compiler to use the tsconfig.json from the open folder
+    // and to generate corresponding d.ts files.
 	"args": ["-p", "./"],
 
 	// use the standard tsc problem matcher to find compile problems
