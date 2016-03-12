@@ -5,6 +5,7 @@
 
 import {AfterEach} from "../queue/AfterEach";
 import {callStack} from "./callstack";
+import {QueueManager} from "../queue/QueueManager";
 
 export function afterEach(callback: (done?: () => void) => void, timeoutInterval = 0): void {
     let _afterEach;
@@ -20,8 +21,8 @@ export function afterEach(callback: (done?: () => void) => void, timeoutInterval
     }
 
     // an AfterEach object
-    _afterEach = new AfterEach(callStack.uniqueId.toString(), callback, timeoutInterval);
+    _afterEach = new AfterEach(callStack.getTopOfStack(), callStack.uniqueId.toString(), callback, timeoutInterval);
 
-    // add the AfterEach to the parent Describe
+    // add it to its parent describe
     callStack.getTopOfStack().afterEach = _afterEach;
 }

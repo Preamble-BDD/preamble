@@ -4,6 +4,7 @@
  * declaration of Q.
  */
 import q = require("q");
+import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
 import {IPrePostTest} from "./ipreposttest";
 import {IIt} from "./IIt";
@@ -13,7 +14,7 @@ import {ICallStack} from "../callstack/ICallStack";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
 export class QueueRunner {
-    constructor(private queue: IDescribe[], private configTimeoutInterval: number,
+    constructor(private queue: mix[], private configTimeoutInterval: number,
         private Q: typeof q) { }
     /**
      * Returns a function (closure) which must complete within a set amount of time
@@ -24,147 +25,58 @@ export class QueueRunner {
      * Example:
      * beforeEach(function(done) {...}, 1);
      */
-    private runBeforeAfter(fn: (done?: () => void) => any, ms: number, context: {}): () => Q.Promise<string | Error> {
+    private runBeforeItAfter(fn: (done?: () => void) => any, context: {}): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
-        return function() {
-            let completed = false;
-            let timedOut = false;
-            // A timer whose callback is triggered after ms have expired
-            // and which rejects the promise if the promise isn't already
-            // resolved.
-            let timerId = setTimeout(() => {
-                if (!completed) {
-                    timedOut = true;
-                    deferred.reject(
-                        new Error(`Function failed to complete within {ms}`)
-                    );
-                }
-            }, ms);
-            // A timer whose callback is triggered after 1 ms has expired which
-            // calls fn passing it a callback that when called resolves the promise
-            // if timedOut is false.
+
+        setTimeout(function(){
             if (fn.length) {
-                // Asynchronous - call fn passing it done
+                // Asynchronously calls fn passing callback for done parameter
                 setTimeout(function() {
                     fn.call(context, () => {
-                        if (!timedOut) {
-                            clearTimeout(timerId);
-                            completed = true;
-                            deferred.resolve();
-                        }
+                        deferred.resolve();
                     });
                 }, 1);
             } else {
-                // Synchronous
+                // Synchronously calls fn
                 setTimeout(function() {
                     fn.call(context);
-                    if (!timedOut) {
-                        clearTimeout(timerId);
-                        completed = true;
-                        deferred.resolve();
-                    }
+                    deferred.resolve();
                 }, 1);
             }
-            // Immediately return a promise to the caller.
-            return deferred.promise;
-        };
-    }
-    private runBefores(hierarchy: IDescribe[]): Q.Promise<string | Error> {
-        let deferred = this.Q.defer<string | Error>();
-        let result: Q.Promise<string | Error> = Q("");
-        let timeoutInterval: number;
-        let befores = [];
-        // build array of functions that return promises
-        hierarchy.forEach((describe) => {
-            if (describe.beforeEach) {
-                befores.push(this.runBeforeAfter(
-                    describe.beforeEach.callback,
-                    describe.beforeEach.timeoutInterval > 0 &&
-                    describe.beforeEach.timeoutInterval || this.configTimeoutInterval,
-                    describe.parent && Object.assign({}, describe.parent.context) || describe.context
-                ));
-            }
-        });
-        // run the functions in sequence and return a single promise for all of them
-        return befores.reduce(Q.when);
-    }
-    private runAfters(): void {
-        // will be same as runBefores but use Describe.AfterEach instead
-    }
-    // private runIt(it: It, beforeEach: IPrePostTest, afterEach: IPrePostTest,
-    //     context: {}): Q.Promise<string | Error> {
-    //     let deferred = this.Q.defer<string | Error>();
-    //     let timeoutInterval: number;
-    //     // run the BeforeEach chain - setup the context for each
-    //     // run the It - pass it the context
-    //     // run the AfterEach chain
-    //     setTimeout(() => {
-    //         if (beforeEach) {
-    //             timeoutInterval = beforeEach.timeoutInterval > 0 &&
-    //                 beforeEach.timeoutInterval || this.configTimeoutInterval;
-    //             this.runBeforeAfter(beforeEach.callback, timeoutInterval, context)
-    //                 .then(() => {
-    //                     console.log("runBeforeAfter success!");
-    //                     console.log("describe.context", context);
-    //                 }, (err: Error) => {
-    //                     console.log("runBeforeAfter failed!");
-    //                     console.log(err.message);
-    //                 });
-    //         }
-    //     }, 1);
-    //     return deferred.promise;
-    // }
-    private runIt(hierarchy: IDescribe[], it: IIt, describe: IDescribe) {
-        let deferred = this.Q.defer<string | Error>();
-        setTimeout(() => {
-            this.runBefores(hierarchy)
-                .then(function() {
-                    deferred.resolve();
-                }, function() {
-                    deferred.reject(new Error("beforeEach failed"));
-                });
         }, 1);
+
+        // Immediately return a promise to the caller.
         return deferred.promise;
     }
     /**
-     *
+     * runs ancestor hierarchy of BeforeEach with inherited contexts
      */
-    /**
-     * recursively iterates through the Describe.items array, asynchronously runing all the Describe
-     * and It entries in it and returns a promise
-     */
-    private runDescribe(describe: IDescribe, ndx: number): Q.Promise<string | Error> {
+    private runBefores(hierarchy: IDescribe[]): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
-        let timeoutInterval: number;
-        let parent = describe;
-        let hierarchy: IDescribe[] = [];
 
-        // build ancestor ancestor hierarchy
-        while (parent) {
-            hierarchy.push(parent);
-            parent = parent.parent;
-        }
-
-        // recursive runner
-        let runner = function(d: IDescribe) {
+        let runner = (ndx) => {
             setTimeout(() => {
-                let item: mix;
-                if (ndx < describe.items.length) {
-                    item = describe.items[ndx];
-                    if (item instanceof It) {
-                        // item is an nstance of It
-                        console.log("item instance of It");
-                        // run It
-                        this.runIt(hierarchy, item, describe).then(() => {
-                                this.runDescribe(describe, ndx + 1);
-                            });
+                if (ndx < hierarchy.length) {
+                    // setup the context for calling BeforeEach.callback
+                    // if it is not the 1st ([0]) item in the array
+                    if (ndx) {
+                        // the current context is a result of applying its parent's context values to a blank object
+                        hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
+                        console.log("beforeEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
                     } else {
-                        // item is an instance of Describe
-                        console.log("item instance of Describe");
-                        // run Describe by calling this method recursively passing it the Describe
-                        this.runDescribe(<IDescribe>item, 0).then(() => {
-                            this.runDescribe(describe, ndx + 1); // <= !!!BAM no good
-                        });
+                        hierarchy[ndx].context = {};
+                    }
+                    if (hierarchy[ndx].beforeEach) {
+                        let ms = hierarchy[ndx].beforeEach.timeoutInterval > 0
+                            && hierarchy[ndx].beforeEach.timeoutInterval || this.configTimeoutInterval;
+                        this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, hierarchy[ndx].context)
+                            .timeout(ms, `beforeEach timed out after ${ms} miliseconds`)
+                            .then(
+                            () => runner(++ndx),
+                            (error) => deferred.reject(error)
+                            );
+                    } else {
+                        runner(++ndx);
                     }
                 } else {
                     deferred.resolve();
@@ -172,28 +84,104 @@ export class QueueRunner {
             }, 1);
         };
 
-        // call recursive runner
-        runner(describe);
+        runner(0);
 
-        // return a promise to caller
         return deferred.promise;
     }
     /**
-     * recursively iterates through all the queue's top-level Describes
-     * asynchronously and returns a promise
+     * runs ancestor hierarchy of AfterEach with inherited contexts
      */
-    run(ndx: number): Q.Promise<string | Error> {
+    private runAfters(hierarchy: IDescribe[]): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
 
-        // recursive iterator
-        let runner = function(i: number) {
+        let runner = (ndx) => {
             setTimeout(() => {
-                if (i < this.queue.length) {
-                    // Run the top-level Describe
-                    this.runDescribe(this.queue[i], 0)
-                        .then(() => {
-                            // recursively call runner
-                            this.runner(i + 1);
+                if (ndx < hierarchy.length) {
+                    // setup the context for calling afterEach.callback
+                    // if it is not the 1st ([0]) item in the array
+                    if (ndx) {
+                        // the current context is a result of applying its parent's context values ontop of its own current values
+                        Object.assign(hierarchy[ndx].context, hierarchy[ndx - 1].context);
+                        console.log("afterEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
+                    }
+                    if (hierarchy[ndx].afterEach) {
+                        let ms = hierarchy[ndx].afterEach.timeoutInterval > 0
+                            && hierarchy[ndx].afterEach.timeoutInterval || this.configTimeoutInterval;
+                        this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, hierarchy[ndx].context)
+                            .timeout(ms, `afterEach timed out after ${ms} miliseconds`)
+                            .then(
+                            () => runner(++ndx),
+                            (error) => deferred.reject(error)
+                            );
+                    } else {
+                        runner(++ndx);
+                    }
+                } else {
+                    deferred.resolve();
+                }
+            }, 1);
+        };
+
+        runner(0);
+
+        return deferred.promise;
+    }
+    /**
+     * runs an It
+     */
+    private runIt(it: IIt) {
+        let deferred = this.Q.defer<string | Error>();
+        let hierarchy = this.getAncestorHierarchy(it.parent);
+        let ms = it.timeoutInterval > 0 && it.timeoutInterval || this.configTimeoutInterval;
+
+        setTimeout(() => {
+            this.runBefores(hierarchy)
+                .then(() => {
+                    return this.runBeforeItAfter(it.callback, it.parent.context)
+                        .timeout(ms, `it.${it.label} timed out after ${ms} miliseconds`);
+                })
+                .then(() => this.runAfters(hierarchy))
+                .then(() => deferred.resolve(), (error) => deferred.reject(error));
+        }, 1);
+
+        return deferred.promise;
+    }
+    /**
+     * build and return an ancestor hierarchy
+     */
+    private getAncestorHierarchy(describe: IDescribe): IDescribe[] {
+        let parent = describe;
+        let hierarchy: IDescribe[] = [];
+
+        // build ancestor hierarchy adding parent to the top of the hierarcy
+        while (parent) {
+            hierarchy.unshift(parent);
+            parent = parent.parent;
+        }
+
+        // return ancestor hierarchy
+        return hierarchy;
+    }
+    /**
+     * recursively iterates through all the queue's Its
+     * asynchronously and returns a promise
+     */
+    run(): Q.Promise<string | Error> {
+        let deferred = this.Q.defer<string | Error>();
+        let its = <IIt[]>this.queue.filter((element) => {
+            return element.isA === "It";
+        });
+        // console.log("its", its);
+
+        // recursive iterator
+        let runner = (i: number) => {
+            setTimeout(() => {
+                if (i < its.length) {
+                    this.runIt(its[i])
+                        .then(() => runner(++i))
+                        .fail((e) => {
+                            console.log(e);
+                            deferred.reject(e);
                         });
                 } else {
                     deferred.resolve();
@@ -202,7 +190,7 @@ export class QueueRunner {
         };
 
         // call recursive runner to begin iterating through the queue
-        runner(ndx);
+        runner(0);
 
         // return a promise to caller
         return deferred.promise;

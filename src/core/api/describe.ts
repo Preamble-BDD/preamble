@@ -7,8 +7,6 @@ import {callStack} from "./callstack";
 import {Describe} from "../queue/Describe";
 import {QueueManager} from "../queue/QueueManager";
 
-let cs = callStack;
-
 export function describe(label: string, callback: () => void) {
     let _describe: Describe;
 
@@ -18,22 +16,26 @@ export function describe(label: string, callback: () => void) {
     }
 
     // a Description object
-    _describe = new Describe(cs.uniqueId.toString(), label, callback,
-        cs.length && cs.getTopOfStack() || null,
-        cs.length && cs.getTopOfStack().excluded || false);
+    _describe = new Describe(callStack.uniqueId.toString(), label, callback,
+        callStack.length && callStack.getTopOfStack() || null,
+        callStack.length && callStack.getTopOfStack().excluded || false);
 
     // push Describe onto the queue only if it is a top level Describe
-    if (cs.length === 0) {
-        QueueManager.queue.push(_describe);
-    } else {
-        cs.getTopOfStack().items.push(_describe);
-    }
+    // if (callStack.length === 0) {
+    //     QueueManager.queue.push(_describe);
+    // } else {
+    //     callStack.getTopOfStack().items.push(_describe);
+    // }
 
-    // push Describe object onto the callstack
-    cs.pushDescribe(_describe);
+    // push Describe onto the queue
+    QueueManager.queue.push(_describe);
 
+    // push Describe onto the callstack
+    callStack.pushDescribe(_describe);
+
+    // call callback to register the beforeEach, afterEach, it and describe calls
     try {
-        _describe.callback.call(_describe.context);
+        _describe.callback();
     } catch (error) {
         console.log(error);
         alert("Error caught when calling Describe callback. See console for more information");
@@ -41,9 +43,5 @@ export function describe(label: string, callback: () => void) {
     }
 
     // pop Describe object off of the callstack
-    cs.popDescribe();
-
-    if (cs.length === 0) {
-        console.log("QueueManager queue", QueueManager.queue);
-    }
+    callStack.popDescribe();
 }
