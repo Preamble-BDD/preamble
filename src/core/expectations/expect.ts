@@ -26,7 +26,9 @@ expectationAPI["not"] = negatedExpectationAPI;
 
 // expect(value)
 export let expect = (ev: any): {} => {
-    note = { expectedValue: ev, actualValue: null, result: null, exception: null };
+    // if a callback was returned then call it and use what it returns for the expected value
+    let expectedValue = typeof(ev) === "function" && ev() || ev;
+    note = { expectedValue: expectedValue, actualValue: null, result: null, exception: null };
     return expectationAPI;
 };
 
@@ -34,12 +36,17 @@ export let registerMatcher = (matcher: IMatcher) => {
     let proxy = (...args): void => {
         if (argsChecker(matcher, args.length)) {
             note.actualValue = matcher.api.apply(null, args);
+            // if a callback was returned then call it and use what it returns for the actual value
+            note.actualValue = typeof(note.actualValue) === "function" && note.actualValue();
             note.result = matcher.evalueator(note.expectedValue, note.actualValue);
+            console.log("note", note);
         }
     };
     let proxyNot = (...args): void => {
         if (argsChecker(matcher, args.length)) {
             note.actualValue = matcher.api.apply(null, args);
+            // if a callback was returned then call it and use what it returns for the actual value
+            note.actualValue = typeof(note.actualValue) === "function" && note.actualValue();
             note.result = !matcher.evalueator(note.expectedValue, note.actualValue);
         }
     };
