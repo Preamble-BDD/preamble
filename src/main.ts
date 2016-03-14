@@ -15,7 +15,9 @@ import {environment} from "./core/environment/environment";
 import {configuration} from "./core/configuration/configuration";
 import {CallStack} from "./core/callstack/CallStack";
 import {UniqueNumber} from "./core/uniquenumber/UniqueNumber";
+import {expect} from "./core/expectations/expect";
 import "./core/configuration/configuration"; // prevent eliding import
+import "./core/expectations/matchers/booleanMatcher"; // prevent eliding import
 
 let reporter: {};
 
@@ -28,6 +30,7 @@ if (environment.windows) {
     window["xit"] = xit;
     window["beforeEach"] = beforeEach;
     window["afterEach"] = afterEach;
+    window["expect"] = expect;
     // reporter
     if (window.hasOwnProperty("preamble") &&
         window["preamble"].hasOwnProperty("reporter")) {

@@ -1,7 +1,8 @@
 export interface IMatcher {
+    apiName: string;
+    api (...args): any;
     evalueator (expectedValue: any, actualValue?: any): boolean;
     negator?: boolean;
-    apiName: string;
     minArgs: number;
     maxArgs: number;
 }
