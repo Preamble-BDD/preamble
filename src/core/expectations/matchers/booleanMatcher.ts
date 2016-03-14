@@ -7,9 +7,9 @@ registerMatcher({
     evalueator(expectedValue): boolean {
         return expectedValue === true;
     },
-    negator(expectedValue): boolean {
-        return expectedValue === true;
-    }
+    negator: true,
+    minArgs: 0,
+    maxArgs: 0
 });
 
 // toEqual/not.toEqual matchers
@@ -18,7 +18,7 @@ registerMatcher({
     evalueator(expectedValue, actualValue): boolean {
         return expectedValue === actualValue;
     },
-    negator(expectedValue, actualValue): boolean {
-        return expectedValue !== actualValue;
-    }
+    negator: true,
+    minArgs: 0,
+    maxArgs: 0
 });
