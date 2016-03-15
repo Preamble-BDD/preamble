@@ -27,7 +27,7 @@ expectationAPI["not"] = negatedExpectationAPI;
 // expect(value)
 export let expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
-    let expectedValue = typeof(ev) === "function" && ev() || ev;
+    let expectedValue = typeof (ev) === "function" && ev() || ev;
     note = { expectedValue: expectedValue, actualValue: null, result: null, exception: null };
     return expectationAPI;
 };
@@ -35,19 +35,30 @@ export let expect = (ev: any): {} => {
 export let registerMatcher = (matcher: IMatcher) => {
     let proxy = (...args): void => {
         if (argsChecker(matcher, args.length)) {
-            note.actualValue = matcher.api.apply(null, args);
+            // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
+            note.actualValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.actualValue;
             // if a callback was returned then call it and use what it returns for the actual value
-            note.actualValue = typeof(note.actualValue) === "function" && note.actualValue();
-            note.result = matcher.evalueator(note.expectedValue, note.actualValue);
+            note.actualValue = note.actualValue && typeof (note.actualValue) === "function" && note.actualValue();
+            if (matcher.minArgs) {
+                note.result = matcher.evalueator(note.expectedValue, note.actualValue);
+            } else {
+                note.result = matcher.evalueator(note.expectedValue);
+            }
             console.log("note", note);
         }
     };
     let proxyNot = (...args): void => {
         if (argsChecker(matcher, args.length)) {
-            note.actualValue = matcher.api.apply(null, args);
+            // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
+            note.actualValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.actualValue;
             // if a callback was returned then call it and use what it returns for the actual value
-            note.actualValue = typeof(note.actualValue) === "function" && note.actualValue();
-            note.result = !matcher.evalueator(note.expectedValue, note.actualValue);
+            note.actualValue = note.actualValue && typeof (note.actualValue) === "function" && note.actualValue();
+            if (matcher.minArgs) {
+                note.result = !matcher.evalueator(note.expectedValue, note.actualValue);
+            } else {
+                note.result = !matcher.evalueator(note.expectedValue);
+            }
+            console.log("note", note);
         }
     };
     expectationAPI[matcher.apiName] = proxy;
