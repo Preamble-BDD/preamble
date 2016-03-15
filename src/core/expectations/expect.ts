@@ -52,7 +52,7 @@ export let registerMatcher = (matcher: IMatcher) => {
         }
     };
     let proxyNot = (...args): void => {
-        note.apiName = matcher.apiName;
+        note.apiName = "not." + matcher.apiName;
         if (argsChecker(matcher, args.length)) {
             // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
             note.actualValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.actualValue;
