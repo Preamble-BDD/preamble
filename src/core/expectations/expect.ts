@@ -5,6 +5,7 @@ let expectationAPI = {};
 let negatedExpectationAPI = {};
 
 interface INote {
+    apiName: string;
     expectedValue: any;
     actualValue: any;
     result: boolean;
@@ -28,12 +29,13 @@ expectationAPI["not"] = negatedExpectationAPI;
 export let expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
     let expectedValue = typeof (ev) === "function" && ev() || ev;
-    note = { expectedValue: expectedValue, actualValue: null, result: null, exception: null };
+    note = { apiName: null, expectedValue: expectedValue, actualValue: null, result: null, exception: null };
     return expectationAPI;
 };
 
 export let registerMatcher = (matcher: IMatcher) => {
     let proxy = (...args): void => {
+        note.apiName = matcher.apiName;
         if (argsChecker(matcher, args.length)) {
             // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
             note.actualValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.actualValue;
@@ -48,6 +50,7 @@ export let registerMatcher = (matcher: IMatcher) => {
         }
     };
     let proxyNot = (...args): void => {
+        note.apiName = matcher.apiName;
         if (argsChecker(matcher, args.length)) {
             // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
             note.actualValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.actualValue;
