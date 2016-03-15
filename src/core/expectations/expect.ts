@@ -40,12 +40,14 @@ export let registerMatcher = (matcher: IMatcher) => {
             // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
             note.actualValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.actualValue;
             // if a callback was returned then call it and use what it returns for the actual value
-            note.actualValue = note.actualValue && typeof (note.actualValue) === "function" && note.actualValue();
+            note.actualValue = note.actualValue && typeof (note.actualValue) === "function" && note.actualValue() || note.actualValue;
             if (matcher.minArgs) {
                 note.result = matcher.evalueator(note.expectedValue, note.actualValue);
             } else {
                 note.result = matcher.evalueator(note.expectedValue);
             }
+            console.log("note", note);
+        } else {
             console.log("note", note);
         }
     };
@@ -55,15 +57,18 @@ export let registerMatcher = (matcher: IMatcher) => {
             // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
             note.actualValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.actualValue;
             // if a callback was returned then call it and use what it returns for the actual value
-            note.actualValue = note.actualValue && typeof (note.actualValue) === "function" && note.actualValue();
+            note.actualValue = note.actualValue && typeof (note.actualValue) === "function" && note.actualValue() || note.actualValue;
             if (matcher.minArgs) {
                 note.result = !matcher.evalueator(note.expectedValue, note.actualValue);
             } else {
                 note.result = !matcher.evalueator(note.expectedValue);
             }
             console.log("note", note);
+        } else {
+            console.log("note", note);
         }
     };
+    console.log("Registering matcher", matcher.apiName);
     expectationAPI[matcher.apiName] = proxy;
     if (matcher.negator) {
         negatedExpectationAPI[matcher.apiName] = proxyNot;

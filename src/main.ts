@@ -17,7 +17,7 @@ import {CallStack} from "./core/callstack/CallStack";
 import {UniqueNumber} from "./core/uniquenumber/UniqueNumber";
 import {expect} from "./core/expectations/expect";
 import "./core/configuration/configuration"; // prevent eliding import
-import "./core/expectations/matchers/booleanMatcher"; // prevent eliding import
+import "./core/expectations/matchers/matchers"; // prevent eliding import
 
 let reporter: {};
 
