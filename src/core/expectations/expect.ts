@@ -2,6 +2,7 @@ import {IMatcher} from "./matchers/IMatcher";
 
 let matchers: IMatcher[] = [];
 let expectationAPI = {};
+let expectationAPICount = 0;
 let negatedExpectationAPI = {};
 
 interface INote {
@@ -33,7 +34,7 @@ export let expect = (ev: any): {} => {
     return expectationAPI;
 };
 
-export let registerMatcher = (matcher: IMatcher) => {
+export let registerMatcher = (matcher: IMatcher): void => {
     let proxy = (...args): void => {
         note.apiName = matcher.apiName;
         if (argsChecker(matcher, args.length)) {
@@ -73,4 +74,9 @@ export let registerMatcher = (matcher: IMatcher) => {
     if (matcher.negator) {
         negatedExpectationAPI[matcher.apiName] = proxyNot;
     }
+    expectationAPICount++;
+};
+
+export let matchersCount = (): number => {
+    return expectationAPICount;
 };
