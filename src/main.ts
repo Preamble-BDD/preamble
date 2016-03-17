@@ -16,8 +16,11 @@ import {configuration} from "./core/configuration/configuration";
 import {CallStack} from "./core/callstack/CallStack";
 import {UniqueNumber} from "./core/uniquenumber/UniqueNumber";
 import {expect} from "./core/expectations/expect";
+import {registerMatcher} from "./core/expectations/expect";
+import {matchersCount} from "./core/expectations/expect";
+import {IMatcher} from "./core/expectations/matchers/IMatcher";
 import "./core/configuration/configuration"; // prevent eliding import
-import "./core/expectations/matchers/booleanMatcher"; // prevent eliding import
+// import "./core/expectations/matchers/matchers"; // prevent eliding import
 
 let reporter: {};
 
@@ -31,15 +34,27 @@ if (environment.windows) {
     window["beforeEach"] = beforeEach;
     window["afterEach"] = afterEach;
     window["expect"] = expect;
-    // reporter
+    // add reporter plugin
     if (window.hasOwnProperty("preamble") &&
         window["preamble"].hasOwnProperty("reporter")) {
-        reporter = window["preamble"].reporter;
+        reporter = window["preamble"]["reporter"];
     }
     if (!reporter) {
         console.log("No reporter found");
         throw new Error("No reporter found");
     }
+    // add matcher plugins
+    if (window.hasOwnProperty("preamble") &&
+        window["preamble"].hasOwnProperty("matchers")) {
+        let matchers: IMatcher[] = window["preamble"]["matchers"];
+        matchers.forEach(matcher => registerMatcher(matcher));
+    }
+    if (!matchersCount()) {
+        console.log("No matchers found");
+        throw new Error("No matchers found");
+    }
+    // expose registerMatcher for one-off matcher registration
+    window["preamble"]["registerMatcher"] = registerMatcher;
 } else {
     throw new Error("Unsuported environment");
 }
