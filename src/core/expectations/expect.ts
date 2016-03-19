@@ -77,6 +77,4 @@ export let registerMatcher = (matcher: IMatcher): void => {
     expectationAPICount++;
 };
 
-export let matchersCount = (): number => {
-    return expectationAPICount;
-};
+export let matchersCount = (): number => expectationAPICount;
