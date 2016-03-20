@@ -1,4 +1,5 @@
 import {IMatcher} from "./matchers/IMatcher";
+import {spyOn} from "./spy/spy";
 
 let matchers: IMatcher[] = [];
 let expectationAPI = {};
@@ -29,7 +30,12 @@ expectationAPI["not"] = negatedExpectationAPI;
 // expect(value)
 export let expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
-    let expectedValue = typeof (ev) === "function" && ev() || ev;
+    let expectedValue;
+    // if(typeof (ev) === "function" && !ev.hasOwnProperty("_snoopsterMaker")) {
+    //     expectedValue = spyOn(actual).
+    //
+    // }
+    //  && ev() || ev;
     note = { apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null };
     return expectationAPI;
 };
