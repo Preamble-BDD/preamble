@@ -16,6 +16,8 @@ import {configuration} from "./core/configuration/configuration";
 import {CallStack} from "./core/callstack/CallStack";
 import {UniqueNumber} from "./core/uniquenumber/UniqueNumber";
 import {expect} from "./core/expectations/expect";
+import {spyOn} from "./core/expectations/spy/spy";
+import {deepRecursiveCompare} from "./core/expectations/comparators/deeprecursiveequal";
 import {registerMatcher} from "./core/expectations/expect";
 import {matchersCount} from "./core/expectations/expect";
 import {IMatcher} from "./core/expectations/matchers/IMatcher";
@@ -26,7 +28,7 @@ let reporter: {};
 
 // Configure based on environment
 if (environment.windows) {
-    // add callable APIs to the window object
+    // add APIs used by suites to the window object
     window["describe"] = describe;
     window["xdescribe"] = xdescribe;
     window["it"] = it;
@@ -34,6 +36,7 @@ if (environment.windows) {
     window["beforeEach"] = beforeEach;
     window["afterEach"] = afterEach;
     window["expect"] = expect;
+    window["spyOn"] = spyOn;
     // add reporter plugin
     if (window.hasOwnProperty("preamble") &&
         window["preamble"].hasOwnProperty("reporter")) {
@@ -53,7 +56,9 @@ if (environment.windows) {
         console.log("No matchers found");
         throw new Error("No matchers found");
     }
-    // expose registerMatcher for one-off matcher registration
+    // expose deeprecursiveequal (used by matchers) to the window object
+    window["preamble"]["deepRecursiveCompare"] = deepRecursiveCompare;
+    // expose registerMatcher for one-off in-line matcher registration
     window["preamble"]["registerMatcher"] = registerMatcher;
 } else {
     throw new Error("Unsuported environment");

@@ -13,9 +13,11 @@ export interface It {
     toThrowWithName: (name: string) => ISnoopster;
     toThrowWithMessage: (message: string) => ISnoopster;
 };
+
 export interface Expect {
     it: It;
 }
+
 export interface And {
     reset: () => ISnoopster;
     callWithContext: (context: {}) => ISnoopster;
@@ -28,6 +30,7 @@ export interface And {
     callStub: () => ISnoopster;
     expect: Expect;
 }
+
 export interface Expectations {
     toBeCalled: boolean;
     toBeCalledWith: any[];
@@ -37,6 +40,7 @@ export interface Expectations {
     toThrowWithName: string;
     toThrowWithMessage: string;
 }
+
 export interface Calls {
     count: () => number;
     forCall: (i: number) => ACall;
@@ -48,6 +52,7 @@ export interface Calls {
     threwWithName: (name: string) => boolean;
     threwWithMessage: (message: string) => boolean;
 }
+
 export interface ISnoopster extends StaticSnoopster {
     _snoopsterMaker: string;
     _returns: any;
@@ -63,12 +68,15 @@ export interface ISnoopster extends StaticSnoopster {
     _expectations: Expectations;
     _resetCalls: () => void;
 }
+
 export interface XStatic {
     (argObject: {}, argPropertyNames: string[]): void;
 }
+
 export interface ISpyOnStatic {
-    (...args): StaticSnoopster;
+    (...args): ISnoopster;
 }
+
 export interface ISpyOn extends ISpyOnStatic {
     x: XStatic;
 }
@@ -103,7 +111,7 @@ export class ACall {
 }
 
 // (argsObject, argProperty)
-export let spyOn: ISpyOnStatic = (...args): StaticSnoopster => {
+export let spyOn: ISpyOnStatic = (...args): ISnoopster => {
     let targetFn: (...args) => any;
     let calls: ACall[] = [];
     if (args.length) {
@@ -371,6 +379,7 @@ export let spyOn: ISpyOnStatic = (...args): StaticSnoopster => {
     }
     return snoopster;
 };
+
 /**
  * @param {object} argObject An object whose properties identified by
  * the elements in argPropertyNames are to be spies.

@@ -17,6 +17,7 @@ interface INote {
 let note: INote;
 
 let argsChecker = (matcher, argsLength): boolean => {
+    // TODO(JS): allow for an unknow max number of args
     if (argsLength < matcher.minArgs || argsLength > matcher.maxArgs) {
         note.exception = new Error(`${matcher.apiName}(): invalid arguments`);
         return false;
@@ -30,12 +31,11 @@ expectationAPI["not"] = negatedExpectationAPI;
 // expect(value)
 export let expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
-    let expectedValue;
-    // if(typeof (ev) === "function" && !ev.hasOwnProperty("_snoopsterMaker")) {
-    //     expectedValue = spyOn(actual).
-    //
-    // }
-    //  && ev() || ev;
+    let expectedValue = ev;
+    if (typeof (ev) === "function" && !ev.hasOwnProperty("_snoopsterMaker")) {
+        let spy = spyOn(ev).and.callActual();
+        expectedValue = spy();
+    }
     note = { apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null };
     return expectationAPI;
 };
