@@ -16,9 +16,36 @@ interface INote {
 
 let note: INote;
 
+/**
+ * argChecker - checks that the matcher has the
+ * correct number of args passed to it.
+ *
+ * Allows for a fixed and a variable number of arguments.
+ *
+ * Returns true if # of args is correct & false otherwise.
+ *
+ * Example: To declare that a matcher can take
+ * a variable number of args but must be passed
+ * at least 1 arg then minArgs: 1 && maxArgs: -1.
+ *
+ * Example: To declare that a matcher can take
+ * zero or more args then minArgs: 0 && maxArgs: -1.
+ *
+ * Example: To declare that a matcher can take
+ * a fixed number of args then minArgs: n && maxArgs: n.
+ *
+ * Example: To declare that a matcher can take
+ * from 3 to n args then minArgs: 3 && maxArgs: n.
+ */
 let argsChecker = (matcher, argsLength): boolean => {
-    // TODO(JS): allow for an unknow max number of args
-    if (argsLength < matcher.minArgs || argsLength > matcher.maxArgs) {
+    // fails if minArgs > maxArgs
+    if (matcher.minArgs !== -1 && matcher.maxArgs !== -1 &&
+        matcher.minArgs > matcher.maxArgs) {
+        return false;
+    }
+    // allows for a variable number of args.
+    if (matcher.minArgs !== -1 && argsLength < matcher.minArgs ||
+        matcher.maxArgs !== -1 && argsLength > matcher.maxArgs) {
         note.exception = new Error(`${matcher.apiName}(): invalid arguments`);
         return false;
     }
