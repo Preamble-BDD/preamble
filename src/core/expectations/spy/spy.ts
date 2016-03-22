@@ -5,29 +5,29 @@ export interface StaticSnoopster {
 }
 
 export interface It {
-    toBeCalled: () => ISnoopster;
-    toBeCalledWith: () => ISnoopster;
-    toBeCalledWithContext: (context: {}) => ISnoopster;
-    toReturn: (value: any) => ISnoopster;
-    toThrow: () => ISnoopster;
-    toThrowWithName: (name: string) => ISnoopster;
-    toThrowWithMessage: (message: string) => ISnoopster;
-};
+    toBeCalled: () => Snoopster;
+    toBeCalledWith: () => Snoopster;
+    toBeCalledWithContext: (context: {}) => Snoopster;
+    toReturn: (value: any) => Snoopster;
+    toThrow: () => Snoopster;
+    toThrowWithName: (name: string) => Snoopster;
+    toThrowWithMessage: (message: string) => Snoopster;
+}
 
 export interface Expect {
     it: It;
 }
 
 export interface And {
-    reset: () => ISnoopster;
-    callWithContext: (context: {}) => ISnoopster;
-    throw: () => ISnoopster;
-    throwWithMessage: (message: string) => ISnoopster;
-    throwWithName: (name: string) => ISnoopster;
-    return: (ret: any) => ISnoopster;
-    callFake: (fn: (...args) => any) => ISnoopster;
-    callActual: () => ISnoopster;
-    callStub: () => ISnoopster;
+    reset: () => Snoopster;
+    callWithContext: (context: {}) => Snoopster;
+    throw: () => Snoopster;
+    throwWithMessage: (message: string) => Snoopster;
+    throwWithName: (name: string) => Snoopster;
+    return: (ret: any) => Snoopster;
+    callFake: (fn: (...args) => any) => Snoopster;
+    callActual: () => Snoopster;
+    callStub: () => Snoopster;
     expect: Expect;
 }
 
@@ -53,7 +53,7 @@ export interface Calls {
     threwWithMessage: (message: string) => boolean;
 }
 
-export interface ISnoopster extends StaticSnoopster {
+export interface Snoopster extends StaticSnoopster {
     _snoopsterMaker: string;
     _returns: any;
     _callActual: boolean;
@@ -73,11 +73,11 @@ export interface XStatic {
     (argObject: {}, argPropertyNames: string[]): void;
 }
 
-export interface ISpyOnStatic {
-    (...args): ISnoopster;
+export interface SpyOnStatic {
+    (...args): Snoopster;
 }
 
-export interface ISpyOn extends ISpyOnStatic {
+export interface ISpyOn extends SpyOnStatic {
     x: XStatic;
 }
 
@@ -111,7 +111,7 @@ export class ACall {
 }
 
 // (argsObject, argProperty)
-export let spyOn: ISpyOnStatic = (...args): ISnoopster => {
+export let spyOn: SpyOnStatic = (...args): Snoopster => {
     let targetFn: (...args) => any;
     let calls: ACall[] = [];
     if (args.length) {
@@ -132,7 +132,7 @@ export let spyOn: ISpyOnStatic = (...args): ISnoopster => {
     targetFn = args.length === 0 ? function() { } :
         typeof (args[0]) === "function" ? args[0] : args[0][args[1]];
     // spy api - tracking
-    let snoopster = <ISnoopster>function(...args): any {
+    let snoopster = <Snoopster>function(...args): any {
         let aArgs: Args[] = args.length && args || [];
         let fn: ((...args) => any);
         let error: Error;
