@@ -77,7 +77,7 @@ export interface SpyOnStatic {
     (...args): Snoopster;
 }
 
-export interface ISpyOn extends SpyOnStatic {
+export interface SpyOn extends SpyOnStatic {
     x: XStatic;
 }
 
@@ -388,7 +388,7 @@ export let spyOn: SpyOnStatic = (...args): Snoopster => {
  * @param {[object]} context An object to use as the context when calling
  * the spied property methods.
  */
- (<ISpyOn>spyOn).x = (argObject, argPropertyNames) => {
+(<SpyOn>spyOn).x = (argObject, argPropertyNames) => {
     let i,
         len;
     if (!argObject || typeof (argObject) !== "object") {
