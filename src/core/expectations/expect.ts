@@ -55,6 +55,8 @@ let argsChecker = (matcher, argsLength): boolean => {
     return true;
 };
 
+let addNoteToIt = (note: INote) => currentIt.expectations.push(note);
+
 // add not api to expect api
 expectationAPI["not"] = negatedExpectationAPI;
 
@@ -83,6 +85,7 @@ export let registerMatcher = (matcher: IMatcher): void => {
             } else {
                 note.result = matcher.evalueator(note.expectedValue);
             }
+            addNoteToIt(note);
             console.log("note", note);
         } else {
             console.log("note", note);
@@ -100,6 +103,7 @@ export let registerMatcher = (matcher: IMatcher): void => {
             } else {
                 note.result = !matcher.evalueator(note.expectedValue);
             }
+            addNoteToIt(note);
             console.log("note", note);
         } else {
             console.log("note", note);
