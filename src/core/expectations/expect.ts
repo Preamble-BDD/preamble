@@ -1,5 +1,7 @@
 import {IMatcher} from "./matchers/IMatcher";
 import {spyOn} from "./spy/spy";
+import {IIt} from "../queue/IIt";
+import {currentIt} from "../queue/QueueRunner";
 
 let matchers: IMatcher[] = [];
 let expectationAPI = {};
@@ -7,6 +9,7 @@ let expectationAPICount = 0;
 let negatedExpectationAPI = {};
 
 interface INote {
+    it: IIt;
     apiName: string;
     expectedValue: any;
     matcherValue: any;
@@ -63,7 +66,7 @@ export let expect = (ev: any): {} => {
         let spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
-    note = { apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null };
+    note = { it: currentIt, apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null };
     return expectationAPI;
 };
 
