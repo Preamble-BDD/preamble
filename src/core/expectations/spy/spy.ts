@@ -254,7 +254,7 @@ export let spyOn: SpyOnStatic = (...args): Spy => {
         all: function() {
             return calls;
         },
-        wasCalledWith: function(args1) {
+        wasCalledWith: function(...args1) {
             return calls.some(function(call) {
                 let args2 = call.getArgs().args;
                 return (deepRecursiveCompare(args1, args2));
