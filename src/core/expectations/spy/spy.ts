@@ -1,17 +1,17 @@
 import {deepRecursiveCompare} from "../comparators/deeprecursiveequal";
 
-export interface StaticSnoopster {
+export interface StaticSpy {
     (...args): any;
 }
 
 export interface It {
-    toBeCalled: () => Snoopster;
-    toBeCalledWith: () => Snoopster;
-    toBeCalledWithContext: (context: {}) => Snoopster;
-    toReturn: (value: any) => Snoopster;
-    toThrow: () => Snoopster;
-    toThrowWithName: (name: string) => Snoopster;
-    toThrowWithMessage: (message: string) => Snoopster;
+    toBeCalled: () => Spy;
+    toBeCalledWith: () => Spy;
+    toBeCalledWithContext: (context: {}) => Spy;
+    toReturn: (value: any) => Spy;
+    toThrow: () => Spy;
+    toThrowWithName: (name: string) => Spy;
+    toThrowWithMessage: (message: string) => Spy;
 }
 
 export interface Expect {
@@ -19,15 +19,15 @@ export interface Expect {
 }
 
 export interface And {
-    reset: () => Snoopster;
-    callWithContext: (context: {}) => Snoopster;
-    throw: () => Snoopster;
-    throwWithMessage: (message: string) => Snoopster;
-    throwWithName: (name: string) => Snoopster;
-    return: (ret: any) => Snoopster;
-    callFake: (fn: (...args) => any) => Snoopster;
-    callActual: () => Snoopster;
-    callStub: () => Snoopster;
+    reset: () => Spy;
+    callWithContext: (context: {}) => Spy;
+    throw: () => Spy;
+    throwWithMessage: (message: string) => Spy;
+    throwWithName: (name: string) => Spy;
+    return: (ret: any) => Spy;
+    callFake: (fn: (...args) => any) => Spy;
+    callActual: () => Spy;
+    callStub: () => Spy;
     expect: Expect;
 }
 
@@ -45,7 +45,7 @@ export interface Calls {
     count: () => number;
     forCall: (i: number) => ACall;
     all: () => ACall[];
-    wasCalledWith: (args: any[]) => boolean;
+    wasCalledWith: (...args) => boolean;
     wasCalledWithContext: (obj: {}) => boolean;
     returned: (value: any) => boolean;
     threw: () => boolean;
@@ -53,8 +53,8 @@ export interface Calls {
     threwWithMessage: (message: string) => boolean;
 }
 
-export interface Snoopster extends StaticSnoopster {
-    _snoopsterMaker: string;
+export interface Spy extends StaticSpy {
+    _spyMaker: string;
     _returns: any;
     _callActual: boolean;
     _callFake: (...args) => any;
@@ -69,22 +69,18 @@ export interface Snoopster extends StaticSnoopster {
     _resetCalls: () => void;
 }
 
-export interface XStatic {
-    (argObject: {}, argPropertyNames: string[]): void;
-}
-
 export interface SpyOnStatic {
-    (...args): Snoopster;
+    (...args): Spy;
 }
 
 export interface SpyOn extends SpyOnStatic {
-    x: XStatic;
+    x: (argObject: {}, argPropertyNames: string[]) => void;
 }
 
 // args API
 export class Args {
     args: any[];
-    constructor(...args) {
+    constructor(args) {
         this.args = args;
     }
     getLength = (): number => this.args.length ? this.args.length : 0;
@@ -111,7 +107,7 @@ export class ACall {
 }
 
 // (argsObject, argProperty)
-export let spyOn: SpyOnStatic = (...args): Snoopster => {
+export let spyOn: SpyOnStatic = (...args): Spy => {
     let targetFn: (...args) => any;
     let calls: ACall[] = [];
     if (args.length) {
@@ -132,7 +128,7 @@ export let spyOn: SpyOnStatic = (...args): Snoopster => {
     targetFn = args.length === 0 ? function() { } :
         typeof (args[0]) === "function" ? args[0] : args[0][args[1]];
     // spy api - tracking
-    let snoopster = <Snoopster>function(...args): any {
+    let spy = <Spy>function(...args): any {
         let aArgs: Args[] = args.length && args || [];
         let fn: ((...args) => any);
         let error: Error;
@@ -143,112 +139,112 @@ export let spyOn: SpyOnStatic = (...args): Snoopster => {
             this.name = name;
         }
 
-        if (snoopster._callActual || snoopster._callFake) {
-            fn = snoopster._callFake || targetFn;
+        if (spy._callActual || spy._callFake) {
+            fn = spy._callFake || targetFn;
             try {
-                returned = fn.apply(snoopster._callWithContext || this, aArgs);
+                returned = fn.apply(spy._callWithContext || this, aArgs);
             } catch (er) {
                 error = er;
             }
-        } else if (snoopster._throws) {
+        } else if (spy._throws) {
             try {
-                throw new ThrowsException(snoopster._throwsMessage, snoopster._throwsName);
+                throw new ThrowsException(spy._throwsMessage, spy._throwsName);
             } catch (er) {
                 error = er;
             }
         }
-        if (!snoopster._callActual) {
-            returned = snoopster._returns || returned;
+        if (!spy._callActual) {
+            returned = spy._returns || returned;
         }
-        //  snoopster.args = new Args(aArgs);
-        calls.push(new ACall(snoopster._callWithContext || this, new Args(aArgs), error, returned));
+        //  spy.args = new Args(aArgs);
+        calls.push(new ACall(spy._callWithContext || this, new Args(aArgs), error, returned));
         return returned;
     };
-    snoopster._snoopsterMaker = "preamble.snoopster";
+    spy._spyMaker = "preamble.spy";
     // stub api
-    snoopster._throws = false;
-    snoopster._throwsMessage = "";
-    snoopster._throwsName = "";
-    snoopster.and = <And>{};
+    spy._throws = false;
+    spy._throwsMessage = "";
+    spy._throwsName = "";
+    spy.and = <And>{};
     // spy api - sets the spy back to its default state
-    snoopster.and.reset = function() {
+    spy.and.reset = function() {
         calls = [];
-        snoopster._resetCalls();
-        snoopster._throws = false;
-        snoopster._throwsMessage = "";
-        snoopster._throwsName = "";
-        snoopster._callWithContext = null;
-        snoopster._hasExpectations = false;
-        snoopster._expectations = <Expectations>{};
-        return snoopster;
+        spy._resetCalls();
+        spy._throws = false;
+        spy._throwsMessage = "";
+        spy._throwsName = "";
+        spy._callWithContext = null;
+        spy._hasExpectations = false;
+        spy._expectations = <Expectations>{};
+        return spy;
     };
-    snoopster._callWithContext = null;
-    snoopster.and.callWithContext = function(context) {
+    spy._callWithContext = null;
+    spy.and.callWithContext = function(context) {
         if (!context || typeof (context) !== "object") {
             throw new Error("callWithContext expects to be called with an object");
         }
-        snoopster._callWithContext = context;
-        return snoopster;
+        spy._callWithContext = context;
+        return spy;
     };
-    snoopster.and.throw = function() {
-        snoopster._throws = true;
+    spy.and.throw = function() {
+        spy._throws = true;
         // for chaining
-        return snoopster;
+        return spy;
     };
-    snoopster.and.throwWithMessage = function(message) {
+    spy.and.throwWithMessage = function(message) {
         if (typeof (message) !== "string") {
             throw new Error("message expects a string");
         }
-        snoopster._throws = true;
-        snoopster._throwsMessage = message;
+        spy._throws = true;
+        spy._throwsMessage = message;
         // for chaining - spy.throws.with.message().and.with.name();
-        return snoopster;
+        return spy;
     };
-    snoopster.and.throwWithName = function(name) {
+    spy.and.throwWithName = function(name) {
         if (typeof (name) !== "string") {
             throw new Error("name expects a string");
         }
-        snoopster._throws = true;
-        snoopster._throwsName = name;
+        spy._throws = true;
+        spy._throwsName = name;
         // for chaining - spy.throws.with.message().and.with.name();
-        return snoopster;
+        return spy;
     };
-    snoopster.and.return = function(ret) {
-        snoopster._returns = ret;
+    spy.and.return = function(ret) {
+        spy._returns = ret;
         // for chaining
-        return snoopster;
+        return spy;
     };
     // spy api
-    snoopster._resetCalls = function() {
-        snoopster._callFake = null;
-        snoopster._callActual = this._callStub = false;
+    spy._resetCalls = function() {
+        spy._callFake = null;
+        spy._callActual = this._callStub = false;
     };
     // spy api
-    snoopster._callFake = null;
-    snoopster.and.callFake = function(fn) {
+    spy._callFake = null;
+    spy.and.callFake = function(fn) {
         if (fn && typeof (fn) !== "function") {
             throw new Error("callFake expects to be called with a function");
         }
-        snoopster._resetCalls();
-        snoopster._callFake = fn;
-        return snoopster;
+        spy._resetCalls();
+        spy._callFake = fn;
+        return spy;
     };
     // spy api
-    snoopster._callActual = false;
-    snoopster.and.callActual = function() {
-        snoopster._resetCalls();
-        snoopster._callActual = true;
+    spy._callActual = false;
+    spy.and.callActual = function() {
+        spy._resetCalls();
+        spy._callActual = true;
         // for chaining
-        return snoopster;
+        return spy;
     };
     // spy api
-    snoopster.and.callStub = function() {
-        snoopster._resetCalls();
-        snoopster._callActual = false;
+    spy.and.callStub = function() {
+        spy._resetCalls();
+        spy._callActual = false;
         // for chaining
-        return snoopster;
+        return spy;
     };
-    snoopster.calls = {
+    spy.calls = {
         count: function() {
             return calls.length;
         },
@@ -293,91 +289,91 @@ export let spyOn: SpyOnStatic = (...args): Snoopster => {
         }
     };
     // mock api
-    snoopster._hasExpectations = false;
-    snoopster._expectations = <Expectations>{};
-    snoopster.and.expect = <Expect>{
+    spy._hasExpectations = false;
+    spy._expectations = <Expectations>{};
+    spy.and.expect = <Expect>{
         it: {}
     };
-    snoopster.and.expect.it.toBeCalled = function() {
-        snoopster._hasExpectations = true;
-        snoopster._expectations.toBeCalled = true;
-        return snoopster;
+    spy.and.expect.it.toBeCalled = function() {
+        spy._hasExpectations = true;
+        spy._expectations.toBeCalled = true;
+        return spy;
     };
-    snoopster.and.expect.it.toBeCalledWith = function(...args) {
-        snoopster._hasExpectations = true;
-        snoopster._expectations.toBeCalledWith = args;
-        return snoopster;
+    spy.and.expect.it.toBeCalledWith = function(...args) {
+        spy._hasExpectations = true;
+        spy._expectations.toBeCalledWith = args;
+        return spy;
     };
-    snoopster.and.expect.it.toBeCalledWithContext = function(obj: {}) {
-        snoopster._hasExpectations = true;
-        snoopster._expectations.toBeCalledWithContext = obj;
-        return snoopster;
+    spy.and.expect.it.toBeCalledWithContext = function(obj: {}) {
+        spy._hasExpectations = true;
+        spy._expectations.toBeCalledWithContext = obj;
+        return spy;
     };
-    snoopster.and.expect.it.toReturn = function(value) {
-        snoopster._hasExpectations = true;
-        snoopster._expectations.toReturn = value;
-        return snoopster;
+    spy.and.expect.it.toReturn = function(value) {
+        spy._hasExpectations = true;
+        spy._expectations.toReturn = value;
+        return spy;
     };
-    snoopster.and.expect.it.toThrow = function() {
-        snoopster._hasExpectations = true;
-        snoopster._expectations.toThrow = true;
-        return snoopster;
+    spy.and.expect.it.toThrow = function() {
+        spy._hasExpectations = true;
+        spy._expectations.toThrow = true;
+        return spy;
     };
-    snoopster.and.expect.it.toThrowWithName = function(name: string) {
-        snoopster._hasExpectations = true;
-        snoopster._expectations.toThrowWithName = name;
-        return snoopster;
+    spy.and.expect.it.toThrowWithName = function(name: string) {
+        spy._hasExpectations = true;
+        spy._expectations.toThrowWithName = name;
+        return spy;
     };
-    snoopster.and.expect.it.toThrowWithMessage = function(message) {
-        snoopster._hasExpectations = true;
-        snoopster._expectations.toThrowWithMessage = message;
-        return snoopster;
+    spy.and.expect.it.toThrowWithMessage = function(message) {
+        spy._hasExpectations = true;
+        spy._expectations.toThrowWithMessage = message;
+        return spy;
     };
-    // snoopster.validate = function() {
+    // spy.validate = function() {
     //     let notations = require("./expectations/notations.js");
     //
-    //     //  if(!snoopster._hasExpectations){
+    //     //  if(!spy._hasExpectations){
     //     //      throwException(""validate" expects a spy with predefined expectation and found none");
     //     //  }
     //     // Expect the mock to have expectations
-    //     notations.noteExpectation(snoopster);
+    //     notations.noteExpectation(spy);
     //     notations.noteMockHasExpectations();
-    //     if (snoopster._expectations.toBeCalled) {
-    //         notations.noteExpectation(snoopster);
+    //     if (spy._expectations.toBeCalled) {
+    //         notations.noteExpectation(spy);
     //         notations.noteToHaveBeenCalled();
     //     }
-    //     if (snoopster._expectations.toBeCalledWith) {
-    //         notations.noteExpectation(snoopster);
+    //     if (spy._expectations.toBeCalledWith) {
+    //         notations.noteExpectation(spy);
     //         notations.noteToHaveBeenCalledWith.apply(null,
-    //             argsToArray(snoopster._expectations.toBeCalledWith));
+    //             argsToArray(spy._expectations.toBeCalledWith));
     //     }
-    //     if (snoopster._expectations.toBeCalledWithContext) {
-    //         notations.noteExpectation(snoopster);
+    //     if (spy._expectations.toBeCalledWithContext) {
+    //         notations.noteExpectation(spy);
     //         notations.noteToHaveBeenCalledWithContext(
-    //             snoopster._expectations.toBeCalledWithContext);
+    //             spy._expectations.toBeCalledWithContext);
     //     }
-    //     if (snoopster._expectations.toReturn) {
-    //         notations.noteExpectation(snoopster);
-    //         notations.noteToHaveReturned(snoopster._expectations.toReturn);
+    //     if (spy._expectations.toReturn) {
+    //         notations.noteExpectation(spy);
+    //         notations.noteToHaveReturned(spy._expectations.toReturn);
     //     }
-    //     if (snoopster._expectations.toThrow) {
-    //         notations.noteExpectation(snoopster);
+    //     if (spy._expectations.toThrow) {
+    //         notations.noteExpectation(spy);
     //         notations.noteToHaveThrown();
     //     }
-    //     if (snoopster._expectations.toThrowWithName) {
-    //         notations.noteExpectation(snoopster);
-    //         notations.noteToHaveThrownWithName(snoopster._expectations.toThrowWithName);
+    //     if (spy._expectations.toThrowWithName) {
+    //         notations.noteExpectation(spy);
+    //         notations.noteToHaveThrownWithName(spy._expectations.toThrowWithName);
     //     }
-    //     if (snoopster._expectations.toThrowWithMessage) {
-    //         notations.noteExpectation(snoopster);
-    //         notations.noteToHaveThrownWithMessage(snoopster._expectations.toThrowWithMessage);
+    //     if (spy._expectations.toThrowWithMessage) {
+    //         notations.noteExpectation(spy);
+    //         notations.noteToHaveThrownWithMessage(spy._expectations.toThrowWithMessage);
     //     }
     // };
     if (args.length && typeof (args[0]) !== "function" &&
         typeof (args[0]) === "object") {
-        args[0][args[1]] = snoopster;
+        args[0][args[1]] = spy;
     }
-    return snoopster;
+    return spy;
 };
 
 /**

@@ -13,6 +13,7 @@ import {mix} from "./mix";
 import {ICallStack} from "../callstack/ICallStack";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
+// TODO(JS): Add .fail api to done??? 
 export class QueueRunner {
     constructor(private queue: mix[], private configTimeoutInterval: number,
         private Q: typeof q) { }

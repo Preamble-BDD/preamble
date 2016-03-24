@@ -59,7 +59,7 @@ expectationAPI["not"] = negatedExpectationAPI;
 export let expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
     let expectedValue = ev;
-    if (typeof (ev) === "function" && !ev.hasOwnProperty("_snoopsterMaker")) {
+    if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMaker")) {
         let spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
@@ -72,7 +72,7 @@ export let registerMatcher = (matcher: IMatcher): void => {
         note.apiName = matcher.apiName;
         if (argsChecker(matcher, args.length)) {
             // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
-            note.matcherValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.matcherValue;
+            note.matcherValue = matcher.minArgs > 0 ? matcher.api.apply(null, args) : note.matcherValue;
             // if a callback was returned then call it and use what it returns for the matcher value
             note.matcherValue = note.matcherValue && typeof (note.matcherValue) === "function" && note.matcherValue() || note.matcherValue;
             if (matcher.minArgs) {
@@ -89,7 +89,7 @@ export let registerMatcher = (matcher: IMatcher): void => {
         note.apiName = "not." + matcher.apiName;
         if (argsChecker(matcher, args.length)) {
             // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
-            note.matcherValue = matcher.minArgs > 0 && matcher.api.apply(null, args) || note.matcherValue;
+            note.matcherValue = matcher.minArgs > 0 ? matcher.api.apply(null, args) : note.matcherValue;
             // if a callback was returned then call it and use what it returns for the matcher value
             note.matcherValue = note.matcherValue && typeof (note.matcherValue) === "function" && note.matcherValue() || note.matcherValue;
             if (matcher.minArgs) {
