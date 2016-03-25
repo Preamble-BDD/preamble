@@ -9,4 +9,5 @@ export interface IIt extends IIsA {
     scope: {};
     callback: () => void;
     timeoutInterval: number;
+    expectations: any[];
 }

@@ -13,6 +13,9 @@ import {mix} from "./mix";
 import {ICallStack} from "../callstack/ICallStack";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
+export let currentIt: IIt;
+
+// TODO(JS): Add .fail api to done???
 export class QueueRunner {
     constructor(private queue: mix[], private configTimeoutInterval: number,
         private Q: typeof q) { }
@@ -135,6 +138,7 @@ export class QueueRunner {
         let ms = it.timeoutInterval > 0 && it.timeoutInterval || this.configTimeoutInterval;
 
         setTimeout(() => {
+            currentIt = it;
             this.runBefores(hierarchy)
                 .then(() => {
                     return this.runBeforeItAfter(it.callback, it.parent.context)
