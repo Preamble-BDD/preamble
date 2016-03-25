@@ -17,6 +17,8 @@ import {CallStack} from "./core/callstack/CallStack";
 import {UniqueNumber} from "./core/uniquenumber/UniqueNumber";
 import {expect} from "./core/expectations/expect";
 import {registerMatcher} from "./core/expectations/expect";
+import {spyOn} from "./core/expectations/spy/spy";
+import {deepRecursiveCompare} from "./core/expectations/comparators/deeprecursiveequal";
 import {matchersCount} from "./core/expectations/expect";
 import {IMatcher} from "./core/expectations/matchers/IMatcher";
 import "./core/configuration/configuration"; // prevent eliding import
@@ -26,7 +28,7 @@ let reporter: {};
 
 // Configure based on environment
 if (environment.windows) {
-    // add callable APIs to the window object
+    // add APIs used by suites to the window object
     window["describe"] = describe;
     window["xdescribe"] = xdescribe;
     window["it"] = it;
@@ -34,6 +36,7 @@ if (environment.windows) {
     window["beforeEach"] = beforeEach;
     window["afterEach"] = afterEach;
     window["expect"] = expect;
+    window["spyOn"] = spyOn;
     // add reporter plugin
     if (window.hasOwnProperty("preamble") &&
         window["preamble"].hasOwnProperty("reporter")) {
@@ -43,17 +46,18 @@ if (environment.windows) {
         console.log("No reporter found");
         throw new Error("No reporter found");
     }
-    // add matcher plugins
+    // call each matcher plugin to register their matchers
     if (window.hasOwnProperty("preamble") &&
-        window["preamble"].hasOwnProperty("matchers")) {
-        let matchers: IMatcher[] = window["preamble"]["matchers"];
-        matchers.forEach(matcher => registerMatcher(matcher));
+        window["preamble"].hasOwnProperty("registerMatchers")) {
+            let registerMatchers = window["preamble"]["registerMatchers"];
+            registerMatchers.forEach((rm) =>
+            rm(registerMatcher, {deepRecursiveCompare: deepRecursiveCompare}));
     }
     if (!matchersCount()) {
         console.log("No matchers found");
         throw new Error("No matchers found");
     }
-    // expose registerMatcher for one-off matcher registration
+    // expose registerMatcher for one-off in-line matcher registration
     window["preamble"]["registerMatcher"] = registerMatcher;
 } else {
     throw new Error("Unsuported environment");
