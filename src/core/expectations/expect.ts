@@ -1,21 +1,12 @@
 import {IMatcher} from "./matchers/IMatcher";
+import {INote} from "./INote";
 import {spyOn} from "./spy/spy";
-import {IIt} from "../queue/IIt";
 import {currentIt} from "../queue/QueueRunner";
 
 let matchers: IMatcher[] = [];
 let expectationAPI = {};
 let expectationAPICount = 0;
 let negatedExpectationAPI = {};
-
-interface INote {
-    it: IIt;
-    apiName: string;
-    expectedValue: any;
-    matcherValue: any;
-    result: boolean;
-    exception?: Error;
-}
 
 let note: INote;
 
@@ -81,9 +72,9 @@ export let registerMatcher = (matcher: IMatcher): void => {
             // if a callback was returned then call it and use what it returns for the matcher value
             note.matcherValue = note.matcherValue && typeof (note.matcherValue) === "function" && note.matcherValue() || note.matcherValue;
             if (matcher.minArgs) {
-                note.result = matcher.evalueator(note.expectedValue, note.matcherValue);
+                note.result = matcher.evaluator(note.expectedValue, note.matcherValue);
             } else {
-                note.result = matcher.evalueator(note.expectedValue);
+                note.result = matcher.evaluator(note.expectedValue);
             }
             addNoteToIt(note);
             console.log("note", note);
@@ -99,9 +90,9 @@ export let registerMatcher = (matcher: IMatcher): void => {
             // if a callback was returned then call it and use what it returns for the matcher value
             note.matcherValue = note.matcherValue && typeof (note.matcherValue) === "function" && note.matcherValue() || note.matcherValue;
             if (matcher.minArgs) {
-                note.result = !matcher.evalueator(note.expectedValue, note.matcherValue);
+                note.result = !matcher.evaluator(note.expectedValue, note.matcherValue);
             } else {
-                note.result = !matcher.evalueator(note.expectedValue);
+                note.result = !matcher.evaluator(note.expectedValue);
             }
             addNoteToIt(note);
             console.log("note", note);

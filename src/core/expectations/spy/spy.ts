@@ -1,4 +1,6 @@
+import {INote} from "../INote";
 import {deepRecursiveCompare} from "../comparators/deeprecursiveequal";
+import {currentIt} from "../../queue/QueueRunner";
 
 export interface StaticSpy {
     (...args): any;
@@ -35,7 +37,7 @@ export interface Expectations {
     toBeCalled: boolean;
     toBeCalledWith: any[];
     toBeCalledWithContext: {};
-    toReturn: any;
+    toReturnValue: any;
     toThrow: boolean;
     toThrowWithName: string;
     toThrowWithMessage: string;
@@ -65,6 +67,7 @@ export interface Spy extends StaticSpy {
     _hasExpectations: boolean;
     and: And;
     calls: Calls;
+    validate: () => void;
     _expectations: Expectations;
     _resetCalls: () => void;
 }
@@ -311,7 +314,7 @@ export let spyOn: SpyOnStatic = (...args): Spy => {
     };
     spy.and.expect.it.toReturn = function(value) {
         spy._hasExpectations = true;
-        spy._expectations.toReturn = value;
+        spy._expectations.toReturnValue = value;
         return spy;
     };
     spy.and.expect.it.toThrow = function() {
@@ -329,46 +332,71 @@ export let spyOn: SpyOnStatic = (...args): Spy => {
         spy._expectations.toThrowWithMessage = message;
         return spy;
     };
-    // spy.validate = function() {
-    //     let notations = require("./expectations/notations.js");
-    //
-    //     //  if(!spy._hasExpectations){
-    //     //      throwException(""validate" expects a spy with predefined expectation and found none");
-    //     //  }
-    //     // Expect the mock to have expectations
-    //     notations.noteExpectation(spy);
-    //     notations.noteMockHasExpectations();
-    //     if (spy._expectations.toBeCalled) {
-    //         notations.noteExpectation(spy);
-    //         notations.noteToHaveBeenCalled();
-    //     }
-    //     if (spy._expectations.toBeCalledWith) {
-    //         notations.noteExpectation(spy);
-    //         notations.noteToHaveBeenCalledWith.apply(null,
-    //             argsToArray(spy._expectations.toBeCalledWith));
-    //     }
-    //     if (spy._expectations.toBeCalledWithContext) {
-    //         notations.noteExpectation(spy);
-    //         notations.noteToHaveBeenCalledWithContext(
-    //             spy._expectations.toBeCalledWithContext);
-    //     }
-    //     if (spy._expectations.toReturn) {
-    //         notations.noteExpectation(spy);
-    //         notations.noteToHaveReturned(spy._expectations.toReturn);
-    //     }
-    //     if (spy._expectations.toThrow) {
-    //         notations.noteExpectation(spy);
-    //         notations.noteToHaveThrown();
-    //     }
-    //     if (spy._expectations.toThrowWithName) {
-    //         notations.noteExpectation(spy);
-    //         notations.noteToHaveThrownWithName(spy._expectations.toThrowWithName);
-    //     }
-    //     if (spy._expectations.toThrowWithMessage) {
-    //         notations.noteExpectation(spy);
-    //         notations.noteToHaveThrownWithMessage(spy._expectations.toThrowWithMessage);
-    //     }
-    // };
+    spy.validate = function() {
+        let noteMockExpectation =
+            (apiName: string, evaluator: () => boolean, matcherValue?: any): void => {
+                let note: INote = {
+                    it: currentIt,
+                    apiName: apiName,
+                    expectedValue: spy,
+                    matcherValue: matcherValue || null,
+                    result: null,
+                    exception: null
+                };
+                try {
+                    note.result = evaluator();
+                } catch (error) {
+                    note.exception = error;
+                }
+                currentIt.expectations.push(note);
+                console.log("note", note);
+            };
+
+        if (spy._hasExpectations && spy._expectations.toBeCalled) {
+            noteMockExpectation("mock.toBeCalled", () => spy.calls.count() > 0);
+        }
+        if (spy._hasExpectations && spy._expectations.toBeCalledWith) {
+            noteMockExpectation(
+                "mock.toBeCalledWith",
+                () => spy.calls.wasCalledWith.apply(null, spy._expectations.toBeCalledWith),
+                spy._expectations.toBeCalledWith
+            );
+        }
+        if (spy._hasExpectations && spy._expectations.toBeCalledWithContext) {
+            noteMockExpectation(
+                "mock.toBeCalledWithContext",
+                () => spy.calls.wasCalledWithContext(spy._expectations.toBeCalledWithContext),
+                spy._expectations.toBeCalledWith
+            );
+        }
+        if (spy._hasExpectations && spy._expectations.toReturnValue) {
+            noteMockExpectation(
+                "mock.toReturnValue",
+                () => spy.calls.returned(spy._expectations.toReturnValue),
+                spy._expectations.toReturnValue
+            );
+        }
+        if (spy._hasExpectations && spy._expectations.toThrow) {
+            noteMockExpectation(
+                "mock.toThrow",
+                () => spy.calls.threw()
+            );
+        }
+        if (spy._hasExpectations && spy._expectations.toThrowWithName) {
+            noteMockExpectation(
+                "mock.toThrowWithName",
+                () => spy.calls.threwWithName(spy._expectations.toThrowWithName),
+                spy._expectations.toThrowWithName
+            );
+        }
+        if (spy._hasExpectations && spy._expectations.toThrowWithMessage) {
+            noteMockExpectation(
+                "mock.toThrowWithMessage",
+                () => spy.calls.threwWithMessage(spy._expectations.toThrowWithMessage),
+                spy._expectations.toThrowWithMessage
+            );
+        }
+    };
     if (args.length && typeof (args[0]) !== "function" &&
         typeof (args[0]) === "object") {
         args[0][args[1]] = spy;
