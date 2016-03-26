@@ -1,5 +1,4 @@
 import {IIsA} from "./IIsA";
-import {Describe} from "./Describe";
 import {BeforeEach} from "./BeforeEach";
 import {AfterEach} from "./AfterEach";
 import {It} from "./It";
@@ -14,4 +13,5 @@ export interface IDescribe extends IIsA {
     beforeEach: BeforeEach;
     afterEach: AfterEach;
     parent: IDescribe;
+    passed: boolean;
 }

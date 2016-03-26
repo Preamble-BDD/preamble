@@ -1,5 +1,6 @@
 import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
+import {INote} from "../expectations/INote";
 
 export interface IIt extends IIsA {
     parent: IDescribe;
@@ -9,5 +10,6 @@ export interface IIt extends IIsA {
     scope: {};
     callback: () => void;
     timeoutInterval: number;
-    expectations: any[];
+    expectations: INote[];
+    passed: boolean;
 }

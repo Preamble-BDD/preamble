@@ -90,6 +90,9 @@ export let registerMatcher = (matcher: IMatcher): void => {
                     }
                 }
                 addNoteToIt(note);
+                // set It's and its parent Describe's passed property to false when expectation fails
+                currentIt.passed = !note.result ? note.result : currentIt.passed;
+                currentIt.parent.passed = !note.result ? note.result : currentIt.parent.passed;
                 console.log("note", note);
             } else {
                 console.log("note", note);
