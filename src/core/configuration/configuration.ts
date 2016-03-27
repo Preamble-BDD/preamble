@@ -27,7 +27,7 @@ function windowsConfiguration(): void {
         windowGlobals: true,
         timeoutInterval: 50,
         name: "Suite",
-        uiTestContainerId: "ui-test-container",
+        uiTestContainerId: "preamble-ui-container",
         hidePassedTests: false,
         shortCircuit: false
     };
