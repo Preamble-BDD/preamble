@@ -24,7 +24,15 @@ import {IMatcher} from "./core/expectations/matchers/IMatcher";
 import "./core/configuration/configuration"; // prevent eliding import
 // import "./core/expectations/matchers/matchers"; // prevent eliding import
 
-let reporter: {};
+// TODO(js): define a Reporter interface
+interface Reporter {
+    reportBegin: (configOptions: { uiTestContainerId: string, name: string }) => void;
+    reportSummary: (summaryInfo: {totDescribes: number, totExcDescribes: number, totIts: number, totExcIts: number} ) => void;
+    reportSuite: () => void;
+    reportSpec: () => void;
+    reportEnd: () => void;
+}
+let reporters: Reporter[];
 
 // Configure based on environment
 if (environment.windows) {
@@ -37,28 +45,42 @@ if (environment.windows) {
     window["afterEach"] = afterEach;
     window["expect"] = expect;
     window["spyOn"] = spyOn;
-    // add reporter plugin
-    if (window.hasOwnProperty("preamble") &&
-        window["preamble"].hasOwnProperty("reporter")) {
-        reporter = window["preamble"]["reporter"];
-    }
-    if (!reporter) {
-        console.log("No reporter found");
-        throw new Error("No reporter found");
-    }
-    // call each matcher plugin to register their matchers
-    if (window.hasOwnProperty("preamble") &&
-        window["preamble"].hasOwnProperty("registerMatchers")) {
+    if (window.hasOwnProperty("preamble")) {
+        // add reporter plugin
+        if (window["preamble"].hasOwnProperty("reporters")) {
+            reporters = window["preamble"]["reporters"];
+        }
+        if (!reporters || !reporters.length) {
+            console.log("No reporters found");
+            throw new Error("No reporters found");
+        }
+        // call each reporter's reportBegin method
+        reporters.forEach((reporter) => reporter.reportBegin({
+            uiTestContainerId: configuration.uiTestContainerId,
+            name: configuration.name
+        }));
+
+        // expose registerMatcher for one-off in-line matcher registration
+        window["preamble"]["registerMatcher"] = registerMatcher;
+        // call each matcher plugin to register their matchers
+        if (window["preamble"].hasOwnProperty("registerMatchers")) {
             let registerMatchers = window["preamble"]["registerMatchers"];
             registerMatchers.forEach((rm) =>
-            rm(registerMatcher, {deepRecursiveCompare: deepRecursiveCompare}));
+                rm(registerMatcher, { deepRecursiveCompare: deepRecursiveCompare }));
+            if (!matchersCount()) {
+                console.log("No matchers registered");
+                throw new Error("No matchers found");
+            }
+        } else {
+            // no matcher plugins found but matchers can be
+            // registered inline so just log it but don't
+            // throw an exception
+            console.log("No matcher plugins found");
+        }
+    } else {
+        console.log("No plugins found");
+        throw new Error("No plugins found");
     }
-    if (!matchersCount()) {
-        console.log("No matchers found");
-        throw new Error("No matchers found");
-    }
-    // expose registerMatcher for one-off in-line matcher registration
-    window["preamble"]["registerMatcher"] = registerMatcher;
 } else {
     throw new Error("Unsuported environment");
 }
@@ -76,6 +98,13 @@ new QueueManager(100, 2, Q)
         // fulfilled/success
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
+        // call each reporter's reportSummary method
+        reporters.forEach((reporter) => reporter.reportSummary({
+            totDescribes: QueueManager.totDescribes,
+            totExcDescribes: QueueManager.totExcDescribes,
+            totIts: QueueManager.totIts,
+            totExcIts: QueueManager.totExclIts
+        }));
         // run the queue
         new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run()
             .then(() => {
