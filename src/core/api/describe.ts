@@ -30,6 +30,9 @@ export function describe(label: string, callback: () => void) {
     // push Describe onto the queue
     QueueManager.queue.push(_describe);
 
+    // increment totDescribes count
+    QueueManager.totDescribes++;
+
     // push Describe onto the callstack
     callStack.pushDescribe(_describe);
 
