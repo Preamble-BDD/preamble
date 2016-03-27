@@ -15,6 +15,8 @@ import {IDescribe} from "./IDescribe";
 
 export class QueueManager {
     static queue: IDescribe[] = [];
+    static totDescribes: number = 0;
+    static totExcDescribes: number = 0;
     static totIts: number = 0;
     static totExclIts: number = 0;
     constructor(private timerInterval: number, private stableRetryCount: number, private Q: typeof q /** see Note above */) { }
