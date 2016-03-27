@@ -33,6 +33,12 @@ export function xdescribe(label: string, callback: () => void) {
     // push Describe onto the queue
     QueueManager.queue.push(_describe);
 
+    // increment totDescribes count
+    QueueManager.totDescribes++;
+
+    // increment totExcDescribes count
+    QueueManager.totExcDescribes++;
+
     // push Describe object onto the callstack
     callStack.pushDescribe(_describe);
 
