@@ -23,9 +23,9 @@ export function it(label: string, callback: (done?: () => void) => void, timeout
     // an It object
     _it = new It(callStack.getTopOfStack(), callStack.uniqueId.toString(), label, callback, callStack.getTopOfStack().excluded, timeoutInterval);
 
-        // push Describe onto the queue
+    // push Describe onto the queue
     QueueManager.queue.push(_it);
 
-    // Increment totIts count
+    // increment totIts count
     QueueManager.totIts++;
 }
