@@ -27,7 +27,7 @@ import "./core/configuration/configuration"; // prevent eliding import
 // TODO(js): define a Reporter interface
 interface Reporter {
     reportBegin: (configOptions: { uiTestContainerId: string, name: string }) => void;
-    reportSummary: (summaryInfo: {totDescribes: number, totExcDescribes: number, totIts: number, totExcIts: number} ) => void;
+    reportSummary: (summaryInfo: {totDescribes: number, totExcDescribes: number, totIts: number, totFailedIts: number, totExcIts: number, name: string} ) => void;
     reportSuite: () => void;
     reportSpec: () => void;
     reportEnd: () => void;
@@ -103,7 +103,9 @@ new QueueManager(100, 2, Q)
             totDescribes: QueueManager.totDescribes,
             totExcDescribes: QueueManager.totExcDescribes,
             totIts: QueueManager.totIts,
-            totExcIts: QueueManager.totExclIts
+            totFailedIts: 0,
+            totExcIts: QueueManager.totExclIts,
+            name: configuration.name
         }));
         // run the queue
         new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run()
