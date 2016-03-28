@@ -9,29 +9,31 @@ import {QueueManager} from "../queue/QueueManager";
 
 export function describe(label: string, callback: () => void) {
     let _describe: Describe;
+    let excluded: boolean;
 
     if (arguments.length !== 2 || typeof (arguments[0])
         !== "string" || typeof (arguments[1]) !== "function") {
         throw new TypeError("describe called with invalid parameters");
     }
 
+    // mark the Describe excluded if any of its parents are excluded
+    excluded = callStack.stack.some((item) => {
+        return item.excluded;
+    });
+
     // a Description object
     _describe = new Describe(callStack.uniqueId.toString(), label, callback,
         callStack.length && callStack.getTopOfStack() || null,
-        callStack.length && callStack.getTopOfStack().excluded || false);
-
-    // push Describe onto the queue only if it is a top level Describe
-    // if (callStack.length === 0) {
-    //     QueueManager.queue.push(_describe);
-    // } else {
-    //     callStack.getTopOfStack().items.push(_describe);
-    // }
+        excluded);
 
     // push Describe onto the queue
     QueueManager.queue.push(_describe);
 
     // increment totDescribes count
     QueueManager.totDescribes++;
+
+    // increment total excluded Describes if excluded
+    QueueManager.totExcDescribes = excluded && QueueManager.totExcDescribes + 1 || QueueManager.totExcDescribes;
 
     // push Describe onto the callstack
     callStack.pushDescribe(_describe);
