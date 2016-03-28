@@ -173,7 +173,7 @@ export class QueueRunner {
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
         let its = <IIt[]>this.queue.filter((element) => {
-            return element.isA === "It";
+            return element.isA === "It" && !element.excluded;
         });
         // console.log("its", its);
 
