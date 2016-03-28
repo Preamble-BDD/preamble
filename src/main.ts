@@ -27,7 +27,7 @@ import "./core/configuration/configuration"; // prevent eliding import
 // TODO(js): define a Reporter interface
 interface Reporter {
     reportBegin: (configOptions: { uiTestContainerId: string, name: string }) => void;
-    reportSummary: (summaryInfo: {totDescribes: number, totExcDescribes: number, totIts: number, totFailedIts: number, totExcIts: number, name: string} ) => void;
+    reportSummary: (summaryInfo: { totDescribes: number, totExcDescribes: number, totIts: number, totFailedIts: number, totExcIts: number, name: string, totTime: number }) => void;
     reportSuite: () => void;
     reportSpec: () => void;
     reportEnd: () => void;
@@ -91,6 +91,17 @@ let timeKeeper = {
     totTime: 0
 };
 
+// call each reporter's reportSummary method
+reporters.forEach((reporter) => reporter.reportSummary({
+    totDescribes: 0,
+    totExcDescribes: 0,
+    totIts: 0,
+    totFailedIts: 0,
+    totExcIts: 0,
+    name: configuration.name,
+    totTime: 0
+}));
+
 // get a queue manager and call its run method to run the test suite
 new QueueManager(100, 2, Q)
     .run()
@@ -105,7 +116,8 @@ new QueueManager(100, 2, Q)
             totIts: QueueManager.totIts,
             totFailedIts: 0,
             totExcIts: QueueManager.totExclIts,
-            name: configuration.name
+            name: configuration.name,
+            totTime: 0
         }));
         // run the queue
         new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run()
@@ -113,17 +125,18 @@ new QueueManager(100, 2, Q)
                 let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
                     return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
                 }, 0);
+                timeKeeper.endTime = Date.now();
+                timeKeeper.totTime = timeKeeper.endTime - timeKeeper.startTime;
+                console.log(`queue ran successfully in ${timeKeeper.totTime} miliseconds`);
                 reporters.forEach((reporter) => reporter.reportSummary({
                     totDescribes: QueueManager.totDescribes,
                     totExcDescribes: QueueManager.totExcDescribes,
                     totIts: QueueManager.totIts,
                     totFailedIts: totFailedIts,
                     totExcIts: QueueManager.totExclIts,
-                    name: configuration.name
+                    name: configuration.name,
+                    totTime: timeKeeper.totTime
                 }));
-                timeKeeper.endTime = Date.now();
-                timeKeeper.totTime = timeKeeper.endTime - timeKeeper.startTime;
-                console.log(`queue ran successfully in ${timeKeeper.totTime} miliseconds`);
             }, () => {
                 console.log("queue failed to run");
             });
