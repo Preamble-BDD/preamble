@@ -110,6 +110,17 @@ new QueueManager(100, 2, Q)
         // run the queue
         new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run()
             .then(() => {
+                let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
+                    return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
+                }, 0);
+                reporters.forEach((reporter) => reporter.reportSummary({
+                    totDescribes: QueueManager.totDescribes,
+                    totExcDescribes: QueueManager.totExcDescribes,
+                    totIts: QueueManager.totIts,
+                    totFailedIts: totFailedIts,
+                    totExcIts: QueueManager.totExclIts,
+                    name: configuration.name
+                }));
                 timeKeeper.endTime = Date.now();
                 timeKeeper.totTime = timeKeeper.endTime - timeKeeper.startTime;
                 console.log(`queue ran successfully in ${timeKeeper.totTime} miliseconds`);
