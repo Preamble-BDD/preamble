@@ -10,7 +10,8 @@ export class ReportDispatch implements Reporter {
     }
     reportSuite(): void {
     }
-    reportSpec(): void {
+    reportSpec(it): void {
+        this._reporters.forEach((report) => report.reportSpec(it));
     }
     reportEnd(): void {
     }
