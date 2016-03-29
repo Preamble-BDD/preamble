@@ -21,17 +21,10 @@ import {spyOn} from "./core/expectations/spy/spy";
 import {deepRecursiveCompare} from "./core/expectations/comparators/deeprecursiveequal";
 import {matchersCount} from "./core/expectations/expect";
 import {IMatcher} from "./core/expectations/matchers/IMatcher";
+import {Reporter} from "./core/reporters/Reporter";
+import {reportDispatch} from "./core/reporters/reportdispatch";
 import "./core/configuration/configuration"; // prevent eliding import
-// import "./core/expectations/matchers/matchers"; // prevent eliding import
 
-// TODO(js): define a Reporter interface
-interface Reporter {
-    reportBegin: (configOptions: { uiTestContainerId: string, name: string }) => void;
-    reportSummary: (summaryInfo: { totDescribes: number, totExcDescribes: number, totIts: number, totFailedIts: number, totExcIts: number, name: string, totTime: number }) => void;
-    reportSuite: () => void;
-    reportSpec: () => void;
-    reportEnd: () => void;
-}
 let reporters: Reporter[];
 
 // Configure based on environment
@@ -49,17 +42,18 @@ if (environment.windows) {
         // add reporter plugin
         if (window["preamble"].hasOwnProperty("reporters")) {
             reporters = window["preamble"]["reporters"];
+            // hand off reporters to the ReportDispatch
+            reportDispatch.reporters = reporters;
         }
         if (!reporters || !reporters.length) {
             console.log("No reporters found");
             throw new Error("No reporters found");
         }
-        // call each reporter's reportBegin method
-        reporters.forEach((reporter) => reporter.reportBegin({
+        // dispatch reportBegin to reporters
+        reportDispatch.reportBegin({
             uiTestContainerId: configuration.uiTestContainerId,
             name: configuration.name
-        }));
-
+        });
         // expose registerMatcher for one-off in-line matcher registration
         window["preamble"]["registerMatcher"] = registerMatcher;
         // call each matcher plugin to register their matchers
@@ -91,8 +85,8 @@ let timeKeeper = {
     totTime: 0
 };
 
-// call each reporter's reportSummary method
-reporters.forEach((reporter) => reporter.reportSummary({
+// dspatch reportSummary to all reporters
+reportDispatch.reportSummary({
     totDescribes: 0,
     totExcDescribes: 0,
     totIts: 0,
@@ -100,7 +94,7 @@ reporters.forEach((reporter) => reporter.reportSummary({
     totExcIts: 0,
     name: configuration.name,
     totTime: 0
-}));
+});
 
 // get a queue manager and call its run method to run the test suite
 new QueueManager(100, 2, Q)
@@ -109,8 +103,8 @@ new QueueManager(100, 2, Q)
         // fulfilled/success
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
-        // call each reporter's reportSummary method
-        reporters.forEach((reporter) => reporter.reportSummary({
+        // dispatch reportSummary to all reporters
+        reportDispatch.reportSummary({
             totDescribes: QueueManager.totDescribes,
             totExcDescribes: QueueManager.totExcDescribes,
             totIts: QueueManager.totIts,
@@ -118,7 +112,7 @@ new QueueManager(100, 2, Q)
             totExcIts: QueueManager.totExclIts,
             name: configuration.name,
             totTime: 0
-        }));
+        });
         // run the queue
         new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run()
             .then(() => {
@@ -128,7 +122,8 @@ new QueueManager(100, 2, Q)
                 timeKeeper.endTime = Date.now();
                 timeKeeper.totTime = timeKeeper.endTime - timeKeeper.startTime;
                 console.log(`queue ran successfully in ${timeKeeper.totTime} miliseconds`);
-                reporters.forEach((reporter) => reporter.reportSummary({
+                // dispatch reportSummary to all reporters
+                reportDispatch.reportSummary({
                     totDescribes: QueueManager.totDescribes,
                     totExcDescribes: QueueManager.totExcDescribes,
                     totIts: QueueManager.totIts,
@@ -136,7 +131,7 @@ new QueueManager(100, 2, Q)
                     totExcIts: QueueManager.totExclIts,
                     name: configuration.name,
                     totTime: timeKeeper.totTime
-                }));
+                });
             }, () => {
                 console.log("queue failed to run");
             });
