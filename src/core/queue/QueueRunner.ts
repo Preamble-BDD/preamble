@@ -11,6 +11,7 @@ import {IIt} from "./IIt";
 import {It} from "./It";
 import {mix} from "./mix";
 import {ICallStack} from "../callstack/ICallStack";
+import {reportDispatch} from "../reporters/reportdispatch";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
 export let currentIt: IIt;
@@ -31,7 +32,7 @@ export class QueueRunner {
     private runBeforeItAfter(fn: (done?: () => void) => any, context: {}): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
 
-        setTimeout(function(){
+        setTimeout(function() {
             if (fn.length) {
                 // Asynchronously calls fn passing callback for done parameter
                 setTimeout(function() {
@@ -172,7 +173,7 @@ export class QueueRunner {
      */
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
-        let its = <IIt[]>this.queue.filter((element) => {
+        let its: IIt[] = <IIt[]>this.queue.filter((element) => {
             return element.isA === "It" && !element.excluded;
         });
         // console.log("its", its);
@@ -182,7 +183,10 @@ export class QueueRunner {
             setTimeout(() => {
                 if (i < its.length) {
                     this.runIt(its[i])
-                        .then(() => runner(++i))
+                        .then(() => {
+                            reportDispatch.reportSpec(its[i]);
+                            runner(++i);
+                        })
                         .fail((e) => {
                             console.log(e);
                             deferred.reject(e);
