@@ -174,23 +174,30 @@ export class QueueRunner {
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
         let its: IIt[] = <IIt[]>this.queue.filter((element) => {
-            return element.isA === "It" && !element.excluded;
+            return element.isA === "It";
         });
+        let it: It;
         // console.log("its", its);
 
         // recursive iterator
         let runner = (i: number) => {
             setTimeout(() => {
                 if (i < its.length) {
-                    this.runIt(its[i])
+                    it = its[i];
+                    if (it.excluded || it.parent.excluded) {
+                        reportDispatch.reportSpec(it);
+                        runner(++i);
+                    } else {
+                        this.runIt(it)
                         .then(() => {
-                            reportDispatch.reportSpec(its[i]);
+                            reportDispatch.reportSpec(it);
                             runner(++i);
                         })
                         .fail((e) => {
                             console.log(e);
                             deferred.reject(e);
                         });
+                    }
                 } else {
                     deferred.resolve();
                 }
