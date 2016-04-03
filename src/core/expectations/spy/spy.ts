@@ -341,13 +341,15 @@ export let spyOn: SpyOnStatic = (...args): Spy => {
                     expectedValue: spy,
                     matcherValue: matcherValue || null,
                     result: null,
-                    exception: null
+                    exception: null,
+                    stackTrace: null
                 };
                 try {
                     note.result = evaluator();
                 } catch (error) {
                     note.exception = error;
                 }
+                // TODO(js): assign reason for failure here once it is working with the expect api.
                 currentIt.expectations.push(note);
                 console.log("note", note);
             };

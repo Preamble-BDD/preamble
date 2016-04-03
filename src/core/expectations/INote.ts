@@ -7,4 +7,5 @@ export interface INote {
     matcherValue: any;
     result: boolean;
     exception?: Error;
+    stackTrace: string[];
 }
