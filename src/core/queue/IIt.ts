@@ -4,6 +4,7 @@ import {INote} from "../expectations/INote";
 
 export interface IIt extends IIsA {
     parent: IDescribe;
+    hierarchy: IDescribe[];
     id: string;
     label: string;
     excluded: boolean;
@@ -12,4 +13,6 @@ export interface IIt extends IIsA {
     timeoutInterval: number;
     expectations: INote[];
     passed: boolean;
+    timeoutInfo: {reason: string , stackTrace: string[]};
+    callStack: string[];
 }

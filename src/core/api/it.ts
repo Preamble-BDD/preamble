@@ -6,6 +6,7 @@
 import {It} from "../queue/It";
 import {callStack} from "./callstack";
 import {QueueManager} from "../queue/QueueManager";
+import {stackTrace} from "../stacktrace/StackTrace";
 
 export function it(label: string, callback: (done?: () => void) => void, timeoutInterval = 0): void {
     let _it;
@@ -28,7 +29,7 @@ export function it(label: string, callback: (done?: () => void) => void, timeout
 
     // an It object
     _it = new It(callStack.getTopOfStack(), callStack.uniqueId.toString(),
-        label, callback, excluded, timeoutInterval);
+        label, callback, excluded, timeoutInterval, stackTrace.stackTrace);
 
     // push It onto the queue
     QueueManager.queue.push(_it);

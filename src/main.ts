@@ -5,6 +5,7 @@
 import Q = require("q");
 import {QueueManager} from "./core/queue/QueueManager";
 import {QueueRunner} from "./core/queue/QueueRunner";
+import {stackTrace} from "./core/stacktrace/StackTrace";
 import {describe} from "./core/api/describe";
 import {xdescribe} from "./core/api/xdescribe";
 import {it} from "./core/api/it";
@@ -26,6 +27,9 @@ import {reportDispatch} from "./core/reporters/reportdispatch";
 import "./core/configuration/configuration"; // prevent eliding import
 
 let reporters: Reporter[];
+
+// turn on long stact support in Q
+Q.longStackSupport = true;
 
 // Configure based on environment
 if (environment.windows) {
@@ -71,6 +75,8 @@ if (environment.windows) {
             // throw an exception
             console.log("No matcher plugins found");
         }
+        // expose Q on wondow.preamble
+        window["preamble"].Q = Q;
     } else {
         console.log("No plugins found");
         throw new Error("No plugins found");
@@ -114,7 +120,7 @@ new QueueManager(100, 2, Q)
             totTime: 0
         });
         // run the queue
-        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, Q).run()
+        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, reportDispatch, Q).run()
             .then(() => {
                 let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
                     return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
