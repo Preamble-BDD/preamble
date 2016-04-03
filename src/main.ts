@@ -56,7 +56,8 @@ if (environment.windows) {
         // dispatch reportBegin to reporters
         reportDispatch.reportBegin({
             uiTestContainerId: configuration.uiTestContainerId,
-            name: configuration.name
+            name: configuration.name,
+            hidePassedTests: configuration.hidePassedTests
         });
         // expose registerMatcher for one-off in-line matcher registration
         window["preamble"]["registerMatcher"] = registerMatcher;

@@ -2,7 +2,7 @@ import {Reporter} from "./Reporter";
 
 export class ReportDispatch implements Reporter {
     private _reporters: Reporter[];
-    reportBegin(configOptions: { uiTestContainerId: string, name: string }): void {
+    reportBegin(configOptions: { uiTestContainerId: string, name: string, hidePassedTests: boolean }): void {
         this._reporters.forEach((report) => report.reportBegin(configOptions));
     }
     reportSummary(summaryInfo: { totDescribes: number, totExcDescribes: number, totIts: number, totFailedIts: number, totExcIts: number, name: string, totTime: number }): void {
