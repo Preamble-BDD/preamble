@@ -53,13 +53,37 @@ let argsChecker = (matcher, argsLength): boolean => {
 
 let addNoteToIt = (note: INote) => currentIt.expectations.push(note);
 
+let showAs = (value: any): string => {
+    if (Array.isArray(value)) {
+        return "array";
+    }
+    if (typeof (value) === "function") {
+        return "function";
+    }
+    if (typeof (value) === "object") {
+        return "object";
+    }
+    if (typeof (value) === "string") {
+        return `"${value}"`;
+    }
+    if (typeof (value) === "number") {
+        return value;
+    }
+    if (typeof (value) === "boolean") {
+        return value;
+    }
+    if (typeof (value) === "undefined") {
+        return "undefined";
+    }
+};
+
 let assignReason = (note: INote) => {
     let reason: string;
     if (!note.result) {
         if (note.matcherValue != null) {
-            reason = `expect(${note.expectedValue}).${note.apiName}(${note.matcherValue}) failed!`;
+            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}(${showAs(note.matcherValue)}) failed!`;
         } else {
-            reason = `expect(${note.expectedValue}).${note.apiName}() failed!`;
+            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}() failed!`;
         }
         currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
