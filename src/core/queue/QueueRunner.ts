@@ -181,17 +181,17 @@ export class QueueRunner {
                     this.runAfters(it.hierarchy).then(() => {
                         deferred.resolve();
                     }, (error: Error) => {
-                        it.timeoutInfo = { reason: error.message, stackTrace: it.parent.afterEach.callStack };
+                        it.reasons.push({ reason: error.message, stackTrace: it.parent.afterEach.callStack });
                         it.passed = false;
                         deferred.reject(error);
                     });
                 }, (error: Error) => {
-                    it.timeoutInfo = { reason: error.message, stackTrace: it.callStack };
+                    it.reasons.push({ reason: error.message, stackTrace: it.callStack });
                     it.passed = false;
                     deferred.reject(error);
                 });
             }, (error: Error) => {
-                it.timeoutInfo = { reason: error.message, stackTrace: it.parent.beforeEach.callStack };
+                it.reasons.push({ reason: error.message, stackTrace: it.parent.beforeEach.callStack });
                 it.passed = false;
                 deferred.reject(error);
             });
@@ -221,15 +221,14 @@ export class QueueRunner {
                         this.reportDispatch.reportSpec(it);
                         runner(++i);
                     } else {
-                        this.runBIA(it)
-                            .then(() => {
-                                this.reportDispatch.reportSpec(it);
-                                runner(++i);
-                            })
-                            .fail(() => {
-                                this.reportDispatch.reportSpec(it);
-                                runner(++i);
-                            });
+                        this.runBIA(it).then(() => {
+                            this.reportDispatch.reportSpec(it);
+                            runner(++i);
+                        }).fail(() => {
+                            // an it timed out or one or more expectations failed
+                            this.reportDispatch.reportSpec(it);
+                            runner(++i);
+                        });
                     }
                 } else {
                     deferred.resolve();

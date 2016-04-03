@@ -2,6 +2,11 @@ import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
 import {INote} from "../expectations/INote";
 
+export interface Reason {
+    reason: string;
+    stackTrace: string[];
+}
+
 export interface IIt extends IIsA {
     parent: IDescribe;
     hierarchy: IDescribe[];
@@ -13,6 +18,6 @@ export interface IIt extends IIsA {
     timeoutInterval: number;
     expectations: INote[];
     passed: boolean;
-    timeoutInfo: {reason: string , stackTrace: string[]};
+    reasons: Reason[];
     callStack: string[];
 }

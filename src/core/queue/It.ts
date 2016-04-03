@@ -1,4 +1,5 @@
 import {IIt} from "./IIt";
+import {Reason} from "./IIt";
 import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
 import {INote} from "../expectations/INote";
@@ -25,7 +26,7 @@ export class It implements IIt {
     expectations: INote[];
     isA: string;
     passed: boolean;
-    timeoutInfo: {reason: string , stackTrace: string[]};
+    reasons: Reason[];
     hierarchy: IDescribe[];
     constructor(public parent: IDescribe, public id: string, public label: string, public callback, public excluded = false, public timeoutInterval: number, public callStack: string[]) {
         this.expectations = [];
@@ -33,5 +34,6 @@ export class It implements IIt {
         this.isA = "It";
         this.passed = true;
         this.hierarchy = getAncestorHierarchy(parent);
+        this.reasons = [];
     }
 }
