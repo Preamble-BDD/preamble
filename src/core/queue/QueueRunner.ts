@@ -205,9 +205,7 @@ export class QueueRunner {
      */
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
-        let its: IIt[] = <IIt[]>this.queue.filter((element) => {
-            return element.isA === "It";
-        });
+        let its: IIt[] = <IIt[]>this.queue.filter(element => element.isA === "It");
         let it: It;
         // console.log("its", its);
 
