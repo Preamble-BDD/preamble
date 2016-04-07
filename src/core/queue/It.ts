@@ -3,24 +3,11 @@ import {Reason} from "./IIt";
 import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
 import {INote} from "../expectations/INote";
+import {ancestorHierarchy} from "./hierarchy";
 
 /**
 * returns an It ancestor hierarchy
 */
-let getAncestorHierarchy = (describe: IDescribe): IDescribe[] => {
-    let parent = describe;
-    let hierarchy: IDescribe[] = [];
-
-    // build ancestor hierarchy adding parent to the top of the hierarcy
-    while (parent) {
-        hierarchy.unshift(parent);
-        parent = parent.parent;
-    }
-
-    // return ancestor hierarchy
-    return hierarchy;
-};
-
 export class It implements IIt {
     scope: {};
     expectations: INote[];
@@ -33,7 +20,7 @@ export class It implements IIt {
         this.scope = {};
         this.isA = "It";
         this.passed = true;
-        this.hierarchy = getAncestorHierarchy(parent);
+        this.hierarchy = <IDescribe[]> ancestorHierarchy(parent);
         this.reasons = [];
     }
 }
