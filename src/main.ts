@@ -24,6 +24,7 @@ import {matchersCount} from "./core/expectations/expect";
 import {IMatcher} from "./core/expectations/matchers/IMatcher";
 import {Reporter} from "./core/reporters/Reporter";
 import {reportDispatch} from "./core/reporters/reportdispatch";
+import {queueFilter} from "./core/queue/QueueFilter";
 import "./core/configuration/configuration"; // prevent eliding import
 
 let reporters: Reporter[];
@@ -92,6 +93,10 @@ let timeKeeper = {
     totTime: 0
 };
 
+// the raw filter looks like "#spec_n" or "#suite_n" where n is some number
+let filter = window.location.hash.substring(window.location.hash.indexOf("_") + 1);
+console.log("filter =", filter);
+
 // dspatch reportSummary to all reporters
 reportDispatch.reportSummary({
     totDescribes: 0,
@@ -121,7 +126,8 @@ new QueueManager(100, 2, Q)
             totTime: 0
         });
         // run the queue
-        new QueueRunner(QueueManager.queue, configuration.timeoutInterval, reportDispatch, Q).run()
+        new QueueRunner(filter && queueFilter(QueueManager.queue, filter) || QueueManager.queue,
+            configuration.timeoutInterval, reportDispatch, Q).run()
             .then(() => {
                 let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
                     return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
