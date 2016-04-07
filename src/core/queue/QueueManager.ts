@@ -11,15 +11,20 @@
  * declaration of Q.
  */
 import q = require("q");
-import {IDescribe} from "./IDescribe";
+import {mix} from "./mix";
 
-export class QueueManager {
-    static queue: IDescribe[] = [];
+export interface IQueueManager {
+    run: () => Q.Promise<string | Error>;
+}
+
+export class QueueManager implements IQueueManager {
+    static queue: mix[] = [];
     static totDescribes: number = 0;
     static totExcDescribes: number = 0;
     static totIts: number = 0;
     static totExclIts: number = 0;
-    constructor(private timerInterval: number, private stableRetryCount: number, private Q: typeof q /** see Note above */) { }
+    constructor(private timerInterval: number, private stableRetryCount: number,
+        private Q: typeof q /** see Note above */) { }
     run(): Q.Promise<string | Error> {
         let deferred = this.Q.defer<string | Error>();
         let retryCount: number = 0;
