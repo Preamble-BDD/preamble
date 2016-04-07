@@ -5,7 +5,6 @@
 
 import {BeforeEach} from "../queue/BeforeEach";
 import {callStack} from "./callstack";
-import {QueueManager} from "../queue/QueueManager";
 import {stackTrace} from "../stacktrace/StackTrace";
 
 export function beforeEach(callback: (done?: () => void) => void, timeoutInterval = 0) {
