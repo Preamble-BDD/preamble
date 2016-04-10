@@ -35,8 +35,10 @@ export function it(label: string, callback: (done?: () => void) => void, timeout
     QueueManager.queue.push(_it);
 
     // increment totIts count
-    QueueManager.totIts++;
+    QueueManager.bumpTotItsCount();
 
     // increment total excluded Its if excluded
-    QueueManager.totExclIts = excluded && QueueManager.totExclIts + 1 || QueueManager.totExclIts;
+    if (excluded) {
+        QueueManager.bumpTotExcItsCount();
+    }
 }

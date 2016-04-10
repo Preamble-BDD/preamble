@@ -27,10 +27,15 @@ import {reportDispatch} from "./core/reporters/reportdispatch";
 import {queueFilter} from "./core/queue/QueueFilter";
 import "./core/configuration/configuration"; // prevent eliding import
 
+let pkgJSON = require("../package.json");
+
 let reporters: Reporter[];
 
 // turn on long stact support in Q
 Q.longStackSupport = true;
+
+// give reportDispatch access to the queuManager
+reportDispatch.queueManagerStats = QueueManager.queueManagerStats;
 
 // Configure based on environment
 if (environment.windows) {
@@ -56,6 +61,7 @@ if (environment.windows) {
         }
         // dispatch reportBegin to reporters
         reportDispatch.reportBegin({
+            version: pkgJSON.version,
             uiTestContainerId: configuration.uiTestContainerId,
             name: configuration.name,
             hidePassedTests: configuration.hidePassedTests
@@ -87,64 +93,34 @@ if (environment.windows) {
     throw new Error("Unsuported environment");
 }
 
-let timeKeeper = {
-    startTime: Date.now(),
-    endTime: 0,
-    totTime: 0
-};
-
 // the raw filter looks like "#spec_n" or "#suite_n" where n is some number
 let filter = window.location.hash.substring(window.location.hash.indexOf("_") + 1);
 console.log("filter =", filter);
 
 // dspatch reportSummary to all reporters
-reportDispatch.reportSummary({
-    totDescribes: 0,
-    totExcDescribes: 0,
-    totIts: 0,
-    totFailedIts: 0,
-    totExcIts: 0,
-    name: configuration.name,
-    totTime: 0
-});
+reportDispatch.reportSummary();
 
 // get a queue manager and call its run method to run the test suite
-new QueueManager(100, 2, Q)
-    .run()
+let queueManager = new QueueManager(100, 2, Q);
+QueueManager.startTimer();
+queueManager.run()
     .then((msg) => {
         // fulfilled/success
         console.log(msg);
         console.log("QueueManager.queue =", QueueManager.queue);
         // dispatch reportSummary to all reporters
-        reportDispatch.reportSummary({
-            totDescribes: QueueManager.totDescribes,
-            totExcDescribes: QueueManager.totExcDescribes,
-            totIts: QueueManager.totIts,
-            totFailedIts: 0,
-            totExcIts: QueueManager.totExclIts,
-            name: configuration.name,
-            totTime: 0
-        });
+        reportDispatch.reportSummary();
         // run the queue
         new QueueRunner(filter && queueFilter(QueueManager.queue, filter) || QueueManager.queue,
-            configuration.timeoutInterval, reportDispatch, Q).run()
+            configuration.timeoutInterval, queueManager, reportDispatch, Q).run()
             .then(() => {
                 let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
                     return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
                 }, 0);
-                timeKeeper.endTime = Date.now();
-                timeKeeper.totTime = timeKeeper.endTime - timeKeeper.startTime;
-                console.log(`queue ran successfully in ${timeKeeper.totTime} miliseconds`);
+                QueueManager.stopTimer();
+                console.log(`queue ran successfully in ${QueueManager.queueManagerStats.timeKeeper.totTime} miliseconds`);
                 // dispatch reportSummary to all reporters
-                reportDispatch.reportSummary({
-                    totDescribes: QueueManager.totDescribes,
-                    totExcDescribes: QueueManager.totExcDescribes,
-                    totIts: QueueManager.totIts,
-                    totFailedIts: totFailedIts,
-                    totExcIts: QueueManager.totExclIts,
-                    name: configuration.name,
-                    totTime: timeKeeper.totTime
-                });
+                reportDispatch.reportSummary();
             }, () => {
                 console.log("queue failed to run");
             });

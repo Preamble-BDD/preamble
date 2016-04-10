@@ -1,8 +1,9 @@
 import {IIt} from "../queue/IIt";
+import {QueueManagerStats} from "../queue/QueueManager";
 
 export interface Reporter {
-    reportBegin: (configOptions: { uiTestContainerId: string, name: string, hidePassedTests: boolean }) => void;
-    reportSummary: (summaryInfo: { totDescribes: number, totExcDescribes: number, totIts: number, totFailedIts: number, totExcIts: number, name: string, totTime: number }) => void;
+    reportBegin: (configOptions: { version: string, uiTestContainerId: string, name: string, hidePassedTests: boolean }) => void;
+    reportSummary: (queueManagerStats: QueueManagerStats) => void;
     reportSuite: () => void;
     reportSpec: (it: IIt) => void;
     reportEnd: () => void;

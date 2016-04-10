@@ -4,13 +4,14 @@
  * declaration of Q.
  */
 import q = require("q");
+import {QueueManager} from "./QueueManager";
 import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
 import {IPrePostTest} from "./ipreposttest";
 import {IIt} from "./IIt";
 import {It} from "./It";
 import {mix} from "./mix";
-import {Reporter} from "../reporters/Reporter";
+import {IReportDispatch} from "../reporters/reportdispatch";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
 export let currentIt: IIt;
@@ -19,7 +20,8 @@ export let currentIt: IIt;
 export class QueueRunner {
     private errors: string[];
     constructor(private queue: mix[], private configTimeoutInterval: number,
-        private reportDispatch: Reporter, private Q: typeof q) { }
+        private queueManager: QueueManager, private reportDispatch: IReportDispatch,
+        private Q: typeof q) { }
     /**
      * Returns a function (closure) which must complete within a set amount of time
      * asynchronously. If the function fails to complete within its given time limit
@@ -220,10 +222,15 @@ export class QueueRunner {
                         runner(++i);
                     } else {
                         this.runBIA(it).then(() => {
+                            if (!it.passed) {
+                                QueueManager.bumpTotFailedItsCount();
+                            }
+                            this.reportDispatch.reportSummary();
                             this.reportDispatch.reportSpec(it);
                             runner(++i);
                         }).fail(() => {
                             // an it timed out or one or more expectations failed
+                            this.reportDispatch.reportSummary();
                             this.reportDispatch.reportSpec(it);
                             runner(++i);
                         });

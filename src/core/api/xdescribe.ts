@@ -23,21 +23,14 @@ export function xdescribe(label: string, callback: () => void) {
     _describe = new Describe(callStack.uniqueId.toString(), label, callback,
         callStack.length && callStack.getTopOfStack() || null, true);
 
-    // // push Describe onto the queue only if it is a top level Describe
-    // if (cs.length === 0) {
-    //     QueueManager.queue.push(_describe);
-    // } else {
-    //     cs.getTopOfStack().items.push(_describe);
-    // }
-
     // push Describe onto the queue
     QueueManager.queue.push(_describe);
 
     // increment totDescribes count
-    QueueManager.totDescribes++;
+    QueueManager.bumpTotDescribesCount();
 
     // increment totExcDescribes count
-    QueueManager.totExcDescribes++;
+    QueueManager.bumpTotExcDescribesCount();
 
     // push Describe object onto the callstack
     callStack.pushDescribe(_describe);

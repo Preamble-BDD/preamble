@@ -30,8 +30,8 @@ export function xit(label: string, callback: (done?: () => void) => void, timeou
     QueueManager.queue.push(_it);
 
     // Increment totIts count
-    QueueManager.totIts++;
+    QueueManager.bumpTotItsCount();
 
     // Increment totExclIts count
-    QueueManager.totExclIts++;
+    QueueManager.bumpTotExcItsCount();
 }

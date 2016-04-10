@@ -17,6 +17,7 @@ export function describe(label: string, callback: () => void) {
     }
 
     // mark the Describe excluded if any of its parents are excluded
+    // TODO(js):
     excluded = callStack.stack.some((item) => {
         return item.excluded;
     });
@@ -30,10 +31,12 @@ export function describe(label: string, callback: () => void) {
     QueueManager.queue.push(_describe);
 
     // increment totDescribes count
-    QueueManager.totDescribes++;
+    QueueManager.bumpTotDescribesCount();
 
     // increment total excluded Describes if excluded
-    QueueManager.totExcDescribes = excluded && QueueManager.totExcDescribes + 1 || QueueManager.totExcDescribes;
+    if (excluded) {
+        QueueManager.bumpTotExcDescribesCount();
+    }
 
     // push Describe onto the callstack
     callStack.pushDescribe(_describe);
