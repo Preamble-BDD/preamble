@@ -24,7 +24,7 @@ import {matchersCount} from "./core/expectations/expect";
 import {IMatcher} from "./core/expectations/matchers/IMatcher";
 import {Reporter} from "./core/reporters/Reporter";
 import {reportDispatch} from "./core/reporters/reportdispatch";
-import {queueFilter} from "./core/queue/QueueFilter";
+import {queueFilter} from "./core/queue/queueFilter";
 import "./core/configuration/configuration"; // prevent eliding import
 
 let pkgJSON = require("../package.json");
