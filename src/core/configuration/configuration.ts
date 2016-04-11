@@ -25,9 +25,9 @@ export let configuration: IPreambleConfiguration;
 function windowsConfiguration(): void {
     let defaultConfiguration: IPreambleConfiguration = {
         windowGlobals: true,
-        timeoutInterval: 50,
+        timeoutInterval: 5000,
         name: "Suite",
-        uiTestContainerId: "ui-test-container",
+        uiTestContainerId: "preamble-ui-container",
         hidePassedTests: false,
         shortCircuit: false
     };

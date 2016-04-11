@@ -5,7 +5,7 @@
 
 import {BeforeEach} from "../queue/BeforeEach";
 import {callStack} from "./callstack";
-import {QueueManager} from "../queue/QueueManager";
+import {stackTrace} from "../stacktrace/StackTrace";
 
 export function beforeEach(callback: (done?: () => void) => void, timeoutInterval = 0) {
     let _beforeEach;
@@ -21,7 +21,7 @@ export function beforeEach(callback: (done?: () => void) => void, timeoutInterva
     }
 
     // a BeforeEach object
-    _beforeEach = new BeforeEach(callStack.getTopOfStack(), callStack.uniqueId.toString(), callback, timeoutInterval);
+    _beforeEach = new BeforeEach(callStack.getTopOfStack(), callStack.uniqueId.toString(), callback, timeoutInterval, stackTrace.stackTrace);
 
     // add it to its parent describe
     callStack.getTopOfStack().beforeEach = _beforeEach;

@@ -1,6 +1,6 @@
 {
   "name": "preamble-ts",
-  "version": "0.0.1",
+  "version": "0.0.0-b0.1.0",
   "description": "Preamble.ts the BDD test runner Reborn!",
   "main": "index.js",
   "scripts": {

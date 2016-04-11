@@ -2,6 +2,7 @@ import {IMatcher} from "./matchers/IMatcher";
 import {INote} from "./INote";
 import {spyOn} from "./spy/spy";
 import {currentIt} from "../queue/QueueRunner";
+import {stackTrace} from "../stacktrace/StackTrace";
 
 let matchers: IMatcher[] = [];
 let expectationAPI = {};
@@ -52,6 +53,42 @@ let argsChecker = (matcher, argsLength): boolean => {
 
 let addNoteToIt = (note: INote) => currentIt.expectations.push(note);
 
+let showAs = (value: any): string => {
+    if (Array.isArray(value)) {
+        return "array";
+    }
+    if (typeof (value) === "function") {
+        return "function";
+    }
+    if (typeof (value) === "object") {
+        return "object";
+    }
+    if (typeof (value) === "string") {
+        return `"${value}"`;
+    }
+    if (typeof (value) === "number") {
+        return value;
+    }
+    if (typeof (value) === "boolean") {
+        return value;
+    }
+    if (typeof (value) === "undefined") {
+        return "undefined";
+    }
+};
+
+let assignReason = (note: INote) => {
+    let reason: string;
+    if (!note.result) {
+        if (note.matcherValue != null) {
+            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}(${showAs(note.matcherValue)}) failed!`;
+        } else {
+            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}() failed!`;
+        }
+        currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
+    }
+};
+
 // add not api to expect api
 expectationAPI["not"] = negatedExpectationAPI;
 
@@ -59,11 +96,13 @@ expectationAPI["not"] = negatedExpectationAPI;
 export let expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
     let expectedValue = ev;
+    // capture the stack trace here when expect is called.
+    let st = stackTrace.stackTrace;
     if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMaker")) {
         let spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
-    note = { it: currentIt, apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null };
+    note = { it: currentIt, apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
     return expectationAPI;
 };
 
@@ -90,6 +129,7 @@ export let registerMatcher = (matcher: IMatcher): void => {
                     }
                 }
                 addNoteToIt(note);
+                assignReason(note);
                 // set It's and its parent Describe's passed property to false when expectation fails
                 currentIt.passed = !note.result ? note.result : currentIt.passed;
                 currentIt.parent.passed = !note.result ? note.result : currentIt.parent.passed;
