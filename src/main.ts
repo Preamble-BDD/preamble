@@ -93,8 +93,8 @@ if (environment.windows) {
     throw new Error("Unsuported environment");
 }
 
-// the raw filter looks like "#spec_n" or "#suite_n" where n is some number
-let filter = window.location.hash.substring(window.location.hash.indexOf("_") + 1);
+// the raw filter looks like "?filter=spec_n" or "?filter=suite_n" where n is some number
+let filter = window.location.search.substring(window.location.search.indexOf("_") + 1);
 console.log("filter =", filter);
 
 // dspatch reportSummary to all reporters
