@@ -56,7 +56,7 @@ export interface Calls {
 }
 
 export interface Spy extends StaticSpy {
-    _spyMaker: string;
+    _spyMarker: string;
     _returns: any;
     _callActual: boolean;
     _callFake: (...args) => any;
@@ -163,7 +163,7 @@ export let spyOn: SpyOnStatic = (...args): Spy => {
         calls.push(new ACall(spy._callWithContext || this, new Args(aArgs), error, returned));
         return returned;
     };
-    spy._spyMaker = "preamble.spy";
+    spy._spyMarker = "preamble.spy";
     // stub api
     spy._throws = false;
     spy._throwsMessage = "";

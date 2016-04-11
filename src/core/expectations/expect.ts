@@ -98,7 +98,7 @@ export let expect = (ev: any): {} => {
     let expectedValue = ev;
     // capture the stack trace here when expect is called.
     let st = stackTrace.stackTrace;
-    if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMaker")) {
+    if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMarker")) {
         let spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
