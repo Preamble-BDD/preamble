@@ -111,7 +111,8 @@ queueManager.run()
         // dispatch reportSummary to all reporters
         reportDispatch.reportSummary();
         // run the queue
-        new QueueRunner(filter && queueFilter(QueueManager.queue, filter) || QueueManager.queue,
+        new QueueRunner(filter && queueFilter(QueueManager.queue,
+            QueueManager.queueManagerStats, filter) || QueueManager.queue,
             configuration.timeoutInterval, queueManager, reportDispatch, Q).run()
             .then(() => {
                 let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
