@@ -26,6 +26,7 @@ export interface QueueManagerStats {
     totExcIts: number;
     totFailedIts: number;
     timeKeeper: TimeKeeper;
+    totFiltered?: number;
 };
 
 export interface IQueueManager {
