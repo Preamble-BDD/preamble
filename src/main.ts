@@ -19,6 +19,7 @@ import {UniqueNumber} from "./core/uniquenumber/UniqueNumber";
 import {expect} from "./core/expectations/expect";
 import {registerMatcher} from "./core/expectations/expect";
 import {spyOn} from "./core/expectations/spy/spy";
+import {mock} from "./core/expectations/mock";
 import {deepRecursiveCompare} from "./core/expectations/comparators/deeprecursiveequal";
 import {matchersCount} from "./core/expectations/expect";
 import {IMatcher} from "./core/expectations/matchers/IMatcher";
@@ -48,6 +49,7 @@ if (environment.windows) {
     window["afterEach"] = afterEach;
     window["expect"] = expect;
     window["spyOn"] = spyOn;
+    window["mock"] = mock;
     if (window.hasOwnProperty("preamble")) {
         // add reporter plugin
         if (window["preamble"].hasOwnProperty("reporters")) {
