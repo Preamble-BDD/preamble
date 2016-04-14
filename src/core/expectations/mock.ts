@@ -1,5 +1,6 @@
 /**
  * Mock API
+ * WARNING: mock is an experimental api and may not be included in the official release.
  */
 
 import {Spy} from "./spy/spy";
