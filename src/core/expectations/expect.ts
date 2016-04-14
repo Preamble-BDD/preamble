@@ -4,10 +4,12 @@ import {spyOn} from "./spy/spy";
 import {currentIt} from "../queue/QueueRunner";
 import {stackTrace} from "../stacktrace/StackTrace";
 
-let matchers: IMatcher[] = [];
 let expectationAPI = {};
 let expectationAPICount = 0;
 let negatedExpectationAPI = {};
+
+// add not api to expect api
+expectationAPI["not"] = negatedExpectationAPI;
 
 interface Proxy {
     (...args): void;
@@ -88,9 +90,6 @@ let assignReason = (note: INote) => {
         currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
 };
-
-// add not api to expect api
-expectationAPI["not"] = negatedExpectationAPI;
 
 // expect(value)
 export let expect = (ev: any): {} => {
