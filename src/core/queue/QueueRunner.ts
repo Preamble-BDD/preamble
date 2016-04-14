@@ -16,7 +16,7 @@ import "../../polyfills/Object.assign"; // prevent eliding import
 
 export let currentIt: IIt;
 
-// TODO(JS): Add .fail api to done???
+// TODO(JS): Show .fails (i.e. timeouts) in the done???
 export class QueueRunner {
     private errors: string[];
     constructor(private queue: mix[], private configTimeoutInterval: number,

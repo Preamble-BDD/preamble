@@ -20,7 +20,6 @@ export interface IReportDispatch {
     // reporters: (reporters: Reporter[]) => void;
     // queueManagerStats: (stats: QueueManagerStats) => void;
 }
-// TODO(js): The QueueManager should be referenced internally to eliminate having to pass each method info from the queue.
 export class ReportDispatch implements IReportDispatch {
     private _reporters: Reporter[];
     private _configOptions;
