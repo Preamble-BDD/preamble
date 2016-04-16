@@ -4,10 +4,12 @@ import {spyOn} from "./spy/spy";
 import {currentIt} from "../queue/QueueRunner";
 import {stackTrace} from "../stacktrace/StackTrace";
 
-let matchers: IMatcher[] = [];
 let expectationAPI = {};
 let expectationAPICount = 0;
 let negatedExpectationAPI = {};
+
+// add not api to expect api
+expectationAPI["not"] = negatedExpectationAPI;
 
 interface Proxy {
     (...args): void;
@@ -89,16 +91,13 @@ let assignReason = (note: INote) => {
     }
 };
 
-// add not api to expect api
-expectationAPI["not"] = negatedExpectationAPI;
-
 // expect(value)
 export let expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
     let expectedValue = ev;
     // capture the stack trace here when expect is called.
     let st = stackTrace.stackTrace;
-    if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMaker")) {
+    if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMarker")) {
         let spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }

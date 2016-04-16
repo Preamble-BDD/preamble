@@ -1,9 +1,10 @@
 export let deepRecursiveCompare = (a: any, b: any): boolean => {
     if (typeof (a) === "object" && typeof (b) === "object") {
+        if (a === b) {
+            // return true if a and b are the same object
+            return true;
+        }
         return compareObjects(a, b) && compareObjects(b, a);
-    }
-    if (typeof (a) === "object" || typeof (b) === "object") {
-        return false;
     }
     return a === b;
 };

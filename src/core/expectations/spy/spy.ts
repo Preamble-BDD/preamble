@@ -1,23 +1,7 @@
-import {INote} from "../INote";
 import {deepRecursiveCompare} from "../comparators/deeprecursiveequal";
-import {currentIt} from "../../queue/QueueRunner";
 
 export interface StaticSpy {
     (...args): any;
-}
-
-export interface It {
-    toBeCalled: () => Spy;
-    toBeCalledWith: () => Spy;
-    toBeCalledWithContext: (context: {}) => Spy;
-    toReturn: (value: any) => Spy;
-    toThrow: () => Spy;
-    toThrowWithName: (name: string) => Spy;
-    toThrowWithMessage: (message: string) => Spy;
-}
-
-export interface Expect {
-    it: It;
 }
 
 export interface And {
@@ -30,17 +14,6 @@ export interface And {
     callFake: (fn: (...args) => any) => Spy;
     callActual: () => Spy;
     callStub: () => Spy;
-    expect: Expect;
-}
-
-export interface Expectations {
-    toBeCalled: boolean;
-    toBeCalledWith: any[];
-    toBeCalledWithContext: {};
-    toReturnValue: any;
-    toThrow: boolean;
-    toThrowWithName: string;
-    toThrowWithMessage: string;
 }
 
 export interface Calls {
@@ -56,7 +29,7 @@ export interface Calls {
 }
 
 export interface Spy extends StaticSpy {
-    _spyMaker: string;
+    _spyMarker: string;
     _returns: any;
     _callActual: boolean;
     _callFake: (...args) => any;
@@ -68,7 +41,6 @@ export interface Spy extends StaticSpy {
     and: And;
     calls: Calls;
     validate: () => void;
-    _expectations: Expectations;
     _resetCalls: () => void;
 }
 
@@ -109,7 +81,6 @@ export class ACall {
     getReturned = (): any => this.returned;
 }
 
-// (argsObject, argProperty)
 export let spyOn: SpyOnStatic = (...args): Spy => {
     let targetFn: (...args) => any;
     let calls: ACall[] = [];
@@ -159,11 +130,10 @@ export let spyOn: SpyOnStatic = (...args): Spy => {
         if (!spy._callActual) {
             returned = spy._returns || returned;
         }
-        //  spy.args = new Args(aArgs);
         calls.push(new ACall(spy._callWithContext || this, new Args(aArgs), error, returned));
         return returned;
     };
-    spy._spyMaker = "preamble.spy";
+    spy._spyMarker = "preamble.spy";
     // stub api
     spy._throws = false;
     spy._throwsMessage = "";
@@ -178,7 +148,6 @@ export let spyOn: SpyOnStatic = (...args): Spy => {
         spy._throwsName = "";
         spy._callWithContext = null;
         spy._hasExpectations = false;
-        spy._expectations = <Expectations>{};
         return spy;
     };
     spy._callWithContext = null;
@@ -289,114 +258,6 @@ export let spyOn: SpyOnStatic = (...args): Spy => {
             return calls.some(function(call) {
                 return call.error && call.error.message === message;
             });
-        }
-    };
-    // mock api
-    spy._hasExpectations = false;
-    spy._expectations = <Expectations>{};
-    spy.and.expect = <Expect>{
-        it: {}
-    };
-    spy.and.expect.it.toBeCalled = function() {
-        spy._hasExpectations = true;
-        spy._expectations.toBeCalled = true;
-        return spy;
-    };
-    spy.and.expect.it.toBeCalledWith = function(...args) {
-        spy._hasExpectations = true;
-        spy._expectations.toBeCalledWith = args;
-        return spy;
-    };
-    spy.and.expect.it.toBeCalledWithContext = function(obj: {}) {
-        spy._hasExpectations = true;
-        spy._expectations.toBeCalledWithContext = obj;
-        return spy;
-    };
-    spy.and.expect.it.toReturn = function(value) {
-        spy._hasExpectations = true;
-        spy._expectations.toReturnValue = value;
-        return spy;
-    };
-    spy.and.expect.it.toThrow = function() {
-        spy._hasExpectations = true;
-        spy._expectations.toThrow = true;
-        return spy;
-    };
-    spy.and.expect.it.toThrowWithName = function(name: string) {
-        spy._hasExpectations = true;
-        spy._expectations.toThrowWithName = name;
-        return spy;
-    };
-    spy.and.expect.it.toThrowWithMessage = function(message) {
-        spy._hasExpectations = true;
-        spy._expectations.toThrowWithMessage = message;
-        return spy;
-    };
-    spy.validate = function() {
-        let noteMockExpectation =
-            (apiName: string, evaluator: () => boolean, matcherValue?: any): void => {
-                let note: INote = {
-                    it: currentIt,
-                    apiName: apiName,
-                    expectedValue: spy,
-                    matcherValue: matcherValue || null,
-                    result: null,
-                    exception: null,
-                    stackTrace: null
-                };
-                try {
-                    note.result = evaluator();
-                } catch (error) {
-                    note.exception = error;
-                }
-                // TODO(js): assign reason for failure here once it is working with the expect api.
-                currentIt.expectations.push(note);
-                console.log("note", note);
-            };
-
-        if (spy._hasExpectations && spy._expectations.toBeCalled) {
-            noteMockExpectation("mock.toBeCalled", () => spy.calls.count() > 0);
-        }
-        if (spy._hasExpectations && spy._expectations.toBeCalledWith) {
-            noteMockExpectation(
-                "mock.toBeCalledWith",
-                () => spy.calls.wasCalledWith.apply(null, spy._expectations.toBeCalledWith),
-                spy._expectations.toBeCalledWith
-            );
-        }
-        if (spy._hasExpectations && spy._expectations.toBeCalledWithContext) {
-            noteMockExpectation(
-                "mock.toBeCalledWithContext",
-                () => spy.calls.wasCalledWithContext(spy._expectations.toBeCalledWithContext),
-                spy._expectations.toBeCalledWith
-            );
-        }
-        if (spy._hasExpectations && spy._expectations.toReturnValue) {
-            noteMockExpectation(
-                "mock.toReturnValue",
-                () => spy.calls.returned(spy._expectations.toReturnValue),
-                spy._expectations.toReturnValue
-            );
-        }
-        if (spy._hasExpectations && spy._expectations.toThrow) {
-            noteMockExpectation(
-                "mock.toThrow",
-                () => spy.calls.threw()
-            );
-        }
-        if (spy._hasExpectations && spy._expectations.toThrowWithName) {
-            noteMockExpectation(
-                "mock.toThrowWithName",
-                () => spy.calls.threwWithName(spy._expectations.toThrowWithName),
-                spy._expectations.toThrowWithName
-            );
-        }
-        if (spy._hasExpectations && spy._expectations.toThrowWithMessage) {
-            noteMockExpectation(
-                "mock.toThrowWithMessage",
-                () => spy.calls.threwWithMessage(spy._expectations.toThrowWithMessage),
-                spy._expectations.toThrowWithMessage
-            );
         }
     };
     if (args.length && typeof (args[0]) !== "function" &&
