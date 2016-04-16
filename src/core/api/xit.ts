@@ -7,6 +7,7 @@
 import {It} from "../queue/It";
 import {callStack} from "./callstack";
 import {QueueManager} from "../queue/QueueManager";
+import {stackTrace} from "../stacktrace/StackTrace";
 
 export function xit(label: string, callback: (done?: () => void) => void, timeoutInterval = 0) {
     let _it;
@@ -22,14 +23,15 @@ export function xit(label: string, callback: (done?: () => void) => void, timeou
     }
 
     // an It object
-    _it = new It(callStack.getTopOfStack(), callStack.uniqueId.toString(), label, callback, true, timeoutInterval);
+    _it = new It(callStack.getTopOfStack(), callStack.uniqueId.toString(),
+        label, callback, true, timeoutInterval, stackTrace.stackTrace);
 
     // push Describe onto the queue
     QueueManager.queue.push(_it);
 
     // Increment totIts count
-    QueueManager.totIts++;
+    QueueManager.bumpTotItsCount();
 
     // Increment totExclIts count
-    QueueManager.totExclIts++;
+    QueueManager.bumpTotExcItsCount();
 }

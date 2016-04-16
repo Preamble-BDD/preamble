@@ -10,6 +10,7 @@ export class Describe implements IDescribe {
     beforeEach: BeforeEach;
     afterEach: AfterEach;
     isA: string;
+    passed: boolean;
     constructor(public id: string, public label: string,
         public callback: () => any, public parent: IDescribe,
         public excluded: boolean = false) {
@@ -17,5 +18,6 @@ export class Describe implements IDescribe {
         this.beforeEach = null;
         this.afterEach = null;
         this.isA = "Describe";
+        this.passed = true;
     }
 }

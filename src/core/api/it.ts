@@ -6,9 +6,11 @@
 import {It} from "../queue/It";
 import {callStack} from "./callstack";
 import {QueueManager} from "../queue/QueueManager";
+import {stackTrace} from "../stacktrace/StackTrace";
 
 export function it(label: string, callback: (done?: () => void) => void, timeoutInterval = 0): void {
     let _it;
+    let excluded: boolean;
 
     if (arguments.length !== 2 && arguments.length !== 3) {
         throw new TypeError("it called with invalid parameters");
@@ -20,12 +22,23 @@ export function it(label: string, callback: (done?: () => void) => void, timeout
         throw new TypeError("it called with invalid parameters");
     }
 
-    // an It object
-    _it = new It(callStack.getTopOfStack(), callStack.uniqueId.toString(), label, callback, callStack.getTopOfStack().excluded, timeoutInterval);
+    // mark the It excluded if any of its parents are excluded
+    excluded = callStack.stack.some((item) => {
+        return item.excluded;
+    });
 
-        // push Describe onto the queue
+    // an It object
+    _it = new It(callStack.getTopOfStack(), callStack.uniqueId.toString(),
+        label, callback, excluded, timeoutInterval, stackTrace.stackTrace);
+
+    // push It onto the queue
     QueueManager.queue.push(_it);
 
-    // Increment totIts count
-    QueueManager.totIts++;
+    // increment totIts count
+    QueueManager.bumpTotItsCount();
+
+    // increment total excluded Its if excluded
+    if (excluded) {
+        QueueManager.bumpTotExcItsCount();
+    }
 }

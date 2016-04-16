@@ -1,4 +1,8 @@
-export class StackTrace {
+export interface AStackTrace {
+    stackTrace: string[];
+}
+
+export class StackTrace implements AStackTrace {
     stackTraceProperty: string;
     constructor() {
         // determine the Error object's stack trace property
@@ -10,16 +14,16 @@ export class StackTrace {
         }
     }
     // TODO(JS): might not want to do this and instead might want to include references to preamble.js or even make it configurable
-    filterstackTrace(st): string[] {
+    private filterstackTrace(st): string[] {
         let reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
         // Get all file references ...
         let matches = st.match(reFileFromStackTrace);
         // ... and return an array of file references except those to preamble.js
         return matches.filter(function(el) {
-            return el.search(/preamble.js/) === -1;
+            return el.search(/preamble-ts.js/) === -1;
         });
     }
-    stackTraceFromError(): string {
+    private stackTraceFromError(): string {
         let stackTrace = null;
         if (this.stackTraceProperty) {
             try {
@@ -40,3 +44,5 @@ export class StackTrace {
         return flt;
     }
 }
+
+export let stackTrace = new StackTrace();

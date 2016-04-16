@@ -2,11 +2,18 @@ import {IMatcher} from "./matchers/IMatcher";
 import {INote} from "./INote";
 import {spyOn} from "./spy/spy";
 import {currentIt} from "../queue/QueueRunner";
+import {stackTrace} from "../stacktrace/StackTrace";
 
-let matchers: IMatcher[] = [];
 let expectationAPI = {};
 let expectationAPICount = 0;
 let negatedExpectationAPI = {};
+
+// add not api to expect api
+expectationAPI["not"] = negatedExpectationAPI;
+
+interface Proxy {
+    (...args): void;
+}
 
 let note: INote;
 
@@ -48,62 +55,93 @@ let argsChecker = (matcher, argsLength): boolean => {
 
 let addNoteToIt = (note: INote) => currentIt.expectations.push(note);
 
-// add not api to expect api
-expectationAPI["not"] = negatedExpectationAPI;
+let showAs = (value: any): string => {
+    if (Array.isArray(value)) {
+        return "array";
+    }
+    if (typeof (value) === "function") {
+        return "function";
+    }
+    if (typeof (value) === "object") {
+        return "object";
+    }
+    if (typeof (value) === "string") {
+        return `"${value}"`;
+    }
+    if (typeof (value) === "number") {
+        return value;
+    }
+    if (typeof (value) === "boolean") {
+        return value;
+    }
+    if (typeof (value) === "undefined") {
+        return "undefined";
+    }
+};
+
+let assignReason = (note: INote) => {
+    let reason: string;
+    if (!note.result) {
+        if (note.matcherValue != null) {
+            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}(${showAs(note.matcherValue)}) failed!`;
+        } else {
+            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}() failed!`;
+        }
+        currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
+    }
+};
 
 // expect(value)
 export let expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
     let expectedValue = ev;
-    if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMaker")) {
+    // capture the stack trace here when expect is called.
+    let st = stackTrace.stackTrace;
+    if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMarker")) {
         let spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
-    note = { it: currentIt, apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null };
+    note = { it: currentIt, apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
     return expectationAPI;
 };
 
 export let registerMatcher = (matcher: IMatcher): void => {
-    let proxy = (...args): void => {
-        note.apiName = matcher.apiName;
-        if (argsChecker(matcher, args.length)) {
-            // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
-            note.matcherValue = matcher.minArgs > 0 ? matcher.api.apply(null, args) : note.matcherValue;
-            // if a callback was returned then call it and use what it returns for the matcher value
-            note.matcherValue = note.matcherValue && typeof (note.matcherValue) === "function" && note.matcherValue() || note.matcherValue;
-            if (matcher.minArgs) {
-                note.result = matcher.evaluator(note.expectedValue, note.matcherValue);
+    let proxy = (not: boolean): Proxy => {
+        return (...args): void => {
+            note.apiName = not ? "not." + matcher.apiName : matcher.apiName;
+            if (argsChecker(matcher, args.length)) {
+                // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
+                note.matcherValue = matcher.minArgs > 0 ? matcher.api.apply(null, args) : note.matcherValue;
+                // if a callback was returned then call it and use what it returns for the matcher value
+                note.matcherValue = note.matcherValue && typeof (note.matcherValue) === "function" && note.matcherValue() || note.matcherValue;
+                if (not) {
+                    if (matcher.minArgs) {
+                        note.result = !matcher.evaluator(note.expectedValue, note.matcherValue);
+                    } else {
+                        note.result = !matcher.evaluator(note.expectedValue);
+                    }
+                } else {
+                    if (matcher.minArgs) {
+                        note.result = matcher.evaluator(note.expectedValue, note.matcherValue);
+                    } else {
+                        note.result = matcher.evaluator(note.expectedValue);
+                    }
+                }
+                addNoteToIt(note);
+                assignReason(note);
+                // set It's and its parent Describe's passed property to false when expectation fails
+                currentIt.passed = !note.result ? note.result : currentIt.passed;
+                currentIt.parent.passed = !note.result ? note.result : currentIt.parent.passed;
+                console.log("note", note);
             } else {
-                note.result = matcher.evaluator(note.expectedValue);
+                console.log("note", note);
             }
-            addNoteToIt(note);
-            console.log("note", note);
-        } else {
-            console.log("note", note);
-        }
-    };
-    let proxyNot = (...args): void => {
-        note.apiName = "not." + matcher.apiName;
-        if (argsChecker(matcher, args.length)) {
-            // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
-            note.matcherValue = matcher.minArgs > 0 ? matcher.api.apply(null, args) : note.matcherValue;
-            // if a callback was returned then call it and use what it returns for the matcher value
-            note.matcherValue = note.matcherValue && typeof (note.matcherValue) === "function" && note.matcherValue() || note.matcherValue;
-            if (matcher.minArgs) {
-                note.result = !matcher.evaluator(note.expectedValue, note.matcherValue);
-            } else {
-                note.result = !matcher.evaluator(note.expectedValue);
-            }
-            addNoteToIt(note);
-            console.log("note", note);
-        } else {
-            console.log("note", note);
-        }
+        };
     };
     console.log("Registering matcher", matcher.apiName);
-    expectationAPI[matcher.apiName] = proxy;
+    expectationAPI[matcher.apiName] = proxy(false);
     if (matcher.negator) {
-        negatedExpectationAPI[matcher.apiName] = proxyNot;
+        negatedExpectationAPI[matcher.apiName] = proxy(true);
     }
     expectationAPICount++;
 };
