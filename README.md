@@ -5,7 +5,7 @@ An environment neutral JavaScript BDD testing framework written using TypeScript
 Preamble-TS is a complete rewrite of the old but now it is written in TypeScript. Out with the old and in with the new!
 
 ## Versioning
-Odd major and minor version numbers represent development versions. Even major and minor version numbers represent release versions.
+Odd major and minor version numbers represent development versions and are considered not stable for production use. Even major and minor version numbers represent release versions and are considered stable for production use.
 
 ## Run your tests in the browser
 Download or clone the [Preamble-TS-Standalone](https://github.com/Preamble-BDD/standalone), which includes everything you need to author and run your tests, all wrapped up in one tidy repo.
