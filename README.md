@@ -8,7 +8,7 @@ Preamble-TS is a complete rewrite of the old but now it is written in TypeScript
 Odd major and minor version numbers represent development versions. Even major and minor version numbers represent release versions.
 
 ## Run your tests in the browser
-Download or clone the [Preamble-Standalone](https://github.com/Preamble-BDD/standalone), which includes everything you need to author and run your tests, all wrapped up in one tidy repo.
+Download or clone the [Preamble-TS-Standalone](https://github.com/Preamble-BDD/standalone), which includes everything you need to author and run your tests, all wrapped up in one tidy repo.
 
 ## What about the original Preamble?
  [Preamble](https://github.com/jeffschwartz/preamble)
