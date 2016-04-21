@@ -5,7 +5,6 @@
 import Q = require("q");
 import {QueueManager} from "./core/queue/QueueManager";
 import {QueueRunner} from "./core/queue/QueueRunner";
-import {stackTrace} from "./core/stacktrace/StackTrace";
 import {describe} from "./core/api/describe";
 import {xdescribe} from "./core/api/xdescribe";
 import {it} from "./core/api/it";
@@ -14,8 +13,6 @@ import {beforeEach} from "./core/api/beforeEach";
 import {afterEach} from "./core/api/afterEach";
 import {pGlobal} from "./core/environment/environment";
 import {configuration} from "./core/configuration/configuration";
-import {CallStack} from "./core/callstack/CallStack";
-import {UniqueNumber} from "./core/uniquenumber/UniqueNumber";
 import {expect} from "./core/expectations/expect";
 import {registerMatcher} from "./core/expectations/expect";
 import {RegisterMatcher} from "./core/expectations/expect";
@@ -26,11 +23,9 @@ import {mock} from "./core/expectations/mock";
 import {deepRecursiveCompare} from "./core/expectations/comparators/deeprecursiveequal";
 import {DeepRecursiveCompare} from "./core/expectations/comparators/deeprecursiveequal";
 import {matchersCount} from "./core/expectations/expect";
-import {IMatcher} from "./core/expectations/matchers/IMatcher";
 import {Reporter} from "./core/reporters/Reporter";
 import {reportDispatch} from "./core/reporters/reportdispatch";
 import {queueFilter} from "./core/queue/queueFilter";
-import "./core/configuration/configuration"; // prevent eliding import
 
 let pkgJSON = require("../package.json");
 
