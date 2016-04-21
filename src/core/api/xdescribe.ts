@@ -8,10 +8,11 @@ import {callStack} from "./callstack";
 import {Describe} from "../queue/Describe";
 import {QueueManager} from "../queue/QueueManager";
 
-/**
- * counter is used to maintain of recursion counter
- */
-export function xdescribe(label: string, callback: () => void) {
+export interface ApiXDescribe {
+    (label: string, callback: () => void): void;
+}
+
+export let xdescribe: ApiXDescribe = function(label: string, callback: () => void) {
     let _describe: Describe;
 
     if (arguments.length !== 2 || typeof (arguments[0])
@@ -46,4 +47,4 @@ export function xdescribe(label: string, callback: () => void) {
 
     // pop Describe object off of the callstack
     callStack.popDescribe();
-}
+};

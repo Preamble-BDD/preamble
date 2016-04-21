@@ -7,7 +7,11 @@ import {callStack} from "./callstack";
 import {Describe} from "../queue/Describe";
 import {QueueManager} from "../queue/QueueManager";
 
-export function describe(label: string, callback: () => void) {
+export interface ApiDescribe {
+    (label: string, callback: () => void): void;
+}
+
+export let describe: ApiDescribe = function(label: string, callback: () => void): void {
     let _describe: Describe;
     let excluded: boolean;
 
@@ -52,4 +56,4 @@ export function describe(label: string, callback: () => void) {
 
     // pop Describe object off of the callstack
     callStack.popDescribe();
-}
+};

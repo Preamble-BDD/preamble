@@ -8,7 +8,11 @@ import {callStack} from "./callstack";
 import {QueueManager} from "../queue/QueueManager";
 import {stackTrace} from "../stacktrace/StackTrace";
 
-export function it(label: string, callback: (done?: () => void) => void, timeoutInterval = 0): void {
+export interface ApiIt {
+    (label: string, callback: (done?: () => void) => void, timeoutInterval: number): void;
+}
+
+export let it: ApiIt = function(label: string, callback: (done?: () => void) => void, timeoutInterval = 0): void {
     let _it;
     let excluded: boolean;
 
@@ -41,4 +45,4 @@ export function it(label: string, callback: (done?: () => void) => void, timeout
     if (excluded) {
         QueueManager.bumpTotExcItsCount();
     }
-}
+};

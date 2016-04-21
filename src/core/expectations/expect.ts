@@ -3,6 +3,7 @@ import {INote} from "./INote";
 import {spyOn} from "./spy/spy";
 import {currentIt} from "../queue/QueueRunner";
 import {stackTrace} from "../stacktrace/StackTrace";
+import {DeepRecursiveCompare} from "./comparators/deeprecursiveequal";
 
 let expectationAPI = {};
 let expectationAPICount = 0;
@@ -91,8 +92,12 @@ let assignReason = (note: INote) => {
     }
 };
 
+export interface Expect {
+    (ev: any): {};
+}
+
 // expect(value)
-export let expect = (ev: any): {} => {
+export let expect: Expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
     let expectedValue = ev;
     // capture the stack trace here when expect is called.
@@ -105,7 +110,19 @@ export let expect = (ev: any): {} => {
     return expectationAPI;
 };
 
-export let registerMatcher = (matcher: IMatcher): void => {
+export interface RegisterMatcher {
+    (matcher: IMatcher): void;
+}
+
+export interface RegisterMatcherHelpers {
+    deepRecursiveCompare: DeepRecursiveCompare;
+}
+
+export interface RegisterMatchers {
+    (registerMatcher: RegisterMatcher, helpers: RegisterMatcherHelpers): void;
+}
+
+export let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
     let proxy = (not: boolean): Proxy => {
         return (...args): void => {
             note.apiName = not ? "not." + matcher.apiName : matcher.apiName;

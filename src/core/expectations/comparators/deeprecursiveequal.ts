@@ -1,4 +1,7 @@
-export let deepRecursiveCompare = (a: any, b: any): boolean => {
+export interface DeepRecursiveCompare {
+    (a: any, b: any): boolean;
+}
+export let deepRecursiveCompare: DeepRecursiveCompare = (a: any, b: any): boolean => {
     if (typeof (a) === "object" && typeof (b) === "object") {
         if (a === b) {
             // return true if a and b are the same object
