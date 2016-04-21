@@ -2,7 +2,7 @@
   "name": "preamble-ts",
   "version": "0.2.1",
   "description": "Preamble.ts the BDD test runner Reborn! Now written using TypeScript",
-  "main": "index.js",
+  "main": "dist/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
