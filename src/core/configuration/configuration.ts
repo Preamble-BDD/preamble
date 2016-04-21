@@ -14,7 +14,7 @@ let defaultConfiguration: PreambleConfiguration = {
     timeoutInterval: 5000,
     name: "Suite",
     uiTestContainerId: "preamble-ui-container",
-    hidePassedTests: false,
+    hidePassedTests: window ? false : true,
     shortCircuit: false
 };
 
