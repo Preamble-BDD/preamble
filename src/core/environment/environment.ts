@@ -15,6 +15,7 @@ import {RegisterMatchers} from "../expectations/expect";
 import {IMatcher} from "../expectations/matchers/IMatcher";
 
 export interface PreambleGlobal {
+    // TODO(js): make this a member of preamble property
     preambleConfig: PreambleConfiguration;
     describe: ApiDescribe;
     xdescribe: ApiXDescribe;
@@ -35,9 +36,9 @@ export interface PreambleGlobal {
 }
 
 let preambleGlobal: Window | NodeJS.Global | PreambleGlobal;
-if (typeof(window) !== "undefined") {
+if (typeof (window) !== "undefined") {
     preambleGlobal = window;
-} else if (typeof(global) !== "undefined") {
+} else if (typeof (global) !== "undefined") {
     preambleGlobal = global;
 } else {
     throw new Error("Unsuported Environment");
