@@ -44,4 +44,4 @@ if (typeof (window) !== "undefined") {
     throw new Error("Unsuported Environment");
 }
 export let pGlobal: PreambleGlobal = <PreambleGlobal>preambleGlobal;
-console.log("preambleGlobal", preambleGlobal);
+// console.log("preambleGlobal", preambleGlobal);
