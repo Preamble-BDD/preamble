@@ -49,9 +49,8 @@ export let describe: ApiDescribe = function(label: string, callback: () => void)
     try {
         _describe.callback();
     } catch (error) {
-        console.log(error);
-        alert("Error caught when calling Describe callback. See console for more information");
-        throw new Error("Terminating test!");
+        // TODO(js): this should be reported 
+        throw new Error(error.message);
     }
 
     // pop Describe object off of the callstack
