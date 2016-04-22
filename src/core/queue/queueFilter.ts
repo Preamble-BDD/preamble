@@ -11,9 +11,10 @@ export function queueFilter(queue: mix[], queueManagerStats: QueueManagerStats, 
     let originalTotItCount = queueManagerStats.totIts;
     let count: number = 0;
 
-    if (!filter.length) {
+    if (!filter || !filter.length) {
         return queue;
     }
+
     // find the item whose id matches the filter and push it onto the hierarchy
     queue.some((item: mix) => {
         if (item.id === filter) {
