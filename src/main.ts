@@ -108,6 +108,7 @@ queueManager.run()
         // dispatch reportSummary to all reporters
         reportDispatch.reportSummary();
         // run the queue
+        // TODO(js): should filter for failed specs if hidePassedTests is true
         new QueueRunner(filter && queueFilter(QueueManager.queue,
             QueueManager.queueManagerStats, filter) || QueueManager.queue,
             configuration.timeoutInterval, queueManager, reportDispatch, Q).run()
