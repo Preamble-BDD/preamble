@@ -26,4 +26,4 @@ if (pGlobal.preambleConfig) {
 }
 
 // log merged configuration
-console.log("configuration", configuration);
+// console.log("configuration", configuration);

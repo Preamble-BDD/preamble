@@ -149,13 +149,13 @@ export let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
                 // set It's and its parent Describe's passed property to false when expectation fails
                 currentIt.passed = !note.result ? note.result : currentIt.passed;
                 currentIt.parent.passed = !note.result ? note.result : currentIt.parent.passed;
-                console.log("note", note);
+                // console.log("note", note);
             } else {
-                console.log("note", note);
+                // console.log("note", note);
             }
         };
     };
-    console.log("Registering matcher", matcher.apiName);
+    // console.log("Registering matcher", matcher.apiName);
     expectationAPI[matcher.apiName] = proxy(false);
     if (matcher.negator) {
         negatedExpectationAPI[matcher.apiName] = proxy(true);

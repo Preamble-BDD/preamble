@@ -34,7 +34,7 @@ export class ReportDispatch implements IReportDispatch {
         this._reporters.forEach((report) => report.reportSpec(it));
     }
     reportEnd(): void {
-        this._reporters.forEach((report) => report.reportEnd());
+        this._reporters.forEach((report) => report.reportEnd(this._queueManagerStats));
     }
     set reporters(reporters: Reporter[]) {
         this._reporters = reporters;

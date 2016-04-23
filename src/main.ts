@@ -56,7 +56,7 @@ if (pGlobal.hasOwnProperty("preamble")) {
         reportDispatch.reporters = reporters;
     }
     if (!reporters || !reporters.length) {
-        console.log("No reporters found");
+        // console.log("No reporters found");
         throw new Error("No reporters found");
     }
     // dispatch reportBegin to reporters
@@ -73,26 +73,26 @@ if (pGlobal.hasOwnProperty("preamble")) {
         let registerMatchers: RegisterMatchers[] = pGlobal.preamble.registerMatchers;
         registerMatchers.forEach(rm => rm(registerMatcher, { deepRecursiveCompare: deepRecursiveCompare }));
         if (!matchersCount()) {
-            console.log("No matchers registered");
+            // console.log("No matchers registered");
             throw new Error("No matchers found");
         }
     } else {
         // no matcher plugins found but matchers can be
         // registered inline so just log it but don't
         // throw an exception
-        console.log("No matcher plugins found");
+        // console.log("No matcher plugins found");
     }
     // expose Q on wondow.preamble
     pGlobal.preamble.Q = Q;
 } else {
-    console.log("No plugins found");
+    // console.log("No plugins found");
     throw new Error("No plugins found");
 }
 
 // the raw filter looks like "?filter=spec_n" or "?filter=suite_n" where n is some number
 let filter = typeof window === "object" &&
     window.location.search.substring(window.location.search.indexOf("_") + 1) || null;
-console.log("filter =", filter);
+// console.log("filter =", filter);
 
 // dspatch reportSummary to all reporters
 reportDispatch.reportSummary();
@@ -103,8 +103,8 @@ QueueManager.startTimer();
 queueManager.run()
     .then((msg) => {
         // fulfilled/success
-        console.log(msg);
-        console.log("QueueManager.queue =", QueueManager.queue);
+        // console.log(msg);
+        // console.log("QueueManager.queue =", QueueManager.queue);
         // dispatch reportSummary to all reporters
         reportDispatch.reportSummary();
         // run the queue
@@ -117,13 +117,13 @@ queueManager.run()
                     return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
                 }, 0);
                 QueueManager.stopTimer();
-                console.log(`queue ran successfully in ${QueueManager.queueManagerStats.timeKeeper.totTime} miliseconds`);
+                // console.log(`queue ran successfully in ${QueueManager.queueManagerStats.timeKeeper.totTime} miliseconds`);
                 reportDispatch.reportSummary();
                 reportDispatch.reportEnd();
             }, () => {
-                console.log("queue failed to run");
+                // console.log("queue failed to run");
             });
     }, (msg) => {
         // rejected/failure
-        console.log(msg);
+        // console.log(msg);
     });
