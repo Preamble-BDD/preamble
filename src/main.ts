@@ -118,8 +118,8 @@ queueManager.run()
                 }, 0);
                 QueueManager.stopTimer();
                 console.log(`queue ran successfully in ${QueueManager.queueManagerStats.timeKeeper.totTime} miliseconds`);
-                // dispatch reportSummary to all reporters
                 reportDispatch.reportSummary();
+                reportDispatch.reportEnd();
             }, () => {
                 console.log("queue failed to run");
             });
