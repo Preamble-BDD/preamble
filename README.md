@@ -1,5 +1,5 @@
 # Preamble-TS
-An environment neutral JavaScript BDD testing framework written in TypeScript and supports writing test suites using TypeScript. While still in development, Preamble-TS is currently rock-hard stable and is ready to be used in the browser and from the command-line.
+An environment neutral JavaScript BDD testing framework written in TypeScript which supports writing test suites in TypeScript. Though still in development, Preamble-TS is currently rock-hard stable and is ready to be used in the browser and from the command-line.
 
 ## This is not your father's Preamble
 Preamble-TS is a complete rewrite of the old but now it is written in TypeScript. Out with the old and in with the new!
