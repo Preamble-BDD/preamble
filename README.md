@@ -17,5 +17,8 @@ See [Preamble-TS-Node](https://github.com/Preamble-BDD/node.runner.reporter), wh
  [Preamble](https://github.com/jeffschwartz/preamble)
  is still available for now but is now deprecated in favor of Preamble-TS. Instructions describing the migration path from Preamble to Preamble-TS is in the works and will be posted here once completed.
 
+## Documentation
+I swear, it's coming :) and the link will be posted here.
+
 ## Want to contribute?
 I will gladly entertain GitHub pull requests for integrating Preamble-TS with [Karma](https://karma-runner.github.io/0.13/index.html) test runner.
