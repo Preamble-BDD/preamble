@@ -9,7 +9,11 @@ import {callStack} from "./callstack";
 import {QueueManager} from "../queue/QueueManager";
 import {stackTrace} from "../stacktrace/StackTrace";
 
-export function xit(label: string, callback: (done?: () => void) => void, timeoutInterval = 0) {
+export interface ApiXIt {
+    (label: string, callback: (done?: () => void) => void, timeoutInterval: number): void;
+}
+
+export let xit: ApiXIt = function(label: string, callback: (done?: () => void) => void, timeoutInterval = 0): void {
     let _it;
 
     if (arguments.length !== 2 && arguments.length !== 3) {
@@ -34,4 +38,4 @@ export function xit(label: string, callback: (done?: () => void) => void, timeou
 
     // Increment totExclIts count
     QueueManager.bumpTotExcItsCount();
-}
+};

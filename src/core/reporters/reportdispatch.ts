@@ -14,7 +14,6 @@ export interface IReportDispatch {
     // _queueManagerStats: QueueManagerStats;
     reportBegin: (configOptions: ConfigOptions) => void;
     reportSummary: () => void;
-    reportSuite: () => void;
     reportSpec: (it) => void;
     reportEnd: () => void;
     // reporters: (reporters: Reporter[]) => void;
@@ -31,13 +30,11 @@ export class ReportDispatch implements IReportDispatch {
     reportSummary(): void {
         this._reporters.forEach((report) => report.reportSummary(this._queueManagerStats));
     }
-    reportSuite(): void {
-    }
     reportSpec(it): void {
-        // TODO(js): call reportSummary here to also update summary infor - this will require some refactoring because the QueueManager isn't referenced in this module.
         this._reporters.forEach((report) => report.reportSpec(it));
     }
     reportEnd(): void {
+        this._reporters.forEach((report) => report.reportEnd(this._queueManagerStats));
     }
     set reporters(reporters: Reporter[]) {
         this._reporters = reporters;
