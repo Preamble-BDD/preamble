@@ -35,13 +35,5 @@ export interface PreambleGlobal {
     };
 }
 
-let preambleGlobal: Window | NodeJS.Global | PreambleGlobal;
-if (typeof (window) !== "undefined") {
-    preambleGlobal = window;
-} else if (typeof (global) !== "undefined") {
-    preambleGlobal = global;
-} else {
-    throw new Error("Unsuported Environment");
-}
-export let pGlobal: PreambleGlobal = <PreambleGlobal>preambleGlobal;
-// console.log("preambleGlobal", preambleGlobal);
+let preambleGlobal = require("@jeffreyschwartz/environment");
+export let pGlobal = <PreambleGlobal>preambleGlobal;
