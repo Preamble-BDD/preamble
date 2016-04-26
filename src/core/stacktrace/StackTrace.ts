@@ -16,8 +16,12 @@ export class StackTrace implements AStackTrace {
     // TODO(JS): might not want to do this and instead might want to include references to preamble.js or even make it configurable
     private filterstackTrace(st): string[] {
         let reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
+        let reFileFromStackTraceNode = /\(\S+\.js:[0-9]+[:0-9]*\)/g;
         // Get all file references ...
         let matches = st.match(reFileFromStackTrace);
+        if (!matches) {
+            matches = st.match(reFileFromStackTraceNode);
+        }
         // ... and return an array of file references except those to preamble.js
         return matches.filter(function(el) {
             return el.search(/preamble-ts.js/) === -1;

@@ -2,55 +2,28 @@
  * Environment Dependent Configuration
  */
 
-import {environment} from "../environment/environment";
+// import {environment} from "../environment/environment";
+import {pGlobal} from "../environment/environment";
+import {PreambleConfiguration} from "./PreambleConfiguration";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
-export interface IPreambleWindowConfiguration {
-    windowGlobals?: boolean;
-    uiTestContainerId: string;
-}
+export let configuration: PreambleConfiguration;
 
-export interface IPreambleConfiguration extends IPreambleWindowConfiguration {
-    timeoutInterval: number;
-    name: string;
-    hidePassedTests: boolean;
-    shortCircuit: boolean;
-}
+// TODO(js): clean up configuration - remove shortCircuit, windowGlobals and make uiTestContainerId conditional
+let defaultConfiguration: PreambleConfiguration = {
+    // windowGlobals: true,
+    timeoutInterval: 5000,
+    name: "Suite",
+    uiTestContainerId: "preamble-ui-container",
+    hidePassedTests: typeof window !== "undefined" ? false : true,
+    shortCircuit: false
+};
 
-export let configuration: IPreambleConfiguration;
-
-/**
- * Windows environment configuration
- */
-function windowsConfiguration(): void {
-    let defaultConfiguration: IPreambleConfiguration = {
-        windowGlobals: true,
-        timeoutInterval: 5000,
-        name: "Suite",
-        uiTestContainerId: "preamble-ui-container",
-        hidePassedTests: false,
-        shortCircuit: false
-    };
-
-    if (window["preambleConfig"]) {
-        configuration = Object.assign({}, defaultConfiguration, window["preambleConfig"]);
-    } else {
-        configuration = defaultConfiguration;
-    }
-
-    // log merged configuration
-    console.log("Windows Configuration", configuration);
-}
-
-/**
- * NodeJS environment configuration
- */
-function nodeConfiguration(): void {
-
-}
-
-if (environment.windows) {
-    windowsConfiguration();
+if (pGlobal.preambleConfig) {
+    configuration = Object.assign({}, defaultConfiguration, pGlobal.preambleConfig);
 } else {
-    nodeConfiguration();
+    configuration = defaultConfiguration;
 }
+
+// log merged configuration
+// console.log("configuration", configuration);

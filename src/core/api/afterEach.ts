@@ -7,7 +7,11 @@ import {AfterEach} from "../queue/AfterEach";
 import {callStack} from "./callstack";
 import {stackTrace} from "../stacktrace/StackTrace";
 
-export function afterEach(callback: (done?: () => void) => void, timeoutInterval = 0): void {
+export interface ApiAfterEach {
+    (callback: (done?: () => void) => void, timeoutInterval: number): void;
+}
+
+export let afterEach: ApiAfterEach = function(callback: (done?: () => void) => void, timeoutInterval = 0): void {
     let _afterEach;
 
     if (arguments.length !== 1 && arguments.length !== 2) {
@@ -25,4 +29,4 @@ export function afterEach(callback: (done?: () => void) => void, timeoutInterval
 
     // add it to its parent describe
     callStack.getTopOfStack().afterEach = _afterEach;
-}
+};

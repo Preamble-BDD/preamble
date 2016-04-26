@@ -27,7 +27,6 @@ export class CallStack implements ICallStack {
         }
     }
     clear(): void {
-        console.log("callStack._callStack =", this._callStack);
         this._callStack = [];
     }
     get stack(): Describe[] {

@@ -81,7 +81,7 @@ export class QueueRunner {
                     if (ndx) {
                         // the current context is a result of applying its parent's context values to a blank object
                         hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
-                        console.log("beforeEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
+                        // console.log("beforeEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
                     } else {
                         hierarchy[ndx].context = {};
                     }
@@ -124,7 +124,7 @@ export class QueueRunner {
                     if (ndx) {
                         // the current context is a result of applying its parent's context values to a blank object
                         hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
-                        console.log("afterEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
+                        // console.log("afterEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
                     } else {
                         hierarchy[ndx].context = {};
                     }
