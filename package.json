@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": "https://github.com/Preamble-BDD/preamble.ts.core.git",
   "dependencies": {
-    "@jeffreyschwartz/environment": "0.0.2",
+    "@jeffreyschwartz/environment": "0.0.3",
     "q": "^1.4.1"
   },
   "devDependencies": {
