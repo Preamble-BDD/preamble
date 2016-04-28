@@ -1,9 +1,15 @@
+// TODO(js): this needs to be refactored so it can be configured by main.
+// For examele, this module currently has to import configuration so that
+// it has access to the short circuit property, which main should really
+// be passing to configure expectations.
+
 import {IMatcher} from "./matchers/IMatcher";
 import {INote} from "./INote";
 import {spyOn} from "./spy/spy";
 import {currentIt} from "../queue/QueueRunner";
 import {stackTrace} from "../stacktrace/StackTrace";
 import {DeepRecursiveCompare} from "./comparators/deeprecursiveequal";
+import {configuration} from "../configuration/configuration";
 
 let expectationAPI = {};
 let expectationAPICount = 0;
@@ -84,10 +90,13 @@ let assignReason = (note: INote) => {
     let reason: string;
     if (!note.result) {
         if (note.matcherValue != null) {
-            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}(${showAs(note.matcherValue)}) failed!`;
+            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}(${showAs(note.matcherValue)}) failed`;
         } else {
-            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}() failed!`;
+            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}() failed`;
         }
+        console.log("configuration.shortCircuit", configuration.shortCircuit);
+        reason = configuration.shortCircuit ? reason + " and testing has been short circuited" : reason;
+        reason += "!";
         currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
 };
