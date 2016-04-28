@@ -10,9 +10,14 @@ watcher.on("change", function(event) {
 });
 
 gulp.task("bundle", function () {
-    // return browserify("dist/main.js", "debug")
-    return browserify("dist/main.js")
-    .bundle()
+    // run browserify passing the entry point
+    var b = browserify("dist/main.js");
+
+    // generate a named external require
+    b.require("./dist/main.js", {expose: "main"});
+
+    // and output bundle names preamble-ts.js to ./dist
+    b.bundle()
     .pipe(vinylSource("preamble-ts.js"))
     .pipe(gulp.dest("./dist/"));
 });
