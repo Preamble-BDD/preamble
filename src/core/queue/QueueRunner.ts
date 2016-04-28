@@ -1,3 +1,6 @@
+// TODO(js): Bug - timeouts must bump the failures count.
+// TODO(js): Feature - implement shourt circuit.
+
 /**
  * Note: ts compiler will elide this import because q is only being
  * used as a type guard. See QueueManager construcor, particularly its
@@ -230,6 +233,7 @@ export class QueueRunner {
                             runner(++i);
                         }).fail(() => {
                             // an it timed out or one or more expectations failed
+                            QueueManager.bumpTotFailedItsCount();
                             this.reportDispatch.reportSummary();
                             this.reportDispatch.reportSpec(it);
                             runner(++i);
