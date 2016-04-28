@@ -19,11 +19,8 @@ let defaultConfiguration: PreambleConfiguration = {
     shortCircuit: false
 };
 
-if (pGlobal.preambleConfig) {
-    configuration = Object.assign({}, defaultConfiguration, pGlobal.preambleConfig);
+if (pGlobal.preamble && pGlobal.preamble.preambleConfig) {
+    configuration = Object.assign({}, defaultConfiguration, pGlobal.preamble.preambleConfig);
 } else {
     configuration = defaultConfiguration;
 }
-
-// log merged configuration
-// console.log("configuration", configuration);
