@@ -13,7 +13,6 @@ import { Reporter } from "../reporters/Reporter";
 import { RegisterMatcher } from "../expectations/expect";
 import { RegisterMatchers } from "../expectations/expect";
 export interface PreambleGlobal {
-    preambleConfig: PreambleConfiguration;
     describe: ApiDescribe;
     xdescribe: ApiXDescribe;
     it: ApiIt;
@@ -25,6 +24,8 @@ export interface PreambleGlobal {
     spyOnN: SpyOnN;
     mock: MockStatic;
     preamble: {
+        run: () => void;
+        preambleConfig: PreambleConfiguration;
         reporters: Reporter[];
         registerMatcher: RegisterMatcher;
         registerMatchers: RegisterMatchers[];

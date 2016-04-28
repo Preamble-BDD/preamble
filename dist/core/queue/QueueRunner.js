@@ -1,3 +1,5 @@
+// TODO(js): Bug - timeouts must bump the failures count.
+// TODO(js): Feature - implement shourt circuit.
 "use strict";
 var QueueManager_1 = require("./QueueManager");
 require("../../polyfills/Object.assign"); // prevent eliding import
@@ -210,6 +212,7 @@ var QueueRunner = (function () {
                             runner(++i);
                         }).fail(function () {
                             // an it timed out or one or more expectations failed
+                            QueueManager_1.QueueManager.bumpTotFailedItsCount();
                             _this.reportDispatch.reportSummary();
                             _this.reportDispatch.reportSpec(it);
                             runner(++i);

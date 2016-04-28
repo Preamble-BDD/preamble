@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
  * Callable API
  * afterEach(function([done]))
@@ -286,21 +286,19 @@ var defaultConfiguration = {
     hidePassedTests: typeof window !== "undefined" ? false : true,
     shortCircuit: false
 };
-if (environment_1.pGlobal.preambleConfig) {
-    exports.configuration = Object.assign({}, defaultConfiguration, environment_1.pGlobal.preambleConfig);
+if (environment_1.pGlobal.preamble && environment_1.pGlobal.preamble.preambleConfig) {
+    exports.configuration = Object.assign({}, defaultConfiguration, environment_1.pGlobal.preamble.preambleConfig);
 }
 else {
     exports.configuration = defaultConfiguration;
 }
-// log merged configuration
-// console.log("configuration", configuration);
 
-},{"../../polyfills/Object.assign":27,"../environment/environment":10}],10:[function(require,module,exports){
+},{"../../polyfills/Object.assign":26,"../environment/environment":10}],10:[function(require,module,exports){
 "use strict";
 var preambleGlobal = require("@jeffreyschwartz/environment");
 exports.pGlobal = preambleGlobal;
 
-},{"@jeffreyschwartz/environment":28}],11:[function(require,module,exports){
+},{"@jeffreyschwartz/environment":27}],11:[function(require,module,exports){
 "use strict";
 exports.deepRecursiveCompare = function (a, b) {
     if (typeof (a) === "object" && typeof (b) === "object") {
@@ -1242,6 +1240,8 @@ var QueueManager = (function () {
 exports.QueueManager = QueueManager;
 
 },{}],20:[function(require,module,exports){
+// TODO(js): Bug - timeouts must bump the failures count.
+// TODO(js): Feature - implement shourt circuit.
 "use strict";
 var QueueManager_1 = require("./QueueManager");
 require("../../polyfills/Object.assign"); // prevent eliding import
@@ -1454,6 +1454,7 @@ var QueueRunner = (function () {
                             runner(++i);
                         }).fail(function () {
                             // an it timed out or one or more expectations failed
+                            QueueManager_1.QueueManager.bumpTotFailedItsCount();
                             _this.reportDispatch.reportSummary();
                             _this.reportDispatch.reportSpec(it);
                             runner(++i);
@@ -1474,7 +1475,7 @@ var QueueRunner = (function () {
 }());
 exports.QueueRunner = QueueRunner;
 
-},{"../../polyfills/Object.assign":27,"./QueueManager":19}],21:[function(require,module,exports){
+},{"../../polyfills/Object.assign":26,"./QueueManager":19}],21:[function(require,module,exports){
 "use strict";
 function ancestorHierarchy(item) {
     var parent = item;
@@ -1669,121 +1670,6 @@ var UniqueNumber = (function () {
 exports.UniqueNumber = UniqueNumber;
 
 },{}],26:[function(require,module,exports){
-/**
- * Main entry point module
- */
-"use strict";
-var Q = require("q");
-var QueueManager_1 = require("./core/queue/QueueManager");
-var QueueRunner_1 = require("./core/queue/QueueRunner");
-var describe_1 = require("./core/api/describe");
-var xdescribe_1 = require("./core/api/xdescribe");
-var it_1 = require("./core/api/it");
-var xit_1 = require("./core/api/xit");
-var beforeEach_1 = require("./core/api/beforeEach");
-var afterEach_1 = require("./core/api/afterEach");
-var environment_1 = require("./core/environment/environment");
-var configuration_1 = require("./core/configuration/configuration");
-var expect_1 = require("./core/expectations/expect");
-var expect_2 = require("./core/expectations/expect");
-var spy_1 = require("./core/expectations/spy/spy");
-var spy_2 = require("./core/expectations/spy/spy");
-var mock_1 = require("./core/expectations/mock");
-var deeprecursiveequal_1 = require("./core/expectations/comparators/deeprecursiveequal");
-var expect_3 = require("./core/expectations/expect");
-var reportdispatch_1 = require("./core/reporters/reportdispatch");
-var queueFilter_1 = require("./core/queue/queueFilter");
-var pkgJSON = require("../package.json");
-var reporters;
-// turn on long stact support in Q
-Q.longStackSupport = true;
-// give reportDispatch access to the queuManager
-reportdispatch_1.reportDispatch.queueManagerStats = QueueManager_1.QueueManager.queueManagerStats;
-// add APIs used by suites to the global object
-environment_1.pGlobal.describe = describe_1.describe;
-environment_1.pGlobal.xdescribe = xdescribe_1.xdescribe;
-environment_1.pGlobal.it = it_1.it;
-environment_1.pGlobal.xit = xit_1.xit;
-environment_1.pGlobal.beforeEach = beforeEach_1.beforeEach;
-environment_1.pGlobal.afterEach = afterEach_1.afterEach;
-environment_1.pGlobal.expect = expect_1.expect;
-environment_1.pGlobal.spyOn = spy_1.spyOn;
-environment_1.pGlobal.spyOnN = spy_2.spyOnN;
-environment_1.pGlobal.mock = mock_1.mock;
-if (environment_1.pGlobal.hasOwnProperty("preamble")) {
-    // add reporter plugin
-    if (environment_1.pGlobal.preamble.hasOwnProperty("reporters")) {
-        reporters = environment_1.pGlobal.preamble.reporters;
-        // hand off reporters to the ReportDispatch
-        reportdispatch_1.reportDispatch.reporters = reporters;
-    }
-    if (!reporters || !reporters.length) {
-        // console.log("No reporters found");
-        throw new Error("No reporters found");
-    }
-    // dispatch reportBegin to reporters
-    reportdispatch_1.reportDispatch.reportBegin({
-        version: pkgJSON.version,
-        uiTestContainerId: configuration_1.configuration.uiTestContainerId,
-        name: configuration_1.configuration.name,
-        hidePassedTests: configuration_1.configuration.hidePassedTests
-    });
-    // expose registerMatcher for one-off in-line matcher registration
-    environment_1.pGlobal.preamble.registerMatcher = expect_2.registerMatcher;
-    // call each matcher plugin to register their matchers
-    if (environment_1.pGlobal.preamble.hasOwnProperty("registerMatchers")) {
-        var registerMatchers = environment_1.pGlobal.preamble.registerMatchers;
-        registerMatchers.forEach(function (rm) { return rm(expect_2.registerMatcher, { deepRecursiveCompare: deeprecursiveequal_1.deepRecursiveCompare }); });
-        if (!expect_3.matchersCount()) {
-            // console.log("No matchers registered");
-            throw new Error("No matchers found");
-        }
-    }
-    else {
-    }
-    // expose Q on wondow.preamble
-    environment_1.pGlobal.preamble.Q = Q;
-}
-else {
-    // console.log("No plugins found");
-    throw new Error("No plugins found");
-}
-// the raw filter looks like "?filter=spec_n" or "?filter=suite_n" where n is some number
-var filter = typeof window === "object" &&
-    window.location.search.substring(window.location.search.indexOf("_") + 1) || null;
-// console.log("filter =", filter);
-// dspatch reportSummary to all reporters
-reportdispatch_1.reportDispatch.reportSummary();
-// get a queue manager and call its run method to run the test suite
-var queueManager = new QueueManager_1.QueueManager(100, 2, Q);
-QueueManager_1.QueueManager.startTimer();
-queueManager.run()
-    .then(function (msg) {
-    // fulfilled/success
-    // console.log(msg);
-    // console.log("QueueManager.queue =", QueueManager.queue);
-    // dispatch reportSummary to all reporters
-    reportdispatch_1.reportDispatch.reportSummary();
-    // run the queue
-    // TODO(js): should filter for failed specs if hidePassedTests is true
-    new QueueRunner_1.QueueRunner(filter && queueFilter_1.queueFilter(QueueManager_1.QueueManager.queue, QueueManager_1.QueueManager.queueManagerStats, filter) || QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, queueManager, reportdispatch_1.reportDispatch, Q).run()
-        .then(function () {
-        var totFailedIts = QueueManager_1.QueueManager.queue.reduce(function (prev, curr) {
-            return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
-        }, 0);
-        QueueManager_1.QueueManager.stopTimer();
-        // console.log(`queue ran successfully in ${QueueManager.queueManagerStats.timeKeeper.totTime} miliseconds`);
-        reportdispatch_1.reportDispatch.reportSummary();
-        reportdispatch_1.reportDispatch.reportEnd();
-    }, function () {
-        // console.log("queue failed to run");
-    });
-}, function (msg) {
-    // rejected/failure
-    // console.log(msg);
-});
-
-},{"../package.json":31,"./core/api/afterEach":1,"./core/api/beforeEach":2,"./core/api/describe":4,"./core/api/it":5,"./core/api/xdescribe":6,"./core/api/xit":7,"./core/configuration/configuration":9,"./core/environment/environment":10,"./core/expectations/comparators/deeprecursiveequal":11,"./core/expectations/expect":12,"./core/expectations/mock":13,"./core/expectations/spy/spy":14,"./core/queue/QueueManager":19,"./core/queue/QueueRunner":20,"./core/queue/queueFilter":22,"./core/reporters/reportdispatch":23,"q":30}],27:[function(require,module,exports){
 if (typeof Object.assign !== "function") {
     (function () {
         Object.assign = function (target) {
@@ -1807,7 +1693,7 @@ if (typeof Object.assign !== "function") {
     })();
 }
 
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (global){
 "use strict";
 var throwError = function () {
@@ -1816,7 +1702,7 @@ var throwError = function () {
 module.exports = typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : throwError();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1909,7 +1795,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],30:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -3961,10 +3847,10 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":29}],31:[function(require,module,exports){
+},{"_process":28}],30:[function(require,module,exports){
 module.exports={
   "name": "@preamble/preamble-ts-core",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "An environment neutral JavaScript BDD testing framework written in TypeScript which supports writing test suites in TypeScript.",
   "main": "dist/main.js",
   "scripts": {
@@ -3984,4 +3870,125 @@ module.exports={
   }
 }
 
-},{}]},{},[26]);
+},{}],"main":[function(require,module,exports){
+/**
+ * Main entry point module
+ */
+"use strict";
+var Q = require("q");
+var QueueManager_1 = require("./core/queue/QueueManager");
+var QueueRunner_1 = require("./core/queue/QueueRunner");
+var describe_1 = require("./core/api/describe");
+var xdescribe_1 = require("./core/api/xdescribe");
+var it_1 = require("./core/api/it");
+var xit_1 = require("./core/api/xit");
+var beforeEach_1 = require("./core/api/beforeEach");
+var afterEach_1 = require("./core/api/afterEach");
+var environment_1 = require("./core/environment/environment");
+var configuration_1 = require("./core/configuration/configuration");
+var expect_1 = require("./core/expectations/expect");
+var expect_2 = require("./core/expectations/expect");
+var spy_1 = require("./core/expectations/spy/spy");
+var spy_2 = require("./core/expectations/spy/spy");
+var mock_1 = require("./core/expectations/mock");
+var deeprecursiveequal_1 = require("./core/expectations/comparators/deeprecursiveequal");
+var expect_3 = require("./core/expectations/expect");
+var reportdispatch_1 = require("./core/reporters/reportdispatch");
+var queueFilter_1 = require("./core/queue/queueFilter");
+var pkgJSON = require("../package.json");
+module.exports = function () {
+    var reporters;
+    // turn on long stact support in Q
+    Q.longStackSupport = true;
+    // give reportDispatch access to the queuManager
+    reportdispatch_1.reportDispatch.queueManagerStats = QueueManager_1.QueueManager.queueManagerStats;
+    // add APIs used by suites to the global object
+    environment_1.pGlobal.describe = describe_1.describe;
+    environment_1.pGlobal.xdescribe = xdescribe_1.xdescribe;
+    environment_1.pGlobal.it = it_1.it;
+    environment_1.pGlobal.xit = xit_1.xit;
+    environment_1.pGlobal.beforeEach = beforeEach_1.beforeEach;
+    environment_1.pGlobal.afterEach = afterEach_1.afterEach;
+    environment_1.pGlobal.expect = expect_1.expect;
+    environment_1.pGlobal.spyOn = spy_1.spyOn;
+    environment_1.pGlobal.spyOnN = spy_2.spyOnN;
+    environment_1.pGlobal.mock = mock_1.mock;
+    if (environment_1.pGlobal.hasOwnProperty("preamble")) {
+        // add reporter plugin
+        if (environment_1.pGlobal.preamble.hasOwnProperty("reporters")) {
+            reporters = environment_1.pGlobal.preamble.reporters;
+            // hand off reporters to the ReportDispatch
+            reportdispatch_1.reportDispatch.reporters = reporters;
+        }
+        if (!reporters || !reporters.length) {
+            // console.log("No reporters found");
+            throw new Error("No reporters found");
+        }
+        // dispatch reportBegin to reporters
+        reportdispatch_1.reportDispatch.reportBegin({
+            version: pkgJSON.version,
+            uiTestContainerId: configuration_1.configuration.uiTestContainerId,
+            name: configuration_1.configuration.name,
+            hidePassedTests: configuration_1.configuration.hidePassedTests
+        });
+        // expose registerMatcher for one-off in-line matcher registration
+        environment_1.pGlobal.preamble.registerMatcher = expect_2.registerMatcher;
+        // call each matcher plugin to register their matchers
+        if (environment_1.pGlobal.preamble.hasOwnProperty("registerMatchers")) {
+            var registerMatchers = environment_1.pGlobal.preamble.registerMatchers;
+            registerMatchers.forEach(function (rm) { return rm(expect_2.registerMatcher, { deepRecursiveCompare: deeprecursiveequal_1.deepRecursiveCompare }); });
+            if (!expect_3.matchersCount()) {
+                // console.log("No matchers registered");
+                throw new Error("No matchers found");
+            }
+        }
+        else {
+            // no matcher plugins found but matchers can be
+            // registered inline so just log it but don't
+            // throw an exception
+            console.log("No matcher plugins found");
+        }
+        // expose Q on wondow.preamble
+        environment_1.pGlobal.preamble.Q = Q;
+    }
+    else {
+        // console.log("No plugins found");
+        throw new Error("No plugins found");
+    }
+    // the raw filter looks like "?filter=spec_n" or "?filter=suite_n" where n is some number
+    var filter = typeof window === "object" &&
+        window.location.search.substring(window.location.search.indexOf("_") + 1) || null;
+    // console.log("filter =", filter);
+    // dspatch reportSummary to all reporters
+    reportdispatch_1.reportDispatch.reportSummary();
+    // get a queue manager and call its run method to run the test suite
+    var queueManager = new QueueManager_1.QueueManager(100, 2, Q);
+    QueueManager_1.QueueManager.startTimer();
+    queueManager.run()
+        .then(function (msg) {
+        // fulfilled/success
+        // console.log(msg);
+        // console.log("QueueManager.queue =", QueueManager.queue);
+        // dispatch reportSummary to all reporters
+        reportdispatch_1.reportDispatch.reportSummary();
+        // run the queue
+        // TODO(js): should filter for failed specs if hidePassedTests is true
+        new QueueRunner_1.QueueRunner(filter && queueFilter_1.queueFilter(QueueManager_1.QueueManager.queue, QueueManager_1.QueueManager.queueManagerStats, filter) || QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, queueManager, reportdispatch_1.reportDispatch, Q).run()
+            .then(function () {
+            var totFailedIts = QueueManager_1.QueueManager.queue.reduce(function (prev, curr) {
+                return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
+            }, 0);
+            QueueManager_1.QueueManager.stopTimer();
+            // console.log(`queue ran successfully in ${QueueManager.queueManagerStats.timeKeeper.totTime} miliseconds`);
+            reportdispatch_1.reportDispatch.reportSummary();
+            reportdispatch_1.reportDispatch.reportEnd();
+        }, function () {
+            // console.log("queue failed to run");
+        });
+    }, function (msg) {
+        // rejected/failure
+        // console.log(msg);
+    });
+};
+
+},{"../package.json":30,"./core/api/afterEach":1,"./core/api/beforeEach":2,"./core/api/describe":4,"./core/api/it":5,"./core/api/xdescribe":6,"./core/api/xit":7,"./core/configuration/configuration":9,"./core/environment/environment":10,"./core/expectations/comparators/deeprecursiveequal":11,"./core/expectations/expect":12,"./core/expectations/mock":13,"./core/expectations/spy/spy":14,"./core/queue/QueueManager":19,"./core/queue/QueueRunner":20,"./core/queue/queueFilter":22,"./core/reporters/reportdispatch":23,"q":29}]},{},["main"]);
