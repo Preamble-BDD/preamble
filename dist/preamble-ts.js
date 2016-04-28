@@ -372,10 +372,15 @@ var compareArrays = function (a, b) {
 };
 
 },{}],12:[function(require,module,exports){
+// TODO(js): this needs to be refactored so it can be configured by main.
+// For examele, this module currently has to import configuration so that
+// it has access to the short circuit property, which main should really
+// be passing to configure expectations.
 "use strict";
 var spy_1 = require("./spy/spy");
 var QueueRunner_1 = require("../queue/QueueRunner");
 var StackTrace_1 = require("../stacktrace/StackTrace");
+var configuration_1 = require("../configuration/configuration");
 var expectationAPI = {};
 var expectationAPICount = 0;
 var negatedExpectationAPI = {};
@@ -445,11 +450,14 @@ var assignReason = function (note) {
     var reason;
     if (!note.result) {
         if (note.matcherValue != null) {
-            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "(" + showAs(note.matcherValue) + ") failed!";
+            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "(" + showAs(note.matcherValue) + ") failed";
         }
         else {
-            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "() failed!";
+            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "() failed";
         }
+        console.log("configuration.shortCircuit", configuration_1.configuration.shortCircuit);
+        reason = configuration_1.configuration.shortCircuit ? reason + " and testing has been short circuited" : reason;
+        reason += "!";
         QueueRunner_1.currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
 };
@@ -514,7 +522,7 @@ exports.registerMatcher = function (matcher) {
 };
 exports.matchersCount = function () { return expectationAPICount; };
 
-},{"../queue/QueueRunner":20,"../stacktrace/StackTrace":24,"./spy/spy":14}],13:[function(require,module,exports){
+},{"../configuration/configuration":9,"../queue/QueueRunner":20,"../stacktrace/StackTrace":24,"./spy/spy":14}],13:[function(require,module,exports){
 /**
  * Mock API
  * WARNING: mock is an experimental api and may not be included in the official release.
@@ -1240,19 +1248,21 @@ var QueueManager = (function () {
 exports.QueueManager = QueueManager;
 
 },{}],20:[function(require,module,exports){
-// TODO(js): Bug - timeouts must bump the failures count.
-// TODO(js): Feature - implement shourt circuit.
+// TODO(js): Feature - implement shourt circuit. Done 4/28/16.
+// TODO(js): Bug - timeouts shouldn't reject their promise. Done 4/28/16.
 "use strict";
 var QueueManager_1 = require("./QueueManager");
 require("../../polyfills/Object.assign"); // prevent eliding import
 // TODO(JS): Show .fails (i.e. timeouts) in the done???
 var QueueRunner = (function () {
-    function QueueRunner(queue, configTimeoutInterval, queueManager, reportDispatch, Q) {
+    function QueueRunner(queue, configTimeoutInterval, configShortCircuit, queueManager, reportDispatch, Q) {
         this.queue = queue;
         this.configTimeoutInterval = configTimeoutInterval;
+        this.configShortCircuit = configShortCircuit;
         this.queueManager = queueManager;
         this.reportDispatch = reportDispatch;
         this.Q = Q;
+        this.isShortCircuited = false;
     }
     /**
      * Returns a function (closure) which must complete within a set amount of time
@@ -1264,6 +1274,7 @@ var QueueRunner = (function () {
      * beforeEach(function(done) {...}, 1);
      */
     QueueRunner.prototype.runBeforeItAfter = function (fn, context, timeoutInterval) {
+        var _this = this;
         var deferred = this.Q.defer();
         setTimeout(function () {
             var resolve = function () {
@@ -1286,9 +1297,13 @@ var QueueRunner = (function () {
             }
             // a timer that expires after timeoutInterval miliseconds
             setTimeout(function () {
+                var errorMsg = "timed out after " + timeoutInterval + "ms";
+                if (_this.isShortCircuited) {
+                    errorMsg += " and testing has been short circuited";
+                }
                 if (deferred.promise.isPending()) {
                     // timedOut = true;
-                    deferred.reject(new Error("timed out after " + timeoutInterval + "ms"));
+                    deferred.reject(new Error(errorMsg));
                 }
             }, timeoutInterval);
         }, 1);
@@ -1400,6 +1415,9 @@ var QueueRunner = (function () {
     QueueRunner.prototype.runBIA = function (it) {
         var _this = this;
         var deferred = this.Q.defer();
+        var shortCircuitMessage = function (message) {
+            return _this.configShortCircuit && message + " and testing has been short circuited!" || message;
+        };
         setTimeout(function () {
             exports.currentIt = it;
             _this.runBefores(it.hierarchy).then(function () {
@@ -1407,17 +1425,26 @@ var QueueRunner = (function () {
                     _this.runAfters(it.hierarchy).then(function () {
                         deferred.resolve();
                     }, function (error) {
-                        it.reasons.push({ reason: error.message, stackTrace: it.parent.afterEach.callStack });
+                        it.reasons.push({
+                            reason: shortCircuitMessage(error.message),
+                            stackTrace: it.parent.afterEach.callStack
+                        });
                         it.passed = false;
                         deferred.reject(error);
                     });
                 }, function (error) {
-                    it.reasons.push({ reason: error.message, stackTrace: it.callStack });
+                    it.reasons.push({
+                        reason: shortCircuitMessage(error.message),
+                        stackTrace: it.callStack
+                    });
                     it.passed = false;
                     deferred.reject(error);
                 });
             }, function (error) {
-                it.reasons.push({ reason: error.message, stackTrace: it.parent.beforeEach.callStack });
+                it.reasons.push({
+                    reason: shortCircuitMessage(error.message),
+                    stackTrace: it.parent.beforeEach.callStack
+                });
                 it.passed = false;
                 deferred.reject(error);
             });
@@ -1437,7 +1464,7 @@ var QueueRunner = (function () {
         // recursive iterator
         var runner = function (i) {
             setTimeout(function () {
-                if (i < its.length) {
+                if (!_this.isShortCircuited && i < its.length) {
                     it = its[i];
                     // TODO(js): is parent.excluded check really needed????
                     if (it.excluded || it.parent.excluded) {
@@ -1448,6 +1475,9 @@ var QueueRunner = (function () {
                         _this.runBIA(it).then(function () {
                             if (!it.passed) {
                                 QueueManager_1.QueueManager.bumpTotFailedItsCount();
+                                if (_this.configShortCircuit) {
+                                    _this.isShortCircuited = true;
+                                }
                             }
                             _this.reportDispatch.reportSummary();
                             _this.reportDispatch.reportSpec(it);
@@ -1457,6 +1487,9 @@ var QueueRunner = (function () {
                             QueueManager_1.QueueManager.bumpTotFailedItsCount();
                             _this.reportDispatch.reportSummary();
                             _this.reportDispatch.reportSpec(it);
+                            if (_this.configShortCircuit) {
+                                _this.isShortCircuited = true;
+                            }
                             runner(++i);
                         });
                     }
@@ -3973,7 +4006,7 @@ module.exports = function () {
         reportdispatch_1.reportDispatch.reportSummary();
         // run the queue
         // TODO(js): should filter for failed specs if hidePassedTests is true
-        new QueueRunner_1.QueueRunner(filter && queueFilter_1.queueFilter(QueueManager_1.QueueManager.queue, QueueManager_1.QueueManager.queueManagerStats, filter) || QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, queueManager, reportdispatch_1.reportDispatch, Q).run()
+        new QueueRunner_1.QueueRunner(filter && queueFilter_1.queueFilter(QueueManager_1.QueueManager.queue, QueueManager_1.QueueManager.queueManagerStats, filter) || QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, configuration_1.configuration.shortCircuit, queueManager, reportdispatch_1.reportDispatch, Q).run()
             .then(function () {
             var totFailedIts = QueueManager_1.QueueManager.queue.reduce(function (prev, curr) {
                 return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
@@ -3984,6 +4017,7 @@ module.exports = function () {
             reportdispatch_1.reportDispatch.reportEnd();
         }, function () {
             // console.log("queue failed to run");
+            console.log("queue failed to run");
         });
     }, function (msg) {
         // rejected/failure

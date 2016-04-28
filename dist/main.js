@@ -100,7 +100,7 @@ module.exports = function () {
         reportdispatch_1.reportDispatch.reportSummary();
         // run the queue
         // TODO(js): should filter for failed specs if hidePassedTests is true
-        new QueueRunner_1.QueueRunner(filter && queueFilter_1.queueFilter(QueueManager_1.QueueManager.queue, QueueManager_1.QueueManager.queueManagerStats, filter) || QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, queueManager, reportdispatch_1.reportDispatch, Q).run()
+        new QueueRunner_1.QueueRunner(filter && queueFilter_1.queueFilter(QueueManager_1.QueueManager.queue, QueueManager_1.QueueManager.queueManagerStats, filter) || QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, configuration_1.configuration.shortCircuit, queueManager, reportdispatch_1.reportDispatch, Q).run()
             .then(function () {
             var totFailedIts = QueueManager_1.QueueManager.queue.reduce(function (prev, curr) {
                 return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
@@ -111,6 +111,7 @@ module.exports = function () {
             reportdispatch_1.reportDispatch.reportEnd();
         }, function () {
             // console.log("queue failed to run");
+            console.log("queue failed to run");
         });
     }, function (msg) {
         // rejected/failure

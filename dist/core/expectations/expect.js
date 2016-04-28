@@ -1,7 +1,12 @@
+// TODO(js): this needs to be refactored so it can be configured by main.
+// For examele, this module currently has to import configuration so that
+// it has access to the short circuit property, which main should really
+// be passing to configure expectations.
 "use strict";
 var spy_1 = require("./spy/spy");
 var QueueRunner_1 = require("../queue/QueueRunner");
 var StackTrace_1 = require("../stacktrace/StackTrace");
+var configuration_1 = require("../configuration/configuration");
 var expectationAPI = {};
 var expectationAPICount = 0;
 var negatedExpectationAPI = {};
@@ -71,11 +76,14 @@ var assignReason = function (note) {
     var reason;
     if (!note.result) {
         if (note.matcherValue != null) {
-            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "(" + showAs(note.matcherValue) + ") failed!";
+            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "(" + showAs(note.matcherValue) + ") failed";
         }
         else {
-            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "() failed!";
+            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "() failed";
         }
+        console.log("configuration.shortCircuit", configuration_1.configuration.shortCircuit);
+        reason = configuration_1.configuration.shortCircuit ? reason + " and testing has been short circuited" : reason;
+        reason += "!";
         QueueRunner_1.currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
 };
