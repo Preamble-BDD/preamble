@@ -113,7 +113,8 @@ export = (): void => {
             // TODO(js): should filter for failed specs if hidePassedTests is true
             new QueueRunner(filter && queueFilter(QueueManager.queue,
                 QueueManager.queueManagerStats, filter) || QueueManager.queue,
-                configuration.timeoutInterval, queueManager, reportDispatch, Q).run()
+                configuration.timeoutInterval, configuration.shortCircuit,
+                queueManager, reportDispatch, Q).run()
                 .then(() => {
                     let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
                         return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
@@ -124,6 +125,7 @@ export = (): void => {
                     reportDispatch.reportEnd();
                 }, () => {
                     // console.log("queue failed to run");
+                    console.log("queue failed to run");
                 });
         }, (msg) => {
             // rejected/failure
