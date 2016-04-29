@@ -1,10 +1,3 @@
-// TODO(js): this needs to be refactored so it can be configured by main.
-// For examele, this module currently has to import configuration so that
-// it has access to the short circuit property, which main should really
-// be passing to configure expectations.
-
-// TODO(js): move this module to src/api
-
 import {IMatcher} from "./matchers/IMatcher";
 import {INote} from "./INote";
 import {SpyOnStatic} from "./spy/spy";
