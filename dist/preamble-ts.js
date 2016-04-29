@@ -377,16 +377,16 @@ var compareArrays = function (a, b) {
 // it has access to the short circuit property, which main should really
 // be passing to configure expectations.
 "use strict";
-var spy_1 = require("./spy/spy");
-var QueueRunner_1 = require("../queue/QueueRunner");
-var StackTrace_1 = require("../stacktrace/StackTrace");
-var configuration_1 = require("../configuration/configuration");
 var expectationAPI = {};
 var expectationAPICount = 0;
 var negatedExpectationAPI = {};
+var isShortCircuit = false;
+var getCurrentIt;
+var note;
+var spyOn;
+var stackTrace;
 // add not api to expect api
 expectationAPI["not"] = negatedExpectationAPI;
-var note;
 /**
  * argChecker - checks that the matcher has the
  * correct number of args passed to it.
@@ -422,7 +422,7 @@ var argsChecker = function (matcher, argsLength) {
     }
     return true;
 };
-var addNoteToIt = function (note) { return QueueRunner_1.currentIt.expectations.push(note); };
+var addNoteToIt = function (note) { return getCurrentIt().expectations.push(note); };
 var showAs = function (value) {
     if (Array.isArray(value)) {
         return "array";
@@ -455,26 +455,25 @@ var assignReason = function (note) {
         else {
             reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "() failed";
         }
-        console.log("configuration.shortCircuit", configuration_1.configuration.shortCircuit);
-        reason = configuration_1.configuration.shortCircuit ? reason + " and testing has been short circuited" : reason;
+        reason = isShortCircuit ? reason + " and testing has been short circuited" : reason;
         reason += "!";
-        QueueRunner_1.currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
+        getCurrentIt().reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
 };
 // expect(value)
-exports.expect = function (ev) {
+var expect = function (ev) {
     // if a callback was returned then call it and use what it returns for the expected value
     var expectedValue = ev;
     // capture the stack trace here when expect is called.
-    var st = StackTrace_1.stackTrace.stackTrace;
+    var st = stackTrace.stackTrace;
     if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMarker")) {
-        var spy = spy_1.spyOn(ev).and.callActual();
+        var spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
-    note = { it: QueueRunner_1.currentIt, apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
+    note = { it: getCurrentIt(), apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
     return expectationAPI;
 };
-exports.registerMatcher = function (matcher) {
+var registerMatcher = function (matcher) {
     var proxy = function (not) {
         return function () {
             var args = [];
@@ -506,8 +505,8 @@ exports.registerMatcher = function (matcher) {
                 addNoteToIt(note);
                 assignReason(note);
                 // set It's and its parent Describe's passed property to false when expectation fails
-                QueueRunner_1.currentIt.passed = !note.result ? note.result : QueueRunner_1.currentIt.passed;
-                QueueRunner_1.currentIt.parent.passed = !note.result ? note.result : QueueRunner_1.currentIt.parent.passed;
+                getCurrentIt().passed = !note.result ? note.result : getCurrentIt().passed;
+                getCurrentIt().parent.passed = !note.result ? note.result : getCurrentIt().parent.passed;
             }
             else {
             }
@@ -520,9 +519,21 @@ exports.registerMatcher = function (matcher) {
     }
     expectationAPICount++;
 };
-exports.matchersCount = function () { return expectationAPICount; };
+var getMatchersCount = function () { return expectationAPICount; };
+var configure = function (_shortCircuit, _getCurrentIt, _spyOn, _stackTrace) {
+    isShortCircuit = _shortCircuit;
+    getCurrentIt = _getCurrentIt;
+    spyOn = _spyOn;
+    stackTrace = _stackTrace;
+};
+exports.expectApi = {
+    expect: expect,
+    registerMatcher: registerMatcher,
+    getMatchersCount: getMatchersCount,
+    configure: configure
+};
 
-},{"../configuration/configuration":9,"../queue/QueueRunner":20,"../stacktrace/StackTrace":24,"./spy/spy":14}],13:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /**
  * Mock API
  * WARNING: mock is an experimental api and may not be included in the official release.
@@ -648,13 +659,13 @@ exports.mock = function () {
     _mock.and.expect = { it: { not: {} } };
     _mock.and.expect.it.toBeCalled = function () {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toBeCalled = function () {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
@@ -664,7 +675,7 @@ exports.mock = function () {
             args[_i - 0] = arguments[_i];
         }
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
@@ -674,67 +685,67 @@ exports.mock = function () {
             args[_i - 0] = arguments[_i];
         }
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toBeCalledWithContext = function (context) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toBeCalledWithContext = function (context) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toReturnValue = function (value) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toReturnValue = function (value) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrow = function () {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrow = function () {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrowWithName = function (name) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrowWithName = function (name) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrowWithMessage = function (message) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrowWithMessage = function (message) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
@@ -790,9 +801,9 @@ exports.mock = function () {
                     mockAPI.not[apiToCall.note.apiName](apiToCall.note.expectedValue) :
                     mockAPI[apiToCall.note.apiName](apiToCall.note.expectedValue);
             }
-            QueueRunner_1.currentIt.passed = apiToCall.note.result && QueueRunner_1.currentIt.passed || false;
-            QueueRunner_1.currentIt.parent.passed = apiToCall.note.result && QueueRunner_1.currentIt.passed || false;
-            QueueRunner_1.currentIt.expectations.push(apiToCall.note);
+            QueueRunner_1.getCurrentIt().passed = apiToCall.note.result && QueueRunner_1.getCurrentIt().passed || false;
+            QueueRunner_1.getCurrentIt().parent.passed = apiToCall.note.result && QueueRunner_1.getCurrentIt().passed || false;
+            QueueRunner_1.getCurrentIt().expectations.push(apiToCall.note);
             if (!apiToCall.note.result) {
                 if (apiToCall.note.matcherValue) {
                     reason = "mock().and.expect.it." + apiToCall.note.apiName + "(" + apiToCall.note.matcherValue + ") failed!";
@@ -800,7 +811,7 @@ exports.mock = function () {
                 else {
                     reason = "mock().and.expect.it." + apiToCall.note.apiName + "() failed!";
                 }
-                QueueRunner_1.currentIt.reasons.push({ reason: reason, stackTrace: apiToCall.note.stackTrace });
+                QueueRunner_1.getCurrentIt().reasons.push({ reason: reason, stackTrace: apiToCall.note.stackTrace });
             }
         });
     };
@@ -1253,6 +1264,8 @@ exports.QueueManager = QueueManager;
 "use strict";
 var QueueManager_1 = require("./QueueManager");
 require("../../polyfills/Object.assign"); // prevent eliding import
+var currentIt;
+exports.getCurrentIt = function () { return currentIt; };
 // TODO(JS): Show .fails (i.e. timeouts) in the done???
 var QueueRunner = (function () {
     function QueueRunner(queue, configTimeoutInterval, configShortCircuit, queueManager, reportDispatch, Q) {
@@ -1419,7 +1432,7 @@ var QueueRunner = (function () {
             return _this.configShortCircuit && message + " and testing has been short circuited!" || message;
         };
         setTimeout(function () {
-            exports.currentIt = it;
+            currentIt = it;
             _this.runBefores(it.hierarchy).then(function () {
                 _this.runIt(it).then(function () {
                     _this.runAfters(it.hierarchy).then(function () {
@@ -3911,6 +3924,7 @@ module.exports={
 var Q = require("q");
 var QueueManager_1 = require("./core/queue/QueueManager");
 var QueueRunner_1 = require("./core/queue/QueueRunner");
+var QueueRunner_2 = require("./core/queue/QueueRunner");
 var describe_1 = require("./core/api/describe");
 var xdescribe_1 = require("./core/api/xdescribe");
 var it_1 = require("./core/api/it");
@@ -3919,13 +3933,12 @@ var beforeEach_1 = require("./core/api/beforeEach");
 var afterEach_1 = require("./core/api/afterEach");
 var environment_1 = require("./core/environment/environment");
 var configuration_1 = require("./core/configuration/configuration");
+var StackTrace_1 = require("./core/stacktrace/StackTrace");
 var expect_1 = require("./core/expectations/expect");
-var expect_2 = require("./core/expectations/expect");
 var spy_1 = require("./core/expectations/spy/spy");
 var spy_2 = require("./core/expectations/spy/spy");
 var mock_1 = require("./core/expectations/mock");
 var deeprecursiveequal_1 = require("./core/expectations/comparators/deeprecursiveequal");
-var expect_3 = require("./core/expectations/expect");
 var reportdispatch_1 = require("./core/reporters/reportdispatch");
 var queueFilter_1 = require("./core/queue/queueFilter");
 var pkgJSON = require("../package.json");
@@ -3935,6 +3948,8 @@ module.exports = function () {
     Q.longStackSupport = true;
     // give reportDispatch access to the queuManager
     reportdispatch_1.reportDispatch.queueManagerStats = QueueManager_1.QueueManager.queueManagerStats;
+    // configure expectations
+    expect_1.expectApi.configure(configuration_1.configuration.shortCircuit, QueueRunner_2.getCurrentIt, spy_1.spyOn, StackTrace_1.stackTrace);
     // add APIs used by suites to the global object
     environment_1.pGlobal.describe = describe_1.describe;
     environment_1.pGlobal.xdescribe = xdescribe_1.xdescribe;
@@ -3942,7 +3957,7 @@ module.exports = function () {
     environment_1.pGlobal.xit = xit_1.xit;
     environment_1.pGlobal.beforeEach = beforeEach_1.beforeEach;
     environment_1.pGlobal.afterEach = afterEach_1.afterEach;
-    environment_1.pGlobal.expect = expect_1.expect;
+    environment_1.pGlobal.expect = expect_1.expectApi.expect;
     environment_1.pGlobal.spyOn = spy_1.spyOn;
     environment_1.pGlobal.spyOnN = spy_2.spyOnN;
     environment_1.pGlobal.mock = mock_1.mock;
@@ -3965,12 +3980,12 @@ module.exports = function () {
             hidePassedTests: configuration_1.configuration.hidePassedTests
         });
         // expose registerMatcher for one-off in-line matcher registration
-        environment_1.pGlobal.preamble.registerMatcher = expect_2.registerMatcher;
+        environment_1.pGlobal.preamble.registerMatcher = expect_1.expectApi.registerMatcher;
         // call each matcher plugin to register their matchers
         if (environment_1.pGlobal.preamble.hasOwnProperty("registerMatchers")) {
             var registerMatchers = environment_1.pGlobal.preamble.registerMatchers;
-            registerMatchers.forEach(function (rm) { return rm(expect_2.registerMatcher, { deepRecursiveCompare: deeprecursiveequal_1.deepRecursiveCompare }); });
-            if (!expect_3.matchersCount()) {
+            registerMatchers.forEach(function (rm) { return rm(expect_1.expectApi.registerMatcher, { deepRecursiveCompare: deeprecursiveequal_1.deepRecursiveCompare }); });
+            if (!expect_1.expectApi.getMatchersCount()) {
                 // console.log("No matchers registered");
                 throw new Error("No matchers found");
             }
@@ -4025,4 +4040,4 @@ module.exports = function () {
     });
 };
 
-},{"../package.json":30,"./core/api/afterEach":1,"./core/api/beforeEach":2,"./core/api/describe":4,"./core/api/it":5,"./core/api/xdescribe":6,"./core/api/xit":7,"./core/configuration/configuration":9,"./core/environment/environment":10,"./core/expectations/comparators/deeprecursiveequal":11,"./core/expectations/expect":12,"./core/expectations/mock":13,"./core/expectations/spy/spy":14,"./core/queue/QueueManager":19,"./core/queue/QueueRunner":20,"./core/queue/queueFilter":22,"./core/reporters/reportdispatch":23,"q":29}]},{},["main"]);
+},{"../package.json":30,"./core/api/afterEach":1,"./core/api/beforeEach":2,"./core/api/describe":4,"./core/api/it":5,"./core/api/xdescribe":6,"./core/api/xit":7,"./core/configuration/configuration":9,"./core/environment/environment":10,"./core/expectations/comparators/deeprecursiveequal":11,"./core/expectations/expect":12,"./core/expectations/mock":13,"./core/expectations/spy/spy":14,"./core/queue/QueueManager":19,"./core/queue/QueueRunner":20,"./core/queue/queueFilter":22,"./core/reporters/reportdispatch":23,"./core/stacktrace/StackTrace":24,"q":29}]},{},["main"]);

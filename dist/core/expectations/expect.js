@@ -3,16 +3,16 @@
 // it has access to the short circuit property, which main should really
 // be passing to configure expectations.
 "use strict";
-var spy_1 = require("./spy/spy");
-var QueueRunner_1 = require("../queue/QueueRunner");
-var StackTrace_1 = require("../stacktrace/StackTrace");
-var configuration_1 = require("../configuration/configuration");
 var expectationAPI = {};
 var expectationAPICount = 0;
 var negatedExpectationAPI = {};
+var isShortCircuit = false;
+var getCurrentIt;
+var note;
+var spyOn;
+var stackTrace;
 // add not api to expect api
 expectationAPI["not"] = negatedExpectationAPI;
-var note;
 /**
  * argChecker - checks that the matcher has the
  * correct number of args passed to it.
@@ -48,7 +48,7 @@ var argsChecker = function (matcher, argsLength) {
     }
     return true;
 };
-var addNoteToIt = function (note) { return QueueRunner_1.currentIt.expectations.push(note); };
+var addNoteToIt = function (note) { return getCurrentIt().expectations.push(note); };
 var showAs = function (value) {
     if (Array.isArray(value)) {
         return "array";
@@ -81,26 +81,25 @@ var assignReason = function (note) {
         else {
             reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "() failed";
         }
-        console.log("configuration.shortCircuit", configuration_1.configuration.shortCircuit);
-        reason = configuration_1.configuration.shortCircuit ? reason + " and testing has been short circuited" : reason;
+        reason = isShortCircuit ? reason + " and testing has been short circuited" : reason;
         reason += "!";
-        QueueRunner_1.currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
+        getCurrentIt().reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
 };
 // expect(value)
-exports.expect = function (ev) {
+var expect = function (ev) {
     // if a callback was returned then call it and use what it returns for the expected value
     var expectedValue = ev;
     // capture the stack trace here when expect is called.
-    var st = StackTrace_1.stackTrace.stackTrace;
+    var st = stackTrace.stackTrace;
     if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMarker")) {
-        var spy = spy_1.spyOn(ev).and.callActual();
+        var spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
-    note = { it: QueueRunner_1.currentIt, apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
+    note = { it: getCurrentIt(), apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
     return expectationAPI;
 };
-exports.registerMatcher = function (matcher) {
+var registerMatcher = function (matcher) {
     var proxy = function (not) {
         return function () {
             var args = [];
@@ -132,8 +131,8 @@ exports.registerMatcher = function (matcher) {
                 addNoteToIt(note);
                 assignReason(note);
                 // set It's and its parent Describe's passed property to false when expectation fails
-                QueueRunner_1.currentIt.passed = !note.result ? note.result : QueueRunner_1.currentIt.passed;
-                QueueRunner_1.currentIt.parent.passed = !note.result ? note.result : QueueRunner_1.currentIt.parent.passed;
+                getCurrentIt().passed = !note.result ? note.result : getCurrentIt().passed;
+                getCurrentIt().parent.passed = !note.result ? note.result : getCurrentIt().parent.passed;
             }
             else {
             }
@@ -146,5 +145,17 @@ exports.registerMatcher = function (matcher) {
     }
     expectationAPICount++;
 };
-exports.matchersCount = function () { return expectationAPICount; };
+var getMatchersCount = function () { return expectationAPICount; };
+var configure = function (_shortCircuit, _getCurrentIt, _spyOn, _stackTrace) {
+    isShortCircuit = _shortCircuit;
+    getCurrentIt = _getCurrentIt;
+    spyOn = _spyOn;
+    stackTrace = _stackTrace;
+};
+exports.expectApi = {
+    expect: expect,
+    registerMatcher: registerMatcher,
+    getMatchersCount: getMatchersCount,
+    configure: configure
+};
 //# sourceMappingURL=expect.js.map

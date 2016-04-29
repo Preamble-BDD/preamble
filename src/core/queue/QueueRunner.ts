@@ -17,7 +17,8 @@ import {mix} from "./mix";
 import {IReportDispatch} from "../reporters/reportdispatch";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
-export let currentIt: IIt;
+let currentIt: IIt;
+export let getCurrentIt = (): IIt => currentIt;
 
 // TODO(JS): Show .fails (i.e. timeouts) in the done???
 export class QueueRunner {

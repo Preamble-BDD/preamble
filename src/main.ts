@@ -5,6 +5,7 @@
 import Q = require("q");
 import {QueueManager} from "./core/queue/QueueManager";
 import {QueueRunner} from "./core/queue/QueueRunner";
+import {getCurrentIt} from "./core/queue/QueueRunner";
 import {describe} from "./core/api/describe";
 import {xdescribe} from "./core/api/xdescribe";
 import {it} from "./core/api/it";
@@ -13,16 +14,15 @@ import {beforeEach} from "./core/api/beforeEach";
 import {afterEach} from "./core/api/afterEach";
 import {pGlobal} from "./core/environment/environment";
 import {configuration} from "./core/configuration/configuration";
-import {expect} from "./core/expectations/expect";
-import {registerMatcher} from "./core/expectations/expect";
 import {RegisterMatcher} from "./core/expectations/expect";
 import {RegisterMatchers} from "./core/expectations/expect";
+import {stackTrace} from "./core/stacktrace/StackTrace";
+import {expectApi} from "./core/expectations/expect";
 import {spyOn} from "./core/expectations/spy/spy";
 import {spyOnN} from "./core/expectations/spy/spy";
 import {mock} from "./core/expectations/mock";
 import {deepRecursiveCompare} from "./core/expectations/comparators/deeprecursiveequal";
 import {DeepRecursiveCompare} from "./core/expectations/comparators/deeprecursiveequal";
-import {matchersCount} from "./core/expectations/expect";
 import {Reporter} from "./core/reporters/Reporter";
 import {reportDispatch} from "./core/reporters/reportdispatch";
 import {queueFilter} from "./core/queue/queueFilter";
@@ -39,6 +39,9 @@ export = (): void => {
     // give reportDispatch access to the queuManager
     reportDispatch.queueManagerStats = QueueManager.queueManagerStats;
 
+    // configure expectations
+    expectApi.configure(configuration.shortCircuit, getCurrentIt, spyOn, stackTrace);
+
     // add APIs used by suites to the global object
     pGlobal.describe = describe;
     pGlobal.xdescribe = xdescribe;
@@ -46,7 +49,7 @@ export = (): void => {
     pGlobal.xit = xit;
     pGlobal.beforeEach = beforeEach;
     pGlobal.afterEach = afterEach;
-    pGlobal.expect = expect;
+    pGlobal.expect = expectApi.expect;
     pGlobal.spyOn = spyOn;
     pGlobal.spyOnN = spyOnN;
     pGlobal.mock = mock;
@@ -69,12 +72,12 @@ export = (): void => {
             hidePassedTests: configuration.hidePassedTests
         });
         // expose registerMatcher for one-off in-line matcher registration
-        pGlobal.preamble.registerMatcher = registerMatcher;
+        pGlobal.preamble.registerMatcher = expectApi.registerMatcher;
         // call each matcher plugin to register their matchers
         if (pGlobal.preamble.hasOwnProperty("registerMatchers")) {
             let registerMatchers: RegisterMatchers[] = pGlobal.preamble.registerMatchers;
-            registerMatchers.forEach(rm => rm(registerMatcher, { deepRecursiveCompare: deepRecursiveCompare }));
-            if (!matchersCount()) {
+            registerMatchers.forEach(rm => rm(expectApi.registerMatcher, { deepRecursiveCompare: deepRecursiveCompare }));
+            if (!expectApi.getMatchersCount()) {
                 // console.log("No matchers registered");
                 throw new Error("No matchers found");
             }

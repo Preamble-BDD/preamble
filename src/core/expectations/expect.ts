@@ -3,26 +3,58 @@
 // it has access to the short circuit property, which main should really
 // be passing to configure expectations.
 
+// TODO(js): move this module to src/api
+
 import {IMatcher} from "./matchers/IMatcher";
 import {INote} from "./INote";
-import {spyOn} from "./spy/spy";
-import {currentIt} from "../queue/QueueRunner";
-import {stackTrace} from "../stacktrace/StackTrace";
+import {SpyOnStatic} from "./spy/spy";
+import {IIt} from "../queue/IIt";
+import {StackTrace} from "../stacktrace/StackTrace";
 import {DeepRecursiveCompare} from "./comparators/deeprecursiveequal";
-import {configuration} from "../configuration/configuration";
-
-let expectationAPI = {};
-let expectationAPICount = 0;
-let negatedExpectationAPI = {};
-
-// add not api to expect api
-expectationAPI["not"] = negatedExpectationAPI;
 
 interface Proxy {
     (...args): void;
 }
 
+export interface Expect {
+    (ev: any): {};
+}
+
+export interface RegisterMatcher {
+    (matcher: IMatcher): void;
+}
+
+export interface RegisterMatcherHelpers {
+    deepRecursiveCompare: DeepRecursiveCompare;
+}
+
+export interface RegisterMatchers {
+    (registerMatcher: RegisterMatcher, helpers: RegisterMatcherHelpers): void;
+}
+
+export interface Configure {
+    (_shortCircuit: boolean, _getCurrentIt: () => IIt, _spyOn: SpyOnStatic,
+        _stackTrace: StackTrace): void;
+}
+
+export interface ExpectAPI {
+    expect: Expect;
+    registerMatcher: RegisterMatcher;
+    getMatchersCount: () => number;
+    configure: Configure;
+}
+
+let expectationAPI = {};
+let expectationAPICount = 0;
+let negatedExpectationAPI = {};
+let isShortCircuit: boolean = false;
+let getCurrentIt: () => IIt;
 let note: INote;
+let spyOn: SpyOnStatic;
+let stackTrace: StackTrace;
+
+// add not api to expect api
+expectationAPI["not"] = negatedExpectationAPI;
 
 /**
  * argChecker - checks that the matcher has the
@@ -60,7 +92,7 @@ let argsChecker = (matcher, argsLength): boolean => {
     return true;
 };
 
-let addNoteToIt = (note: INote) => currentIt.expectations.push(note);
+let addNoteToIt = (note: INote) => getCurrentIt().expectations.push(note);
 
 let showAs = (value: any): string => {
     if (Array.isArray(value)) {
@@ -94,19 +126,14 @@ let assignReason = (note: INote) => {
         } else {
             reason = `expect(${showAs(note.expectedValue)}).${note.apiName}() failed`;
         }
-        console.log("configuration.shortCircuit", configuration.shortCircuit);
-        reason = configuration.shortCircuit ? reason + " and testing has been short circuited" : reason;
+        reason = isShortCircuit ? reason + " and testing has been short circuited" : reason;
         reason += "!";
-        currentIt.reasons.push({ reason: reason, stackTrace: note.stackTrace });
+        getCurrentIt().reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
 };
 
-export interface Expect {
-    (ev: any): {};
-}
-
 // expect(value)
-export let expect: Expect = (ev: any): {} => {
+let expect: Expect = (ev: any): {} => {
     // if a callback was returned then call it and use what it returns for the expected value
     let expectedValue = ev;
     // capture the stack trace here when expect is called.
@@ -115,23 +142,11 @@ export let expect: Expect = (ev: any): {} => {
         let spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
-    note = { it: currentIt, apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
+    note = { it: getCurrentIt(), apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
     return expectationAPI;
 };
 
-export interface RegisterMatcher {
-    (matcher: IMatcher): void;
-}
-
-export interface RegisterMatcherHelpers {
-    deepRecursiveCompare: DeepRecursiveCompare;
-}
-
-export interface RegisterMatchers {
-    (registerMatcher: RegisterMatcher, helpers: RegisterMatcherHelpers): void;
-}
-
-export let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
+let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
     let proxy = (not: boolean): Proxy => {
         return (...args): void => {
             note.apiName = not ? "not." + matcher.apiName : matcher.apiName;
@@ -156,8 +171,8 @@ export let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
                 addNoteToIt(note);
                 assignReason(note);
                 // set It's and its parent Describe's passed property to false when expectation fails
-                currentIt.passed = !note.result ? note.result : currentIt.passed;
-                currentIt.parent.passed = !note.result ? note.result : currentIt.parent.passed;
+                getCurrentIt().passed = !note.result ? note.result : getCurrentIt().passed;
+                getCurrentIt().parent.passed = !note.result ? note.result : getCurrentIt().parent.passed;
                 // console.log("note", note);
             } else {
                 // console.log("note", note);
@@ -172,4 +187,19 @@ export let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
     expectationAPICount++;
 };
 
-export let matchersCount = (): number => expectationAPICount;
+let getMatchersCount = (): number => expectationAPICount;
+
+let configure: Configure = (_shortCircuit: boolean, _getCurrentIt: () => IIt,
+    _spyOn: SpyOnStatic, _stackTrace: StackTrace): void => {
+    isShortCircuit = _shortCircuit;
+    getCurrentIt = _getCurrentIt;
+    spyOn = _spyOn;
+    stackTrace = _stackTrace;
+};
+
+export let expectApi: ExpectAPI = {
+    expect: expect,
+    registerMatcher: registerMatcher,
+    getMatchersCount: getMatchersCount,
+    configure: configure
+};

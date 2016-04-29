@@ -123,13 +123,13 @@ exports.mock = function () {
     _mock.and.expect = { it: { not: {} } };
     _mock.and.expect.it.toBeCalled = function () {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toBeCalled = function () {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
@@ -139,7 +139,7 @@ exports.mock = function () {
             args[_i - 0] = arguments[_i];
         }
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
@@ -149,67 +149,67 @@ exports.mock = function () {
             args[_i - 0] = arguments[_i];
         }
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toBeCalledWithContext = function (context) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toBeCalledWithContext = function (context) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toReturnValue = function (value) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toReturnValue = function (value) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrow = function () {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrow = function () {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrowWithName = function (name) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrowWithName = function (name) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrowWithMessage = function (message) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrowWithMessage = function (message) {
         apisToCall.push({
-            note: { it: QueueRunner_1.currentIt, apiName: "not.toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
+            note: { it: QueueRunner_1.getCurrentIt(), apiName: "not.toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
@@ -265,9 +265,9 @@ exports.mock = function () {
                     mockAPI.not[apiToCall.note.apiName](apiToCall.note.expectedValue) :
                     mockAPI[apiToCall.note.apiName](apiToCall.note.expectedValue);
             }
-            QueueRunner_1.currentIt.passed = apiToCall.note.result && QueueRunner_1.currentIt.passed || false;
-            QueueRunner_1.currentIt.parent.passed = apiToCall.note.result && QueueRunner_1.currentIt.passed || false;
-            QueueRunner_1.currentIt.expectations.push(apiToCall.note);
+            QueueRunner_1.getCurrentIt().passed = apiToCall.note.result && QueueRunner_1.getCurrentIt().passed || false;
+            QueueRunner_1.getCurrentIt().parent.passed = apiToCall.note.result && QueueRunner_1.getCurrentIt().passed || false;
+            QueueRunner_1.getCurrentIt().expectations.push(apiToCall.note);
             if (!apiToCall.note.result) {
                 if (apiToCall.note.matcherValue) {
                     reason = "mock().and.expect.it." + apiToCall.note.apiName + "(" + apiToCall.note.matcherValue + ") failed!";
@@ -275,7 +275,7 @@ exports.mock = function () {
                 else {
                     reason = "mock().and.expect.it." + apiToCall.note.apiName + "() failed!";
                 }
-                QueueRunner_1.currentIt.reasons.push({ reason: reason, stackTrace: apiToCall.note.stackTrace });
+                QueueRunner_1.getCurrentIt().reasons.push({ reason: reason, stackTrace: apiToCall.note.stackTrace });
             }
         });
     };
