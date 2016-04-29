@@ -1,14 +1,18 @@
+// TODO(js): Feature - implement shourt circuit. Done 4/28/16.
+// TODO(js): Bug - timeouts shouldn't reject their promise. Done 4/28/16.
 "use strict";
 var QueueManager_1 = require("./QueueManager");
 require("../../polyfills/Object.assign"); // prevent eliding import
 // TODO(JS): Show .fails (i.e. timeouts) in the done???
 var QueueRunner = (function () {
-    function QueueRunner(queue, configTimeoutInterval, queueManager, reportDispatch, Q) {
+    function QueueRunner(queue, configTimeoutInterval, configShortCircuit, queueManager, reportDispatch, Q) {
         this.queue = queue;
         this.configTimeoutInterval = configTimeoutInterval;
+        this.configShortCircuit = configShortCircuit;
         this.queueManager = queueManager;
         this.reportDispatch = reportDispatch;
         this.Q = Q;
+        this.isShortCircuited = false;
     }
     /**
      * Returns a function (closure) which must complete within a set amount of time
@@ -20,6 +24,7 @@ var QueueRunner = (function () {
      * beforeEach(function(done) {...}, 1);
      */
     QueueRunner.prototype.runBeforeItAfter = function (fn, context, timeoutInterval) {
+        var _this = this;
         var deferred = this.Q.defer();
         setTimeout(function () {
             var resolve = function () {
@@ -42,9 +47,13 @@ var QueueRunner = (function () {
             }
             // a timer that expires after timeoutInterval miliseconds
             setTimeout(function () {
+                var errorMsg = "timed out after " + timeoutInterval + "ms";
+                if (_this.isShortCircuited) {
+                    errorMsg += " and testing has been short circuited";
+                }
                 if (deferred.promise.isPending()) {
                     // timedOut = true;
-                    deferred.reject(new Error("timed out after " + timeoutInterval + "ms"));
+                    deferred.reject(new Error(errorMsg));
                 }
             }, timeoutInterval);
         }, 1);
@@ -156,6 +165,9 @@ var QueueRunner = (function () {
     QueueRunner.prototype.runBIA = function (it) {
         var _this = this;
         var deferred = this.Q.defer();
+        var shortCircuitMessage = function (message) {
+            return _this.configShortCircuit && message + " and testing has been short circuited!" || message;
+        };
         setTimeout(function () {
             exports.currentIt = it;
             _this.runBefores(it.hierarchy).then(function () {
@@ -163,17 +175,26 @@ var QueueRunner = (function () {
                     _this.runAfters(it.hierarchy).then(function () {
                         deferred.resolve();
                     }, function (error) {
-                        it.reasons.push({ reason: error.message, stackTrace: it.parent.afterEach.callStack });
+                        it.reasons.push({
+                            reason: shortCircuitMessage(error.message),
+                            stackTrace: it.parent.afterEach.callStack
+                        });
                         it.passed = false;
                         deferred.reject(error);
                     });
                 }, function (error) {
-                    it.reasons.push({ reason: error.message, stackTrace: it.callStack });
+                    it.reasons.push({
+                        reason: shortCircuitMessage(error.message),
+                        stackTrace: it.callStack
+                    });
                     it.passed = false;
                     deferred.reject(error);
                 });
             }, function (error) {
-                it.reasons.push({ reason: error.message, stackTrace: it.parent.beforeEach.callStack });
+                it.reasons.push({
+                    reason: shortCircuitMessage(error.message),
+                    stackTrace: it.parent.beforeEach.callStack
+                });
                 it.passed = false;
                 deferred.reject(error);
             });
@@ -193,7 +214,7 @@ var QueueRunner = (function () {
         // recursive iterator
         var runner = function (i) {
             setTimeout(function () {
-                if (i < its.length) {
+                if (!_this.isShortCircuited && i < its.length) {
                     it = its[i];
                     // TODO(js): is parent.excluded check really needed????
                     if (it.excluded || it.parent.excluded) {
@@ -204,14 +225,21 @@ var QueueRunner = (function () {
                         _this.runBIA(it).then(function () {
                             if (!it.passed) {
                                 QueueManager_1.QueueManager.bumpTotFailedItsCount();
+                                if (_this.configShortCircuit) {
+                                    _this.isShortCircuited = true;
+                                }
                             }
                             _this.reportDispatch.reportSummary();
                             _this.reportDispatch.reportSpec(it);
                             runner(++i);
                         }).fail(function () {
                             // an it timed out or one or more expectations failed
+                            QueueManager_1.QueueManager.bumpTotFailedItsCount();
                             _this.reportDispatch.reportSummary();
                             _this.reportDispatch.reportSpec(it);
+                            if (_this.configShortCircuit) {
+                                _this.isShortCircuited = true;
+                            }
                             runner(++i);
                         });
                     }

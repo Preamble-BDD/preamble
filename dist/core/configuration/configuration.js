@@ -14,12 +14,10 @@ var defaultConfiguration = {
     hidePassedTests: typeof window !== "undefined" ? false : true,
     shortCircuit: false
 };
-if (environment_1.pGlobal.preambleConfig) {
-    exports.configuration = Object.assign({}, defaultConfiguration, environment_1.pGlobal.preambleConfig);
+if (environment_1.pGlobal.preamble && environment_1.pGlobal.preamble.preambleConfig) {
+    exports.configuration = Object.assign({}, defaultConfiguration, environment_1.pGlobal.preamble.preambleConfig);
 }
 else {
     exports.configuration = defaultConfiguration;
 }
-// log merged configuration
-// console.log("configuration", configuration);
 //# sourceMappingURL=configuration.js.map

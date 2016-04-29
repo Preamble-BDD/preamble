@@ -1,3 +1,6 @@
+// TODO(js): Feature - implement shourt circuit. Done 4/28/16.
+// TODO(js): Bug - timeouts shouldn't reject their promise. Done 4/28/16.
+
 /**
  * Note: ts compiler will elide this import because q is only being
  * used as a type guard. See QueueManager construcor, particularly its
@@ -19,9 +22,12 @@ export let currentIt: IIt;
 // TODO(JS): Show .fails (i.e. timeouts) in the done???
 export class QueueRunner {
     private errors: string[];
+    private isShortCircuited: boolean;
     constructor(private queue: mix[], private configTimeoutInterval: number,
-        private queueManager: QueueManager, private reportDispatch: IReportDispatch,
-        private Q: typeof q) { }
+        private configShortCircuit: boolean, private queueManager: QueueManager,
+        private reportDispatch: IReportDispatch, private Q: typeof q) {
+        this.isShortCircuited = false;
+    }
     /**
      * Returns a function (closure) which must complete within a set amount of time
      * asynchronously. If the function fails to complete within its given time limit
@@ -56,9 +62,13 @@ export class QueueRunner {
 
             // a timer that expires after timeoutInterval miliseconds
             setTimeout(() => {
+                let errorMsg = `timed out after ${timeoutInterval}ms`;
+                if (this.isShortCircuited) {
+                    errorMsg += " and testing has been short circuited";
+                }
                 if (deferred.promise.isPending()) {
                     // timedOut = true;
-                    deferred.reject(new Error(`timed out after ${timeoutInterval}ms`));
+                    deferred.reject(new Error(errorMsg));
                 }
             }, timeoutInterval);
         }, 1);
@@ -175,6 +185,9 @@ export class QueueRunner {
      */
     private runBIA(it: IIt): Q.Promise<any> {
         let deferred = this.Q.defer<any>();
+        let shortCircuitMessage = (message: string): string => {
+            return this.configShortCircuit && message + " and testing has been short circuited!" || message;
+        };
 
         setTimeout(() => {
             currentIt = it;
@@ -183,17 +196,26 @@ export class QueueRunner {
                     this.runAfters(it.hierarchy).then(() => {
                         deferred.resolve();
                     }, (error: Error) => {
-                        it.reasons.push({ reason: error.message, stackTrace: it.parent.afterEach.callStack });
+                        it.reasons.push({
+                            reason: shortCircuitMessage(error.message),
+                            stackTrace: it.parent.afterEach.callStack
+                        });
                         it.passed = false;
                         deferred.reject(error);
                     });
                 }, (error: Error) => {
-                    it.reasons.push({ reason: error.message, stackTrace: it.callStack });
+                    it.reasons.push({
+                        reason: shortCircuitMessage(error.message),
+                        stackTrace: it.callStack
+                    });
                     it.passed = false;
                     deferred.reject(error);
                 });
             }, (error: Error) => {
-                it.reasons.push({ reason: error.message, stackTrace: it.parent.beforeEach.callStack });
+                it.reasons.push({
+                    reason: shortCircuitMessage(error.message),
+                    stackTrace: it.parent.beforeEach.callStack
+                });
                 it.passed = false;
                 deferred.reject(error);
             });
@@ -214,7 +236,7 @@ export class QueueRunner {
         // recursive iterator
         let runner = (i: number) => {
             setTimeout(() => {
-                if (i < its.length) {
+                if (!this.isShortCircuited && i < its.length) {
                     it = its[i];
                     // TODO(js): is parent.excluded check really needed????
                     if (it.excluded || it.parent.excluded) {
@@ -224,14 +246,21 @@ export class QueueRunner {
                         this.runBIA(it).then(() => {
                             if (!it.passed) {
                                 QueueManager.bumpTotFailedItsCount();
+                                if (this.configShortCircuit) {
+                                    this.isShortCircuited = true;
+                                }
                             }
                             this.reportDispatch.reportSummary();
                             this.reportDispatch.reportSpec(it);
                             runner(++i);
                         }).fail(() => {
                             // an it timed out or one or more expectations failed
+                            QueueManager.bumpTotFailedItsCount();
                             this.reportDispatch.reportSummary();
                             this.reportDispatch.reportSpec(it);
+                            if (this.configShortCircuit) {
+                                this.isShortCircuited = true;
+                            }
                             runner(++i);
                         });
                     }

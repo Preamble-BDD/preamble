@@ -16,7 +16,6 @@ import {IMatcher} from "../expectations/matchers/IMatcher";
 
 export interface PreambleGlobal {
     // TODO(js): make this a member of preamble property
-    preambleConfig: PreambleConfiguration;
     describe: ApiDescribe;
     xdescribe: ApiXDescribe;
     it: ApiIt;
@@ -28,6 +27,8 @@ export interface PreambleGlobal {
     spyOnN: SpyOnN;
     mock: MockStatic;
     preamble: {
+        run: () => void;
+        preambleConfig: PreambleConfiguration;
         reporters: Reporter[];
         registerMatcher: RegisterMatcher;
         registerMatchers: RegisterMatchers[];

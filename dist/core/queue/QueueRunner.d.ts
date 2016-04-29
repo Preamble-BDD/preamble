@@ -13,11 +13,13 @@ export declare let currentIt: IIt;
 export declare class QueueRunner {
     private queue;
     private configTimeoutInterval;
+    private configShortCircuit;
     private queueManager;
     private reportDispatch;
     private Q;
     private errors;
-    constructor(queue: mix[], configTimeoutInterval: number, queueManager: QueueManager, reportDispatch: IReportDispatch, Q: typeof q);
+    private isShortCircuited;
+    constructor(queue: mix[], configTimeoutInterval: number, configShortCircuit: boolean, queueManager: QueueManager, reportDispatch: IReportDispatch, Q: typeof q);
     /**
      * Returns a function (closure) which must complete within a set amount of time
      * asynchronously. If the function fails to complete within its given time limit

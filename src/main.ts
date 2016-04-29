@@ -26,104 +26,109 @@ import {matchersCount} from "./core/expectations/expect";
 import {Reporter} from "./core/reporters/Reporter";
 import {reportDispatch} from "./core/reporters/reportdispatch";
 import {queueFilter} from "./core/queue/queueFilter";
-
 let pkgJSON = require("../package.json");
 
-let reporters: Reporter[];
+// TODO(js): this needs to be tested on node and in the browser on 4/28 in the morning!!!!!!!!
+// equivalent to module.exports =
+export = (): void => {
+    let reporters: Reporter[];
 
-// turn on long stact support in Q
-Q.longStackSupport = true;
+    // turn on long stact support in Q
+    Q.longStackSupport = true;
 
-// give reportDispatch access to the queuManager
-reportDispatch.queueManagerStats = QueueManager.queueManagerStats;
+    // give reportDispatch access to the queuManager
+    reportDispatch.queueManagerStats = QueueManager.queueManagerStats;
 
-// add APIs used by suites to the global object
-pGlobal.describe = describe;
-pGlobal.xdescribe = xdescribe;
-pGlobal.it = it;
-pGlobal.xit = xit;
-pGlobal.beforeEach = beforeEach;
-pGlobal.afterEach = afterEach;
-pGlobal.expect = expect;
-pGlobal.spyOn = spyOn;
-pGlobal.spyOnN = spyOnN;
-pGlobal.mock = mock;
-if (pGlobal.hasOwnProperty("preamble")) {
-    // add reporter plugin
-    if (pGlobal.preamble.hasOwnProperty("reporters")) {
-        reporters = pGlobal.preamble.reporters;
-        // hand off reporters to the ReportDispatch
-        reportDispatch.reporters = reporters;
-    }
-    if (!reporters || !reporters.length) {
-        // console.log("No reporters found");
-        throw new Error("No reporters found");
-    }
-    // dispatch reportBegin to reporters
-    reportDispatch.reportBegin({
-        version: pkgJSON.version,
-        uiTestContainerId: configuration.uiTestContainerId,
-        name: configuration.name,
-        hidePassedTests: configuration.hidePassedTests
-    });
-    // expose registerMatcher for one-off in-line matcher registration
-    pGlobal.preamble.registerMatcher = registerMatcher;
-    // call each matcher plugin to register their matchers
-    if (pGlobal.preamble.hasOwnProperty("registerMatchers")) {
-        let registerMatchers: RegisterMatchers[] = pGlobal.preamble.registerMatchers;
-        registerMatchers.forEach(rm => rm(registerMatcher, { deepRecursiveCompare: deepRecursiveCompare }));
-        if (!matchersCount()) {
-            // console.log("No matchers registered");
-            throw new Error("No matchers found");
+    // add APIs used by suites to the global object
+    pGlobal.describe = describe;
+    pGlobal.xdescribe = xdescribe;
+    pGlobal.it = it;
+    pGlobal.xit = xit;
+    pGlobal.beforeEach = beforeEach;
+    pGlobal.afterEach = afterEach;
+    pGlobal.expect = expect;
+    pGlobal.spyOn = spyOn;
+    pGlobal.spyOnN = spyOnN;
+    pGlobal.mock = mock;
+    if (pGlobal.hasOwnProperty("preamble")) {
+        // add reporter plugin
+        if (pGlobal.preamble.hasOwnProperty("reporters")) {
+            reporters = pGlobal.preamble.reporters;
+            // hand off reporters to the ReportDispatch
+            reportDispatch.reporters = reporters;
         }
+        if (!reporters || !reporters.length) {
+            // console.log("No reporters found");
+            throw new Error("No reporters found");
+        }
+        // dispatch reportBegin to reporters
+        reportDispatch.reportBegin({
+            version: pkgJSON.version,
+            uiTestContainerId: configuration.uiTestContainerId,
+            name: configuration.name,
+            hidePassedTests: configuration.hidePassedTests
+        });
+        // expose registerMatcher for one-off in-line matcher registration
+        pGlobal.preamble.registerMatcher = registerMatcher;
+        // call each matcher plugin to register their matchers
+        if (pGlobal.preamble.hasOwnProperty("registerMatchers")) {
+            let registerMatchers: RegisterMatchers[] = pGlobal.preamble.registerMatchers;
+            registerMatchers.forEach(rm => rm(registerMatcher, { deepRecursiveCompare: deepRecursiveCompare }));
+            if (!matchersCount()) {
+                // console.log("No matchers registered");
+                throw new Error("No matchers found");
+            }
+        } else {
+            // no matcher plugins found but matchers can be
+            // registered inline so just log it but don't
+            // throw an exception
+            console.log("No matcher plugins found");
+        }
+        // expose Q on wondow.preamble
+        pGlobal.preamble.Q = Q;
     } else {
-        // no matcher plugins found but matchers can be
-        // registered inline so just log it but don't
-        // throw an exception
-        // console.log("No matcher plugins found");
+        // console.log("No plugins found");
+        throw new Error("No plugins found");
     }
-    // expose Q on wondow.preamble
-    pGlobal.preamble.Q = Q;
-} else {
-    // console.log("No plugins found");
-    throw new Error("No plugins found");
-}
 
-// the raw filter looks like "?filter=spec_n" or "?filter=suite_n" where n is some number
-let filter = typeof window === "object" &&
-    window.location.search.substring(window.location.search.indexOf("_") + 1) || null;
-// console.log("filter =", filter);
+    // the raw filter looks like "?filter=spec_n" or "?filter=suite_n" where n is some number
+    let filter = typeof window === "object" &&
+        window.location.search.substring(window.location.search.indexOf("_") + 1) || null;
+    // console.log("filter =", filter);
 
-// dspatch reportSummary to all reporters
-reportDispatch.reportSummary();
+    // dspatch reportSummary to all reporters
+    reportDispatch.reportSummary();
 
-// get a queue manager and call its run method to run the test suite
-let queueManager = new QueueManager(100, 2, Q);
-QueueManager.startTimer();
-queueManager.run()
-    .then((msg) => {
-        // fulfilled/success
-        // console.log(msg);
-        // console.log("QueueManager.queue =", QueueManager.queue);
-        // dispatch reportSummary to all reporters
-        reportDispatch.reportSummary();
-        // run the queue
-        // TODO(js): should filter for failed specs if hidePassedTests is true
-        new QueueRunner(filter && queueFilter(QueueManager.queue,
-            QueueManager.queueManagerStats, filter) || QueueManager.queue,
-            configuration.timeoutInterval, queueManager, reportDispatch, Q).run()
-            .then(() => {
-                let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
-                    return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
-                }, 0);
-                QueueManager.stopTimer();
-                // console.log(`queue ran successfully in ${QueueManager.queueManagerStats.timeKeeper.totTime} miliseconds`);
-                reportDispatch.reportSummary();
-                reportDispatch.reportEnd();
-            }, () => {
-                // console.log("queue failed to run");
-            });
-    }, (msg) => {
-        // rejected/failure
-        // console.log(msg);
-    });
+    // get a queue manager and call its run method to run the test suite
+    let queueManager = new QueueManager(100, 2, Q);
+    QueueManager.startTimer();
+    queueManager.run()
+        .then((msg) => {
+            // fulfilled/success
+            // console.log(msg);
+            // console.log("QueueManager.queue =", QueueManager.queue);
+            // dispatch reportSummary to all reporters
+            reportDispatch.reportSummary();
+            // run the queue
+            // TODO(js): should filter for failed specs if hidePassedTests is true
+            new QueueRunner(filter && queueFilter(QueueManager.queue,
+                QueueManager.queueManagerStats, filter) || QueueManager.queue,
+                configuration.timeoutInterval, configuration.shortCircuit,
+                queueManager, reportDispatch, Q).run()
+                .then(() => {
+                    let totFailedIts = QueueManager.queue.reduce((prev, curr) => {
+                        return curr.isA === "It" && !curr.passed ? prev + 1 : prev;
+                    }, 0);
+                    QueueManager.stopTimer();
+                    // console.log(`queue ran successfully in ${QueueManager.queueManagerStats.timeKeeper.totTime} miliseconds`);
+                    reportDispatch.reportSummary();
+                    reportDispatch.reportEnd();
+                }, () => {
+                    // console.log("queue failed to run");
+                    console.log("queue failed to run");
+                });
+        }, (msg) => {
+            // rejected/failure
+            // console.log(msg);
+        });
+};
