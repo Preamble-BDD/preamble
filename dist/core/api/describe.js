@@ -14,7 +14,6 @@ exports.describe = function (label, callback) {
         throw new TypeError("describe called with invalid parameters");
     }
     // mark the Describe excluded if any of its parents are excluded
-    // TODO(js):
     excluded = callstack_1.callStack.stack.some(function (item) {
         return item.excluded;
     });
@@ -35,7 +34,7 @@ exports.describe = function (label, callback) {
         _describe.callback();
     }
     catch (error) {
-        // TODO(js): this should be reported 
+        // TODO(js): this should be reported
         throw new Error(error.message);
     }
     // pop Describe object off of the callstack

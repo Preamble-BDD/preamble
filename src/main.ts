@@ -28,7 +28,6 @@ import {reportDispatch} from "./core/reporters/reportdispatch";
 import {queueFilter} from "./core/queue/queueFilter";
 let pkgJSON = require("../package.json");
 
-// TODO(js): this needs to be tested on node and in the browser on 4/28 in the morning!!!!!!!!
 // equivalent to module.exports =
 export = (): void => {
     let reporters: Reporter[];
@@ -113,7 +112,6 @@ export = (): void => {
             // dispatch reportSummary to all reporters
             reportDispatch.reportSummary();
             // run the queue
-            // TODO(js): should filter for failed specs if hidePassedTests is true
             new QueueRunner(filter && queueFilter(QueueManager.queue,
                 QueueManager.queueManagerStats, filter) || QueueManager.queue,
                 configuration.timeoutInterval, configuration.shortCircuit,

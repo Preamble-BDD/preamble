@@ -1,6 +1,3 @@
-// TODO(js): Feature - implement shourt circuit. Done 4/28/16.
-// TODO(js): Bug - timeouts shouldn't reject their promise. Done 4/28/16.
-
 /**
  * Note: ts compiler will elide this import because q is only being
  * used as a type guard. See QueueManager construcor, particularly its
@@ -20,7 +17,6 @@ import "../../polyfills/Object.assign"; // prevent eliding import
 let currentIt: IIt;
 export let getCurrentIt = (): IIt => currentIt;
 
-// TODO(JS): Show .fails (i.e. timeouts) in the done???
 export class QueueRunner {
     private errors: string[];
     private isShortCircuited: boolean;

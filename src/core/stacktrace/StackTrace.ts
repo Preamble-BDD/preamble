@@ -13,7 +13,8 @@ export class StackTrace implements AStackTrace {
                 "stacktrace" : undefined;
         }
     }
-    // TODO(JS): might not want to do this and instead might want to include references to preamble.js or even make it configurable
+    // TODO(JS): might not want to do this and instead might want to
+    // include references to preamble.js or even make it configurable
     private filterstackTrace(st): string[] {
         let reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
         let reFileFromStackTraceNode = /\(\S+\.js:[0-9]+[:0-9]*\)/g;

@@ -21,7 +21,6 @@ export let describe: ApiDescribe = function(label: string, callback: () => void)
     }
 
     // mark the Describe excluded if any of its parents are excluded
-    // TODO(js):
     excluded = callStack.stack.some((item) => {
         return item.excluded;
     });
@@ -49,7 +48,7 @@ export let describe: ApiDescribe = function(label: string, callback: () => void)
     try {
         _describe.callback();
     } catch (error) {
-        // TODO(js): this should be reported 
+        // TODO(js): this should be reported
         throw new Error(error.message);
     }
 

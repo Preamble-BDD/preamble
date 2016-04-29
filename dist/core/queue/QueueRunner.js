@@ -1,11 +1,8 @@
-// TODO(js): Feature - implement shourt circuit. Done 4/28/16.
-// TODO(js): Bug - timeouts shouldn't reject their promise. Done 4/28/16.
 "use strict";
 var QueueManager_1 = require("./QueueManager");
 require("../../polyfills/Object.assign"); // prevent eliding import
 var currentIt;
 exports.getCurrentIt = function () { return currentIt; };
-// TODO(JS): Show .fails (i.e. timeouts) in the done???
 var QueueRunner = (function () {
     function QueueRunner(queue, configTimeoutInterval, configShortCircuit, queueManager, reportDispatch, Q) {
         this.queue = queue;

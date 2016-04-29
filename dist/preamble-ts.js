@@ -75,7 +75,6 @@ exports.describe = function (label, callback) {
         throw new TypeError("describe called with invalid parameters");
     }
     // mark the Describe excluded if any of its parents are excluded
-    // TODO(js):
     excluded = callstack_1.callStack.stack.some(function (item) {
         return item.excluded;
     });
@@ -96,7 +95,7 @@ exports.describe = function (label, callback) {
         _describe.callback();
     }
     catch (error) {
-        // TODO(js): this should be reported 
+        // TODO(js): this should be reported
         throw new Error(error.message);
     }
     // pop Describe object off of the callstack
@@ -1075,9 +1074,7 @@ exports.CallStack = CallStack;
 // import {environment} from "../environment/environment";
 var environment_1 = require("../environment/environment");
 require("../../polyfills/Object.assign"); // prevent eliding import
-// TODO(js): clean up configuration - remove shortCircuit, windowGlobals and make uiTestContainerId conditional
 var defaultConfiguration = {
-    // windowGlobals: true,
     timeoutInterval: 5000,
     name: "Suite",
     uiTestContainerId: "preamble-ui-container",
@@ -1255,14 +1252,11 @@ var QueueManager = (function () {
 exports.QueueManager = QueueManager;
 
 },{}],20:[function(require,module,exports){
-// TODO(js): Feature - implement shourt circuit. Done 4/28/16.
-// TODO(js): Bug - timeouts shouldn't reject their promise. Done 4/28/16.
 "use strict";
 var QueueManager_1 = require("./QueueManager");
 require("../../polyfills/Object.assign"); // prevent eliding import
 var currentIt;
 exports.getCurrentIt = function () { return currentIt; };
-// TODO(JS): Show .fails (i.e. timeouts) in the done???
 var QueueRunner = (function () {
     function QueueRunner(queue, configTimeoutInterval, configShortCircuit, queueManager, reportDispatch, Q) {
         this.queue = queue;
@@ -1644,7 +1638,8 @@ var StackTrace = (function () {
                 "stacktrace" : undefined;
         }
     }
-    // TODO(JS): might not want to do this and instead might want to include references to preamble.js or even make it configurable
+    // TODO(JS): might not want to do this and instead might want to
+    // include references to preamble.js or even make it configurable
     StackTrace.prototype.filterstackTrace = function (st) {
         var reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
         var reFileFromStackTraceNode = /\(\S+\.js:[0-9]+[:0-9]*\)/g;
@@ -4016,7 +4011,6 @@ module.exports = function () {
         // dispatch reportSummary to all reporters
         reportdispatch_1.reportDispatch.reportSummary();
         // run the queue
-        // TODO(js): should filter for failed specs if hidePassedTests is true
         new QueueRunner_1.QueueRunner(filter && queueFilter_1.queueFilter(QueueManager_1.QueueManager.queue, QueueManager_1.QueueManager.queueManagerStats, filter) || QueueManager_1.QueueManager.queue, configuration_1.configuration.timeoutInterval, configuration_1.configuration.shortCircuit, queueManager, reportdispatch_1.reportDispatch, Q).run()
             .then(function () {
             var totFailedIts = QueueManager_1.QueueManager.queue.reduce(function (prev, curr) {

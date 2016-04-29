@@ -9,9 +9,7 @@ import "../../polyfills/Object.assign"; // prevent eliding import
 
 export let configuration: PreambleConfiguration;
 
-// TODO(js): clean up configuration - remove shortCircuit, windowGlobals and make uiTestContainerId conditional
 let defaultConfiguration: PreambleConfiguration = {
-    // windowGlobals: true,
     timeoutInterval: 5000,
     name: "Suite",
     uiTestContainerId: "preamble-ui-container",

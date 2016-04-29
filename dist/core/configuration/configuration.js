@@ -5,9 +5,7 @@
 // import {environment} from "../environment/environment";
 var environment_1 = require("../environment/environment");
 require("../../polyfills/Object.assign"); // prevent eliding import
-// TODO(js): clean up configuration - remove shortCircuit, windowGlobals and make uiTestContainerId conditional
 var defaultConfiguration = {
-    // windowGlobals: true,
     timeoutInterval: 5000,
     name: "Suite",
     uiTestContainerId: "preamble-ui-container",

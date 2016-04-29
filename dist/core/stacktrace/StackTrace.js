@@ -10,7 +10,8 @@ var StackTrace = (function () {
                 "stacktrace" : undefined;
         }
     }
-    // TODO(JS): might not want to do this and instead might want to include references to preamble.js or even make it configurable
+    // TODO(JS): might not want to do this and instead might want to
+    // include references to preamble.js or even make it configurable
     StackTrace.prototype.filterstackTrace = function (st) {
         var reFileFromStackTrace = /file:\/\/\/\S+\.js:[0-9]+[:0-9]*/g;
         var reFileFromStackTraceNode = /\(\S+\.js:[0-9]+[:0-9]*\)/g;

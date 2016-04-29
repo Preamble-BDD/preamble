@@ -15,7 +15,6 @@ import {RegisterMatchers} from "../api/expectations/expect";
 import {IMatcher} from "../api/expectations/matchers/IMatcher";
 
 export interface PreambleGlobal {
-    // TODO(js): make this a member of preamble property
     describe: ApiDescribe;
     xdescribe: ApiXDescribe;
     it: ApiIt;
