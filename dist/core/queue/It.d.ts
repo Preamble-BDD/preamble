@@ -1,7 +1,7 @@
 import { IIt } from "./IIt";
 import { Reason } from "./IIt";
 import { IDescribe } from "./IDescribe";
-import { INote } from "../expectations/INote";
+import { INote } from "../api/expectations/INote";
 /**
 * returns an It ancestor hierarchy
 */

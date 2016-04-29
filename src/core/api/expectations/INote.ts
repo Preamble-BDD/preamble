@@ -1,4 +1,4 @@
-import {IIt} from "../queue/IIt";
+import {IIt} from "../../queue/IIt";
 
 export interface INote {
     it: IIt;
