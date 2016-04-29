@@ -58,7 +58,7 @@ var CallStack_1 = require("../callstack/CallStack");
 var UniqueNumber_1 = require("../uniquenumber/UniqueNumber");
 exports.callStack = new CallStack_1.CallStack(new UniqueNumber_1.UniqueNumber());
 
-},{"../callstack/CallStack":8,"../uniquenumber/UniqueNumber":25}],4:[function(require,module,exports){
+},{"../callstack/CallStack":12,"../uniquenumber/UniqueNumber":25}],4:[function(require,module,exports){
 /**
  * Callable API
  * describe("description", callback)
@@ -104,201 +104,6 @@ exports.describe = function (label, callback) {
 };
 
 },{"../queue/Describe":17,"../queue/QueueManager":19,"./callstack":3}],5:[function(require,module,exports){
-/**
- * Callable api
- * it("description", callback)
- */
-"use strict";
-var It_1 = require("../queue/It");
-var callstack_1 = require("./callstack");
-var QueueManager_1 = require("../queue/QueueManager");
-var StackTrace_1 = require("../stacktrace/StackTrace");
-exports.it = function (label, callback, timeoutInterval) {
-    if (timeoutInterval === void 0) { timeoutInterval = 0; }
-    var _it;
-    var excluded;
-    if (arguments.length !== 2 && arguments.length !== 3) {
-        throw new TypeError("it called with invalid parameters");
-    }
-    if (typeof (arguments[0]) !== "string" || typeof (arguments[1]) !== "function") {
-        throw new TypeError("it called with invalid parameters");
-    }
-    if (arguments.length === 3 && typeof (arguments[2]) !== "number") {
-        throw new TypeError("it called with invalid parameters");
-    }
-    // mark the It excluded if any of its parents are excluded
-    excluded = callstack_1.callStack.stack.some(function (item) {
-        return item.excluded;
-    });
-    // an It object
-    _it = new It_1.It(callstack_1.callStack.getTopOfStack(), callstack_1.callStack.uniqueId.toString(), label, callback, excluded, timeoutInterval, StackTrace_1.stackTrace.stackTrace);
-    // push It onto the queue
-    QueueManager_1.QueueManager.queue.push(_it);
-    // increment totIts count
-    QueueManager_1.QueueManager.bumpTotItsCount();
-    // increment total excluded Its if excluded
-    if (excluded) {
-        QueueManager_1.QueueManager.bumpTotExcItsCount();
-    }
-};
-
-},{"../queue/It":18,"../queue/QueueManager":19,"../stacktrace/StackTrace":24,"./callstack":3}],6:[function(require,module,exports){
-/**
- * Callable API
- * xdescribe("description", callback)
- * excluded suite
- */
-"use strict";
-var callstack_1 = require("./callstack");
-var Describe_1 = require("../queue/Describe");
-var QueueManager_1 = require("../queue/QueueManager");
-exports.xdescribe = function (label, callback) {
-    var _describe;
-    if (arguments.length !== 2 || typeof (arguments[0])
-        !== "string" || typeof (arguments[1]) !== "function") {
-        throw new TypeError("describe called with invalid parameters");
-    }
-    // a Description object
-    _describe = new Describe_1.Describe(callstack_1.callStack.uniqueId.toString(), label, callback, callstack_1.callStack.length && callstack_1.callStack.getTopOfStack() || null, true);
-    // push Describe onto the queue
-    QueueManager_1.QueueManager.queue.push(_describe);
-    // increment totDescribes count
-    QueueManager_1.QueueManager.bumpTotDescribesCount();
-    // increment totExcDescribes count
-    QueueManager_1.QueueManager.bumpTotExcDescribesCount();
-    // push Describe object onto the callstack
-    callstack_1.callStack.pushDescribe(_describe);
-    // call callback to register the beforeEach, afterEach, it and describe calls
-    try {
-        _describe.callback();
-    }
-    catch (error) {
-        // TODO(js): this should be reported 
-        throw new Error(error.message);
-    }
-    // pop Describe object off of the callstack
-    callstack_1.callStack.popDescribe();
-};
-
-},{"../queue/Describe":17,"../queue/QueueManager":19,"./callstack":3}],7:[function(require,module,exports){
-/**
- * Callable api
- * xit("description", callback)
- * exlude test
- */
-"use strict";
-var It_1 = require("../queue/It");
-var callstack_1 = require("./callstack");
-var QueueManager_1 = require("../queue/QueueManager");
-var StackTrace_1 = require("../stacktrace/StackTrace");
-exports.xit = function (label, callback, timeoutInterval) {
-    if (timeoutInterval === void 0) { timeoutInterval = 0; }
-    var _it;
-    if (arguments.length !== 2 && arguments.length !== 3) {
-        throw new TypeError("it called with invalid parameters");
-    }
-    if (typeof (arguments[0]) !== "string" || typeof (arguments[1]) !== "function") {
-        throw new TypeError("it called with invalid parameters");
-    }
-    if (arguments.length === 3 && typeof (arguments[2]) !== "number") {
-        throw new TypeError("it called with invalid parameters");
-    }
-    // an It object
-    _it = new It_1.It(callstack_1.callStack.getTopOfStack(), callstack_1.callStack.uniqueId.toString(), label, callback, true, timeoutInterval, StackTrace_1.stackTrace.stackTrace);
-    // push Describe onto the queue
-    QueueManager_1.QueueManager.queue.push(_it);
-    // Increment totIts count
-    QueueManager_1.QueueManager.bumpTotItsCount();
-    // Increment totExclIts count
-    QueueManager_1.QueueManager.bumpTotExcItsCount();
-};
-
-},{"../queue/It":18,"../queue/QueueManager":19,"../stacktrace/StackTrace":24,"./callstack":3}],8:[function(require,module,exports){
-/**
- * CallStack
- */
-"use strict";
-var Describe_1 = require("../queue/Describe");
-var CallStack = (function () {
-    function CallStack(_uniqueNumber) {
-        this._uniqueNumber = _uniqueNumber;
-        this._callStack = [];
-    }
-    CallStack.prototype.pushDescribe = function (describe) {
-        if (!(describe instanceof Describe_1.Describe)) {
-            throw new TypeError("callstack.push called with invalid parameter");
-        }
-        return this._callStack.push(describe);
-    };
-    CallStack.prototype.popDescribe = function () {
-        if (this._callStack.length) {
-            return this._callStack.pop();
-        }
-        else {
-            return null;
-        }
-    };
-    CallStack.prototype.clear = function () {
-        this._callStack = [];
-    };
-    Object.defineProperty(CallStack.prototype, "stack", {
-        get: function () {
-            return this._callStack;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(CallStack.prototype, "length", {
-        get: function () {
-            return this._callStack.length;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(CallStack.prototype, "uniqueId", {
-        get: function () {
-            return this._uniqueNumber.next;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    CallStack.prototype.getTopOfStack = function () {
-        return this._callStack.length && this._callStack[this._callStack.length - 1] || null;
-    };
-    return CallStack;
-}());
-exports.CallStack = CallStack;
-
-},{"../queue/Describe":17}],9:[function(require,module,exports){
-/**
- * Environment Dependent Configuration
- */
-"use strict";
-// import {environment} from "../environment/environment";
-var environment_1 = require("../environment/environment");
-require("../../polyfills/Object.assign"); // prevent eliding import
-// TODO(js): clean up configuration - remove shortCircuit, windowGlobals and make uiTestContainerId conditional
-var defaultConfiguration = {
-    // windowGlobals: true,
-    timeoutInterval: 5000,
-    name: "Suite",
-    uiTestContainerId: "preamble-ui-container",
-    hidePassedTests: typeof window !== "undefined" ? false : true,
-    shortCircuit: false
-};
-if (environment_1.pGlobal.preamble && environment_1.pGlobal.preamble.preambleConfig) {
-    exports.configuration = Object.assign({}, defaultConfiguration, environment_1.pGlobal.preamble.preambleConfig);
-}
-else {
-    exports.configuration = defaultConfiguration;
-}
-
-},{"../../polyfills/Object.assign":26,"../environment/environment":10}],10:[function(require,module,exports){
-"use strict";
-var preambleGlobal = require("@jeffreyschwartz/environment");
-exports.pGlobal = preambleGlobal;
-
-},{"@jeffreyschwartz/environment":27}],11:[function(require,module,exports){
 "use strict";
 exports.deepRecursiveCompare = function (a, b) {
     if (typeof (a) === "object" && typeof (b) === "object") {
@@ -371,7 +176,7 @@ var compareArrays = function (a, b) {
     return false;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // TODO(js): this needs to be refactored so it can be configured by main.
 // For examele, this module currently has to import configuration so that
 // it has access to the short circuit property, which main should really
@@ -533,15 +338,15 @@ exports.expectApi = {
     configure: configure
 };
 
-},{}],13:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * Mock API
  * WARNING: mock is an experimental api and may not be included in the official release.
  */
 "use strict";
 var spy_1 = require("./spy/spy");
-var QueueRunner_1 = require("../queue/QueueRunner");
-var StackTrace_1 = require("../stacktrace/StackTrace");
+var QueueRunner_1 = require("../../queue/QueueRunner");
+var StackTrace_1 = require("../../stacktrace/StackTrace");
 var mockAPI = { not: {} };
 var mockAPICount = 0;
 var negatedMockAPI = {};
@@ -820,7 +625,7 @@ exports.mock = function () {
 // test api here
 // let aMock = mock().and.expect.it.toBeCalled();
 
-},{"../queue/QueueRunner":20,"../stacktrace/StackTrace":24,"./spy/spy":14}],14:[function(require,module,exports){
+},{"../../queue/QueueRunner":20,"../../stacktrace/StackTrace":24,"./spy/spy":8}],8:[function(require,module,exports){
 "use strict";
 var deeprecursiveequal_1 = require("../comparators/deeprecursiveequal");
 // args API
@@ -1100,7 +905,202 @@ exports.spyOnN = function (argObject, argPropertyNames) {
     });
 };
 
-},{"../comparators/deeprecursiveequal":11}],15:[function(require,module,exports){
+},{"../comparators/deeprecursiveequal":5}],9:[function(require,module,exports){
+/**
+ * Callable api
+ * it("description", callback)
+ */
+"use strict";
+var It_1 = require("../queue/It");
+var callstack_1 = require("./callstack");
+var QueueManager_1 = require("../queue/QueueManager");
+var StackTrace_1 = require("../stacktrace/StackTrace");
+exports.it = function (label, callback, timeoutInterval) {
+    if (timeoutInterval === void 0) { timeoutInterval = 0; }
+    var _it;
+    var excluded;
+    if (arguments.length !== 2 && arguments.length !== 3) {
+        throw new TypeError("it called with invalid parameters");
+    }
+    if (typeof (arguments[0]) !== "string" || typeof (arguments[1]) !== "function") {
+        throw new TypeError("it called with invalid parameters");
+    }
+    if (arguments.length === 3 && typeof (arguments[2]) !== "number") {
+        throw new TypeError("it called with invalid parameters");
+    }
+    // mark the It excluded if any of its parents are excluded
+    excluded = callstack_1.callStack.stack.some(function (item) {
+        return item.excluded;
+    });
+    // an It object
+    _it = new It_1.It(callstack_1.callStack.getTopOfStack(), callstack_1.callStack.uniqueId.toString(), label, callback, excluded, timeoutInterval, StackTrace_1.stackTrace.stackTrace);
+    // push It onto the queue
+    QueueManager_1.QueueManager.queue.push(_it);
+    // increment totIts count
+    QueueManager_1.QueueManager.bumpTotItsCount();
+    // increment total excluded Its if excluded
+    if (excluded) {
+        QueueManager_1.QueueManager.bumpTotExcItsCount();
+    }
+};
+
+},{"../queue/It":18,"../queue/QueueManager":19,"../stacktrace/StackTrace":24,"./callstack":3}],10:[function(require,module,exports){
+/**
+ * Callable API
+ * xdescribe("description", callback)
+ * excluded suite
+ */
+"use strict";
+var callstack_1 = require("./callstack");
+var Describe_1 = require("../queue/Describe");
+var QueueManager_1 = require("../queue/QueueManager");
+exports.xdescribe = function (label, callback) {
+    var _describe;
+    if (arguments.length !== 2 || typeof (arguments[0])
+        !== "string" || typeof (arguments[1]) !== "function") {
+        throw new TypeError("describe called with invalid parameters");
+    }
+    // a Description object
+    _describe = new Describe_1.Describe(callstack_1.callStack.uniqueId.toString(), label, callback, callstack_1.callStack.length && callstack_1.callStack.getTopOfStack() || null, true);
+    // push Describe onto the queue
+    QueueManager_1.QueueManager.queue.push(_describe);
+    // increment totDescribes count
+    QueueManager_1.QueueManager.bumpTotDescribesCount();
+    // increment totExcDescribes count
+    QueueManager_1.QueueManager.bumpTotExcDescribesCount();
+    // push Describe object onto the callstack
+    callstack_1.callStack.pushDescribe(_describe);
+    // call callback to register the beforeEach, afterEach, it and describe calls
+    try {
+        _describe.callback();
+    }
+    catch (error) {
+        // TODO(js): this should be reported 
+        throw new Error(error.message);
+    }
+    // pop Describe object off of the callstack
+    callstack_1.callStack.popDescribe();
+};
+
+},{"../queue/Describe":17,"../queue/QueueManager":19,"./callstack":3}],11:[function(require,module,exports){
+/**
+ * Callable api
+ * xit("description", callback)
+ * exlude test
+ */
+"use strict";
+var It_1 = require("../queue/It");
+var callstack_1 = require("./callstack");
+var QueueManager_1 = require("../queue/QueueManager");
+var StackTrace_1 = require("../stacktrace/StackTrace");
+exports.xit = function (label, callback, timeoutInterval) {
+    if (timeoutInterval === void 0) { timeoutInterval = 0; }
+    var _it;
+    if (arguments.length !== 2 && arguments.length !== 3) {
+        throw new TypeError("it called with invalid parameters");
+    }
+    if (typeof (arguments[0]) !== "string" || typeof (arguments[1]) !== "function") {
+        throw new TypeError("it called with invalid parameters");
+    }
+    if (arguments.length === 3 && typeof (arguments[2]) !== "number") {
+        throw new TypeError("it called with invalid parameters");
+    }
+    // an It object
+    _it = new It_1.It(callstack_1.callStack.getTopOfStack(), callstack_1.callStack.uniqueId.toString(), label, callback, true, timeoutInterval, StackTrace_1.stackTrace.stackTrace);
+    // push Describe onto the queue
+    QueueManager_1.QueueManager.queue.push(_it);
+    // Increment totIts count
+    QueueManager_1.QueueManager.bumpTotItsCount();
+    // Increment totExclIts count
+    QueueManager_1.QueueManager.bumpTotExcItsCount();
+};
+
+},{"../queue/It":18,"../queue/QueueManager":19,"../stacktrace/StackTrace":24,"./callstack":3}],12:[function(require,module,exports){
+/**
+ * CallStack
+ */
+"use strict";
+var Describe_1 = require("../queue/Describe");
+var CallStack = (function () {
+    function CallStack(_uniqueNumber) {
+        this._uniqueNumber = _uniqueNumber;
+        this._callStack = [];
+    }
+    CallStack.prototype.pushDescribe = function (describe) {
+        if (!(describe instanceof Describe_1.Describe)) {
+            throw new TypeError("callstack.push called with invalid parameter");
+        }
+        return this._callStack.push(describe);
+    };
+    CallStack.prototype.popDescribe = function () {
+        if (this._callStack.length) {
+            return this._callStack.pop();
+        }
+        else {
+            return null;
+        }
+    };
+    CallStack.prototype.clear = function () {
+        this._callStack = [];
+    };
+    Object.defineProperty(CallStack.prototype, "stack", {
+        get: function () {
+            return this._callStack;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CallStack.prototype, "length", {
+        get: function () {
+            return this._callStack.length;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CallStack.prototype, "uniqueId", {
+        get: function () {
+            return this._uniqueNumber.next;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    CallStack.prototype.getTopOfStack = function () {
+        return this._callStack.length && this._callStack[this._callStack.length - 1] || null;
+    };
+    return CallStack;
+}());
+exports.CallStack = CallStack;
+
+},{"../queue/Describe":17}],13:[function(require,module,exports){
+/**
+ * Environment Dependent Configuration
+ */
+"use strict";
+// import {environment} from "../environment/environment";
+var environment_1 = require("../environment/environment");
+require("../../polyfills/Object.assign"); // prevent eliding import
+// TODO(js): clean up configuration - remove shortCircuit, windowGlobals and make uiTestContainerId conditional
+var defaultConfiguration = {
+    // windowGlobals: true,
+    timeoutInterval: 5000,
+    name: "Suite",
+    uiTestContainerId: "preamble-ui-container",
+    hidePassedTests: typeof window !== "undefined" ? false : true,
+    shortCircuit: false
+};
+if (environment_1.pGlobal.preamble && environment_1.pGlobal.preamble.preambleConfig) {
+    exports.configuration = Object.assign({}, defaultConfiguration, environment_1.pGlobal.preamble.preambleConfig);
+}
+else {
+    exports.configuration = defaultConfiguration;
+}
+
+},{"../../polyfills/Object.assign":26,"../environment/environment":14}],14:[function(require,module,exports){
+"use strict";
+var preambleGlobal = require("@jeffreyschwartz/environment");
+exports.pGlobal = preambleGlobal;
+
+},{"@jeffreyschwartz/environment":27}],15:[function(require,module,exports){
 "use strict";
 var AfterEach = (function () {
     function AfterEach(parent, id, callback, timeoutInterval, callStack) {
@@ -3934,11 +3934,11 @@ var afterEach_1 = require("./core/api/afterEach");
 var environment_1 = require("./core/environment/environment");
 var configuration_1 = require("./core/configuration/configuration");
 var StackTrace_1 = require("./core/stacktrace/StackTrace");
-var expect_1 = require("./core/expectations/expect");
-var spy_1 = require("./core/expectations/spy/spy");
-var spy_2 = require("./core/expectations/spy/spy");
-var mock_1 = require("./core/expectations/mock");
-var deeprecursiveequal_1 = require("./core/expectations/comparators/deeprecursiveequal");
+var expect_1 = require("./core/api/expectations/expect");
+var spy_1 = require("./core/api/expectations/spy/spy");
+var spy_2 = require("./core/api/expectations/spy/spy");
+var mock_1 = require("./core/api/expectations/mock");
+var deeprecursiveequal_1 = require("./core/api/expectations/comparators/deeprecursiveequal");
 var reportdispatch_1 = require("./core/reporters/reportdispatch");
 var queueFilter_1 = require("./core/queue/queueFilter");
 var pkgJSON = require("../package.json");
@@ -4040,4 +4040,4 @@ module.exports = function () {
     });
 };
 
-},{"../package.json":30,"./core/api/afterEach":1,"./core/api/beforeEach":2,"./core/api/describe":4,"./core/api/it":5,"./core/api/xdescribe":6,"./core/api/xit":7,"./core/configuration/configuration":9,"./core/environment/environment":10,"./core/expectations/comparators/deeprecursiveequal":11,"./core/expectations/expect":12,"./core/expectations/mock":13,"./core/expectations/spy/spy":14,"./core/queue/QueueManager":19,"./core/queue/QueueRunner":20,"./core/queue/queueFilter":22,"./core/reporters/reportdispatch":23,"./core/stacktrace/StackTrace":24,"q":29}]},{},["main"]);
+},{"../package.json":30,"./core/api/afterEach":1,"./core/api/beforeEach":2,"./core/api/describe":4,"./core/api/expectations/comparators/deeprecursiveequal":5,"./core/api/expectations/expect":6,"./core/api/expectations/mock":7,"./core/api/expectations/spy/spy":8,"./core/api/it":9,"./core/api/xdescribe":10,"./core/api/xit":11,"./core/configuration/configuration":13,"./core/environment/environment":14,"./core/queue/QueueManager":19,"./core/queue/QueueRunner":20,"./core/queue/queueFilter":22,"./core/reporters/reportdispatch":23,"./core/stacktrace/StackTrace":24,"q":29}]},{},["main"]);

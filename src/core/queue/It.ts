@@ -2,7 +2,7 @@ import {IIt} from "./IIt";
 import {Reason} from "./IIt";
 import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
-import {INote} from "../expectations/INote";
+import {INote} from "../api/expectations/INote";
 import {ancestorHierarchy} from "./hierarchy";
 
 /**

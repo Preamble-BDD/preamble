@@ -6,8 +6,8 @@
 import {Spy} from "./spy/spy";
 import {spyOn} from "./spy/spy";
 import {INote} from "./INote";
-import {getCurrentIt} from "../queue/QueueRunner";
-import {stackTrace} from "../stacktrace/StackTrace";
+import {getCurrentIt} from "../../queue/QueueRunner";
+import {stackTrace} from "../../stacktrace/StackTrace";
 import {IMatcher} from "./matchers/IMatcher";
 
 export interface MockStatic {

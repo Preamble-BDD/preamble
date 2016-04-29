@@ -2,60 +2,17 @@
 // For examele, this module currently has to import configuration so that
 // it has access to the short circuit property, which main should really
 // be passing to configure expectations.
-
-// TODO(js): move this module to src/api
-
-import {IMatcher} from "./matchers/IMatcher";
-import {INote} from "./INote";
-import {SpyOnStatic} from "./spy/spy";
-import {IIt} from "../queue/IIt";
-import {StackTrace} from "../stacktrace/StackTrace";
-import {DeepRecursiveCompare} from "./comparators/deeprecursiveequal";
-
-interface Proxy {
-    (...args): void;
-}
-
-export interface Expect {
-    (ev: any): {};
-}
-
-export interface RegisterMatcher {
-    (matcher: IMatcher): void;
-}
-
-export interface RegisterMatcherHelpers {
-    deepRecursiveCompare: DeepRecursiveCompare;
-}
-
-export interface RegisterMatchers {
-    (registerMatcher: RegisterMatcher, helpers: RegisterMatcherHelpers): void;
-}
-
-export interface Configure {
-    (_shortCircuit: boolean, _getCurrentIt: () => IIt, _spyOn: SpyOnStatic,
-        _stackTrace: StackTrace): void;
-}
-
-export interface ExpectAPI {
-    expect: Expect;
-    registerMatcher: RegisterMatcher;
-    getMatchersCount: () => number;
-    configure: Configure;
-}
-
-let expectationAPI = {};
-let expectationAPICount = 0;
-let negatedExpectationAPI = {};
-let isShortCircuit: boolean = false;
-let getCurrentIt: () => IIt;
-let note: INote;
-let spyOn: SpyOnStatic;
-let stackTrace: StackTrace;
-
+"use strict";
+var expectationAPI = {};
+var expectationAPICount = 0;
+var negatedExpectationAPI = {};
+var isShortCircuit = false;
+var getCurrentIt;
+var note;
+var spyOn;
+var stackTrace;
 // add not api to expect api
 expectationAPI["not"] = negatedExpectationAPI;
-
 /**
  * argChecker - checks that the matcher has the
  * correct number of args passed to it.
@@ -77,7 +34,7 @@ expectationAPI["not"] = negatedExpectationAPI;
  * Example: To declare that a matcher can take
  * from 3 to n args then minArgs: 3 && maxArgs: n.
  */
-let argsChecker = (matcher, argsLength): boolean => {
+var argsChecker = function (matcher, argsLength) {
     // fails if minArgs > maxArgs
     if (matcher.minArgs !== -1 && matcher.maxArgs !== -1 &&
         matcher.minArgs > matcher.maxArgs) {
@@ -86,15 +43,13 @@ let argsChecker = (matcher, argsLength): boolean => {
     // allows for a variable number of args.
     if (matcher.minArgs !== -1 && argsLength < matcher.minArgs ||
         matcher.maxArgs !== -1 && argsLength > matcher.maxArgs) {
-        note.exception = new Error(`${matcher.apiName}(): invalid arguments`);
+        note.exception = new Error(matcher.apiName + "(): invalid arguments");
         return false;
     }
     return true;
 };
-
-let addNoteToIt = (note: INote) => getCurrentIt().expectations.push(note);
-
-let showAs = (value: any): string => {
+var addNoteToIt = function (note) { return getCurrentIt().expectations.push(note); };
+var showAs = function (value) {
     if (Array.isArray(value)) {
         return "array";
     }
@@ -105,7 +60,7 @@ let showAs = (value: any): string => {
         return "object";
     }
     if (typeof (value) === "string") {
-        return `"${value}"`;
+        return "\"" + value + "\"";
     }
     if (typeof (value) === "number") {
         return value;
@@ -117,38 +72,40 @@ let showAs = (value: any): string => {
         return "undefined";
     }
 };
-
-let assignReason = (note: INote) => {
-    let reason: string;
+var assignReason = function (note) {
+    var reason;
     if (!note.result) {
         if (note.matcherValue != null) {
-            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}(${showAs(note.matcherValue)}) failed`;
-        } else {
-            reason = `expect(${showAs(note.expectedValue)}).${note.apiName}() failed`;
+            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "(" + showAs(note.matcherValue) + ") failed";
+        }
+        else {
+            reason = "expect(" + showAs(note.expectedValue) + ")." + note.apiName + "() failed";
         }
         reason = isShortCircuit ? reason + " and testing has been short circuited" : reason;
         reason += "!";
         getCurrentIt().reasons.push({ reason: reason, stackTrace: note.stackTrace });
     }
 };
-
 // expect(value)
-let expect: Expect = (ev: any): {} => {
+var expect = function (ev) {
     // if a callback was returned then call it and use what it returns for the expected value
-    let expectedValue = ev;
+    var expectedValue = ev;
     // capture the stack trace here when expect is called.
-    let st = stackTrace.stackTrace;
+    var st = stackTrace.stackTrace;
     if (typeof (ev) === "function" && !ev.hasOwnProperty("_spyMarker")) {
-        let spy = spyOn(ev).and.callActual();
+        var spy = spyOn(ev).and.callActual();
         expectedValue = spy();
     }
     note = { it: getCurrentIt(), apiName: null, expectedValue: expectedValue, matcherValue: null, result: null, exception: null, stackTrace: st };
     return expectationAPI;
 };
-
-let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
-    let proxy = (not: boolean): Proxy => {
-        return (...args): void => {
+var registerMatcher = function (matcher) {
+    var proxy = function (not) {
+        return function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
             note.apiName = not ? "not." + matcher.apiName : matcher.apiName;
             if (argsChecker(matcher, args.length)) {
                 // don't call matcher.api if it doesn't return a value (e.g. toBeTrue)
@@ -158,13 +115,16 @@ let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
                 if (not) {
                     if (matcher.minArgs) {
                         note.result = !matcher.evaluator(note.expectedValue, note.matcherValue);
-                    } else {
+                    }
+                    else {
                         note.result = !matcher.evaluator(note.expectedValue);
                     }
-                } else {
+                }
+                else {
                     if (matcher.minArgs) {
                         note.result = matcher.evaluator(note.expectedValue, note.matcherValue);
-                    } else {
+                    }
+                    else {
                         note.result = matcher.evaluator(note.expectedValue);
                     }
                 }
@@ -173,9 +133,8 @@ let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
                 // set It's and its parent Describe's passed property to false when expectation fails
                 getCurrentIt().passed = !note.result ? note.result : getCurrentIt().passed;
                 getCurrentIt().parent.passed = !note.result ? note.result : getCurrentIt().parent.passed;
-                // console.log("note", note);
-            } else {
-                // console.log("note", note);
+            }
+            else {
             }
         };
     };
@@ -186,20 +145,17 @@ let registerMatcher: RegisterMatcher = (matcher: IMatcher): void => {
     }
     expectationAPICount++;
 };
-
-let getMatchersCount = (): number => expectationAPICount;
-
-let configure: Configure = (_shortCircuit: boolean, _getCurrentIt: () => IIt,
-    _spyOn: SpyOnStatic, _stackTrace: StackTrace): void => {
+var getMatchersCount = function () { return expectationAPICount; };
+var configure = function (_shortCircuit, _getCurrentIt, _spyOn, _stackTrace) {
     isShortCircuit = _shortCircuit;
     getCurrentIt = _getCurrentIt;
     spyOn = _spyOn;
     stackTrace = _stackTrace;
 };
-
-export let expectApi: ExpectAPI = {
+exports.expectApi = {
     expect: expect,
     registerMatcher: registerMatcher,
     getMatchersCount: getMatchersCount,
     configure: configure
 };
+//# sourceMappingURL=expect.js.map

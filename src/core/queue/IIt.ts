@@ -1,6 +1,6 @@
 import {IIsA} from "./IIsA";
 import {IDescribe} from "./IDescribe";
-import {INote} from "../expectations/INote";
+import {INote} from "../api/expectations/INote";
 
 export interface Reason {
     reason: string;
