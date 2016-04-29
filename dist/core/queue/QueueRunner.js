@@ -3,6 +3,8 @@
 "use strict";
 var QueueManager_1 = require("./QueueManager");
 require("../../polyfills/Object.assign"); // prevent eliding import
+var currentIt;
+exports.getCurrentIt = function () { return currentIt; };
 // TODO(JS): Show .fails (i.e. timeouts) in the done???
 var QueueRunner = (function () {
     function QueueRunner(queue, configTimeoutInterval, configShortCircuit, queueManager, reportDispatch, Q) {
@@ -169,7 +171,7 @@ var QueueRunner = (function () {
             return _this.configShortCircuit && message + " and testing has been short circuited!" || message;
         };
         setTimeout(function () {
-            exports.currentIt = it;
+            currentIt = it;
             _this.runBefores(it.hierarchy).then(function () {
                 _this.runIt(it).then(function () {
                     _this.runAfters(it.hierarchy).then(function () {

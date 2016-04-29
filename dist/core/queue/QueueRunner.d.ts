@@ -9,7 +9,7 @@ import { IIt } from "./IIt";
 import { mix } from "./mix";
 import { IReportDispatch } from "../reporters/reportdispatch";
 import "../../polyfills/Object.assign";
-export declare let currentIt: IIt;
+export declare let getCurrentIt: () => IIt;
 export declare class QueueRunner {
     private queue;
     private configTimeoutInterval;
