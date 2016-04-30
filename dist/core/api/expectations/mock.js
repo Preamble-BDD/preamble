@@ -283,4 +283,3 @@ exports.mock = function () {
 };
 // test api here
 // let aMock = mock().and.expect.it.toBeCalled();
-//# sourceMappingURL=mock.js.map

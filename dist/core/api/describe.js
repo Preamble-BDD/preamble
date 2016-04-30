@@ -1,7 +1,3 @@
-/**
- * Callable API
- * describe("description", callback)
- */
 "use strict";
 var callstack_1 = require("./callstack");
 var Describe_1 = require("../queue/Describe");
@@ -40,4 +36,3 @@ exports.describe = function (label, callback) {
     // pop Describe object off of the callstack
     callstack_1.callStack.popDescribe();
 };
-//# sourceMappingURL=describe.js.map

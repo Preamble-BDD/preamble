@@ -119,4 +119,3 @@ module.exports = function () {
         // console.log(msg);
     });
 };
-//# sourceMappingURL=main.js.map

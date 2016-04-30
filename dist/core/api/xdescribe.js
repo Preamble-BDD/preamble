@@ -1,8 +1,3 @@
-/**
- * Callable API
- * xdescribe("description", callback)
- * excluded suite
- */
 "use strict";
 var callstack_1 = require("./callstack");
 var Describe_1 = require("../queue/Describe");
@@ -28,10 +23,9 @@ exports.xdescribe = function (label, callback) {
         _describe.callback();
     }
     catch (error) {
-        // TODO(js): this should be reported 
+        // TODO(js): this should be reported
         throw new Error(error.message);
     }
     // pop Describe object off of the callstack
     callstack_1.callStack.popDescribe();
 };
-//# sourceMappingURL=xdescribe.js.map

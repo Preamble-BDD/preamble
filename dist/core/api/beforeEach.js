@@ -1,7 +1,3 @@
-/**
- * Callable API
- * beforeEach(function([done]))
- */
 "use strict";
 var BeforeEach_1 = require("../queue/BeforeEach");
 var callstack_1 = require("./callstack");
@@ -23,4 +19,3 @@ exports.beforeEach = function (callback, timeoutInterval) {
     // add it to its parent describe
     callstack_1.callStack.getTopOfStack().beforeEach = _beforeEach;
 };
-//# sourceMappingURL=beforeEach.js.map

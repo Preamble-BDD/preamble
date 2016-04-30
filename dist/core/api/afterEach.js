@@ -1,7 +1,3 @@
-/**
- * Callable API
- * afterEach(function([done]))
- */
 "use strict";
 var AfterEach_1 = require("../queue/AfterEach");
 var callstack_1 = require("./callstack");
@@ -23,4 +19,3 @@ exports.afterEach = function (callback, timeoutInterval) {
     // add it to its parent describe
     callstack_1.callStack.getTopOfStack().afterEach = _afterEach;
 };
-//# sourceMappingURL=afterEach.js.map

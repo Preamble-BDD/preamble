@@ -154,4 +154,3 @@ exports.expectApi = {
     getMatchersCount: getMatchersCount,
     configure: configure
 };
-//# sourceMappingURL=expect.js.map

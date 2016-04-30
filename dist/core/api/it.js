@@ -1,7 +1,3 @@
-/**
- * Callable api
- * it("description", callback)
- */
 "use strict";
 var It_1 = require("../queue/It");
 var callstack_1 = require("./callstack");
@@ -35,4 +31,3 @@ exports.it = function (label, callback, timeoutInterval) {
         QueueManager_1.QueueManager.bumpTotExcItsCount();
     }
 };
-//# sourceMappingURL=it.js.map

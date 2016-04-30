@@ -16,4 +16,3 @@ var Describe = (function () {
     return Describe;
 }());
 exports.Describe = Describe;
-//# sourceMappingURL=Describe.js.map

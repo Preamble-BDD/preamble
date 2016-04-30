@@ -52,4 +52,3 @@ var CallStack = (function () {
     return CallStack;
 }());
 exports.CallStack = CallStack;
-//# sourceMappingURL=CallStack.js.map

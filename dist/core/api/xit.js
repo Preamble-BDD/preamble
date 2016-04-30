@@ -1,8 +1,3 @@
-/**
- * Callable api
- * xit("description", callback)
- * exlude test
- */
 "use strict";
 var It_1 = require("../queue/It");
 var callstack_1 = require("./callstack");
@@ -29,4 +24,3 @@ exports.xit = function (label, callback, timeoutInterval) {
     // Increment totExclIts count
     QueueManager_1.QueueManager.bumpTotExcItsCount();
 };
-//# sourceMappingURL=xit.js.map

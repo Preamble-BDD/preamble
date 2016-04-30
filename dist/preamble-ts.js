@@ -1,8 +1,4 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/**
- * Callable API
- * afterEach(function([done]))
- */
 "use strict";
 var AfterEach_1 = require("../queue/AfterEach");
 var callstack_1 = require("./callstack");
@@ -26,10 +22,6 @@ exports.afterEach = function (callback, timeoutInterval) {
 };
 
 },{"../queue/AfterEach":15,"../stacktrace/StackTrace":24,"./callstack":3}],2:[function(require,module,exports){
-/**
- * Callable API
- * beforeEach(function([done]))
- */
 "use strict";
 var BeforeEach_1 = require("../queue/BeforeEach");
 var callstack_1 = require("./callstack");
@@ -59,10 +51,6 @@ var UniqueNumber_1 = require("../uniquenumber/UniqueNumber");
 exports.callStack = new CallStack_1.CallStack(new UniqueNumber_1.UniqueNumber());
 
 },{"../callstack/CallStack":12,"../uniquenumber/UniqueNumber":25}],4:[function(require,module,exports){
-/**
- * Callable API
- * describe("description", callback)
- */
 "use strict";
 var callstack_1 = require("./callstack");
 var Describe_1 = require("../queue/Describe");
@@ -901,10 +889,6 @@ exports.spyOnN = function (argObject, argPropertyNames) {
 };
 
 },{"../comparators/deeprecursiveequal":5}],9:[function(require,module,exports){
-/**
- * Callable api
- * it("description", callback)
- */
 "use strict";
 var It_1 = require("../queue/It");
 var callstack_1 = require("./callstack");
@@ -940,11 +924,6 @@ exports.it = function (label, callback, timeoutInterval) {
 };
 
 },{"../queue/It":18,"../queue/QueueManager":19,"../stacktrace/StackTrace":24,"./callstack":3}],10:[function(require,module,exports){
-/**
- * Callable API
- * xdescribe("description", callback)
- * excluded suite
- */
 "use strict";
 var callstack_1 = require("./callstack");
 var Describe_1 = require("../queue/Describe");
@@ -970,7 +949,7 @@ exports.xdescribe = function (label, callback) {
         _describe.callback();
     }
     catch (error) {
-        // TODO(js): this should be reported 
+        // TODO(js): this should be reported
         throw new Error(error.message);
     }
     // pop Describe object off of the callstack
@@ -978,11 +957,6 @@ exports.xdescribe = function (label, callback) {
 };
 
 },{"../queue/Describe":17,"../queue/QueueManager":19,"./callstack":3}],11:[function(require,module,exports){
-/**
- * Callable api
- * xit("description", callback)
- * exlude test
- */
 "use strict";
 var It_1 = require("../queue/It");
 var callstack_1 = require("./callstack");
@@ -3903,6 +3877,10 @@ module.exports={
   "devDependencies": {
     "browserify": "^13.0.0",
     "gulp": "^3.9.1",
+    "gulp-batch": "^1.0.5",
+    "gulp-typescript": "^2.13.0",
+    "merge2": "^1.0.2",
+    "typescript": "^1.8.10",
     "vinyl-source-stream": "^1.1.0"
   }
 }
