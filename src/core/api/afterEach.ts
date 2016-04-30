@@ -1,8 +1,3 @@
-/**
- * Callable API
- * afterEach(function([done]))
- */
-
 import {AfterEach} from "../queue/AfterEach";
 import {callStack} from "./callstack";
 import {stackTrace} from "../stacktrace/StackTrace";

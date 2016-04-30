@@ -1,8 +1,3 @@
-/**
- * Callable API
- * describe("description", callback)
- */
-
 import {callStack} from "./callstack";
 import {Describe} from "../queue/Describe";
 import {QueueManager} from "../queue/QueueManager";
