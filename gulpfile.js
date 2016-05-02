@@ -5,7 +5,7 @@ var browserify = require("browserify");
 var vinylSource = require("vinyl-source-stream");
 var ts = require("gulp-typescript");
 var merge = require("merge2");
-var watchedFiles = ["src/**/*.ts"];
+var watchedFiles = ["src/**/*.ts", "spec/**/*.ts"];
 var batch = require("gulp-batch");
 
 /**

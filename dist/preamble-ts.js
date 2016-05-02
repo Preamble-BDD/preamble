@@ -3886,6 +3886,7 @@ module.exports={
 }
 
 },{}],"main":[function(require,module,exports){
+// TODO(js): add spec/sanitycheck.ts to project and integrate test into gulp workflow
 /**
  * Main entry point module
  */
