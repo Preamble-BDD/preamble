@@ -86,7 +86,7 @@ export = (): void => {
             // throw an exception
             console.log("No matcher plugins found");
         }
-        // expose Q on wondow.preamble
+        // expose Q to specs
         pGlobal.preamble.Q = Q;
     } else {
         // console.log("No plugins found");

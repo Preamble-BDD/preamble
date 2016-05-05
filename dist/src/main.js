@@ -77,7 +77,7 @@ module.exports = function () {
             // throw an exception
             console.log("No matcher plugins found");
         }
-        // expose Q on wondow.preamble
+        // expose Q to specs
         environment_1.pGlobal.preamble.Q = Q;
     }
     else {
