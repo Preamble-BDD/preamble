@@ -23,8 +23,7 @@ See [Preamble-TS-Node](https://github.com/Preamble-BDD/node.runner.reporter), wh
 It's coming and the link will be posted here.
 
 ## How you can contribute:
-* Find a bug and issue a pull request
-* File a new issue report [here](https://github.com/Preamble-BDD/preamble.ts.core/issues)
+* Find a bug - issue a pull request or file a new issue report [here](https://github.com/Preamble-BDD/preamble.ts.core/issues)
 * Do you want [Karma](https://karma-runner.github.io/0.13/index.html) integration? Issue a pull request.
-* Create a new _matchers plugin_ or expand on the default matchers plugin.
+* Create a new _matchers plugin_ or expand on the _default matchers plugin_.
 * Create a new _HTML reporter plugin_ or a new _command-line reporter plugin_.
