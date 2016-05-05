@@ -1,13 +1,13 @@
 # Preamble-TS-Core
-An environment-neutral JavaScript BDD unit testing framework written in TypeScript which supports writing test suites in TypeScript.
-
-Though still in development, Preamble-TS-Core is currently rock-hard stable and is ready to be used in the browser and from the command-line via [NodeJS](https://nodejs.org).
+An environment-neutral JavaScript BDD unit testing framework written in TypeScript.
 
 ## This is not your father's Preamble
 Preamble-TS-Core is a complete rewrite of the old but now it is written in TypeScript. Out with the old and in with the new!
 
 ## Versioning
 _Zero_ and _odd_ numbered _major_ versions are considered development versions. _Even_ numbered versions can also be followed by a _release candidate_ number (e.g. `v2.0.0-RCn`).
+
+Though still in pre-release development, Preamble-TS-Core is currently rock-hard stable and is ready to be used in the browser and from the command-line via [NodeJS](https://nodejs.org).
 
 ## Run your tests in the browser
 Download or clone the [Preamble-TS-Standalone](https://github.com/Preamble-BDD/standalone), which includes everything you need to author and run your tests, all wrapped up in one tidy repo.
