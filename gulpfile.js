@@ -7,21 +7,22 @@ var ts = require("gulp-typescript");
 var merge = require("merge2");
 var watchedFiles = ["src/**/*.ts", "spec/**/*.ts"];
 var batch = require("gulp-batch");
+var spawn = require("child_process").spawnSync;
 
 /**
  * batch calls its callback only once, after all chaged events have fired.
  * So even if 2 or more files are changed, callback is only called once.
  */
-var watcher = gulp.watch(watchedFiles, batch(function(events, done) {
-    // running the bundle task will cause the typescript task
-    // to run first/ because it is a dependency of the bundle task
-    gulp.start("bundle");
-    // call done to signal this task is finished
-    done();
-}));
+gulp.task("watch", function () {
+  var watcher = gulp.watch(watchedFiles, batch(function(events, done) {
+      gulp.start("test");
+      // call done to signal this task is finished
+      done();
+  }));
 
-watcher.on("change", function(event) {
-  console.log("File " + event.path + " was " + event.type + ", running tasks...");
+  watcher.on("change", function(event) {
+    console.log("File " + event.path + " was " + event.type + ", running tasks...");
+  });
 });
 
 /**
@@ -57,6 +58,33 @@ gulp.task("bundle", ["typescript"], function () {
 });
 
 /**
+ * run the sanity test
+ */
+gulp.task("test", ["bundle"], function () {
+  spawn ("preamble", ["-s", "./dist/spec/sanitycheck.js"], {
+    stdio: "inherit"
+  });
+});
+
+/**
+ * npm link this package
+ */
+gulp.task("link", function () {
+  spawn ("npm", ["link"], {
+    stdio: "inherit"
+  });
+});
+
+/**
+ * npm unlink this package
+ */
+gulp.task("unlink", function () {
+  spawn ("npm", ["unlink"], {
+    stdio: "inherit"
+  });
+});
+
+/**
  * default task i.e. $ gulp
  */
-gulp.task("default", ["typescript"]);
+gulp.task("default", ["watch"]);
