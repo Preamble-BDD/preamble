@@ -34,3 +34,4 @@ function descendantHierarchy(queue, item) {
     return hierarchy;
 }
 exports.descendantHierarchy = descendantHierarchy;
+//# sourceMappingURL=hierarchy.js.map

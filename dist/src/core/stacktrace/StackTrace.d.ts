@@ -6,6 +6,6 @@ export declare class StackTrace implements AStackTrace {
     constructor();
     private filterstackTrace(st);
     private stackTraceFromError();
-    stackTrace: string[];
+    readonly stackTrace: string[];
 }
 export declare let stackTrace: StackTrace;

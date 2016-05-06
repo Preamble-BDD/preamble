@@ -11,8 +11,8 @@ export declare class CallStack implements ICallStack {
     pushDescribe(describe: Describe): number;
     popDescribe(): Describe;
     clear(): void;
-    stack: Describe[];
-    length: number;
-    uniqueId: number;
+    readonly stack: Describe[];
+    readonly length: number;
+    readonly uniqueId: number;
     getTopOfStack(): Describe;
 }

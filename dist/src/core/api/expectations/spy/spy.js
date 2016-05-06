@@ -276,3 +276,4 @@ exports.spyOnN = function (argObject, argPropertyNames) {
         exports.spyOn(argObject, property);
     });
 };
+//# sourceMappingURL=spy.js.map

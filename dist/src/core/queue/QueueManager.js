@@ -79,3 +79,4 @@ var QueueManager = (function () {
     return QueueManager;
 }());
 exports.QueueManager = QueueManager;
+//# sourceMappingURL=QueueManager.js.map

@@ -31,13 +31,9 @@ export declare class QueueRunner {
      */
     private runBeforeItAfter(fn, context, timeoutInterval);
     /**
-     * runs ancestor hierarchy of BeforeEach with inherited contexts
+     * runs ancestor hierarchy of BeforeEach or AfterEach with inherited contexts
      */
-    private runBefores(hierarchy);
-    /**
-     * runs ancestor hierarchy of AfterEach with inherited contexts
-     */
-    private runAfters(hierarchy);
+    private runBeforesAfters(hierarchy, runAs);
     /**
      * runs an It
      */
