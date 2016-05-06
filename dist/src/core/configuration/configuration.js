@@ -18,4 +18,3 @@ if (environment_1.pGlobal.preamble && environment_1.pGlobal.preamble.preambleCon
 else {
     exports.configuration = defaultConfiguration;
 }
-//# sourceMappingURL=configuration.js.map

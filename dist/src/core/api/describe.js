@@ -36,4 +36,3 @@ exports.describe = function (label, callback) {
     // pop Describe object off of the callstack
     callstack_1.callStack.popDescribe();
 };
-//# sourceMappingURL=describe.js.map

@@ -54,4 +54,3 @@ var StackTrace = (function () {
 }());
 exports.StackTrace = StackTrace;
 exports.stackTrace = new StackTrace();
-//# sourceMappingURL=StackTrace.js.map

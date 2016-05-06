@@ -19,4 +19,3 @@ exports.afterEach = function (callback, timeoutInterval) {
     // add it to its parent describe
     callstack_1.callStack.getTopOfStack().afterEach = _afterEach;
 };
-//# sourceMappingURL=afterEach.js.map

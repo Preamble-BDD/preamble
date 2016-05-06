@@ -19,4 +19,3 @@ var UniqueNumber = (function () {
     return UniqueNumber;
 }());
 exports.UniqueNumber = UniqueNumber;
-//# sourceMappingURL=UniqueNumber.js.map

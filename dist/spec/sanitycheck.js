@@ -715,4 +715,3 @@ describe("Calling and.expect.it.toThrowWithMessage(\"Whoops!\")", function () {
         m.validate();
     });
 });
-//# sourceMappingURL=sanitycheck.js.map

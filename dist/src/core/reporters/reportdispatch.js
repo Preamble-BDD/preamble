@@ -35,4 +35,3 @@ var ReportDispatch = (function () {
 }());
 exports.ReportDispatch = ReportDispatch;
 exports.reportDispatch = new ReportDispatch();
-//# sourceMappingURL=reportdispatch.js.map

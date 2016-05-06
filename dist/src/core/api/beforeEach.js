@@ -19,4 +19,3 @@ exports.beforeEach = function (callback, timeoutInterval) {
     // add it to its parent describe
     callstack_1.callStack.getTopOfStack().beforeEach = _beforeEach;
 };
-//# sourceMappingURL=beforeEach.js.map
