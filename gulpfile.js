@@ -10,6 +10,7 @@ var batch = require("gulp-batch");
 var spawn = require("child_process").spawnSync;
 
 /**
+ * Watch files for changes
  * batch calls its callback only once, after all chaged events have fired.
  * So even if 2 or more files are changed, callback is only called once.
  */
