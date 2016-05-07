@@ -1,3 +1,4 @@
+/// <reference path="./preamble-bdd-api.d.ts" />
 "use strict";
 describe("\"describe\" is used to describe a suite which can contain one or more specs", function () {
     it("and \"it\" is used to describe a spec and is used to group one or more expectations\"", function () {
@@ -715,3 +716,4 @@ describe("Calling and.expect.it.toThrowWithMessage(\"Whoops!\")", function () {
         m.validate();
     });
 });
+//# sourceMappingURL=sanitycheck.js.map
