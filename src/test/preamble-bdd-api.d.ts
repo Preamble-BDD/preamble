@@ -20,11 +20,19 @@ declare function describe(label: string, callback: () => void): void;
 
 declare function xdescribe(label: string, callback: () => void): void;
 
+declare function it(label: string, callback: () => void, timeoutInterval?: number): void;
+
 declare function it(label: string, callback: (done?: () => void) => void, timeoutInterval?: number): void;
+
+declare function xit(label: string, callback: () => void, timeoutInterval?: number): void;
 
 declare function xit(label: string, callback: (done?: () => void) => void, timeoutInterval?: number): void;
 
+declare function beforeEach(callback: () => void, timeoutInterval?: number): void;
+
 declare function beforeEach(callback: (done?: () => void) => void, timeoutInterval?: number): void;
+
+declare function afterEach(callback: () => void, timeoutInterval?: number): void;
 
 declare function afterEach(callback: (done?: () => void) => void, timeoutInterval?: number): void;
 
