@@ -1,5 +1,6 @@
 /**
  * Main entry point module
+ * call this module's export to boot
  */
 
 import Q = require("q");
