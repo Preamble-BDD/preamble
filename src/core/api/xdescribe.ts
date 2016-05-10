@@ -1,9 +1,3 @@
-/**
- * Callable API
- * xdescribe("description", callback)
- * excluded suite
- */
-
 import {callStack} from "./callstack";
 import {Describe} from "../queue/Describe";
 import {QueueManager} from "../queue/QueueManager";
@@ -40,7 +34,7 @@ export let xdescribe: ApiXDescribe = function(label: string, callback: () => voi
     try {
         _describe.callback();
     } catch (error) {
-        // TODO(js): this should be reported 
+        // TODO(js): this should be reported
         throw new Error(error.message);
     }
 

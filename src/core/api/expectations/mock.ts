@@ -6,8 +6,8 @@
 import {Spy} from "./spy/spy";
 import {spyOn} from "./spy/spy";
 import {INote} from "./INote";
-import {currentIt} from "../queue/QueueRunner";
-import {stackTrace} from "../stacktrace/StackTrace";
+import {getCurrentIt} from "../../queue/QueueRunner";
+import {stackTrace} from "../../stacktrace/StackTrace";
 import {IMatcher} from "./matchers/IMatcher";
 
 export interface MockStatic {
@@ -163,85 +163,85 @@ export let mock: MockStatic = (...args: any[]): Mock => {
     _mock.and.expect = <Expect>{ it: { not: {} } };
     _mock.and.expect.it.toBeCalled = (): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toBeCalled = (): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "not.toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "not.toBeCalled", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toBeCalledWith = (...args): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toBeCalledWith = (...args): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "not.toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "not.toBeCalledWith", expectedValue: aSpy, matcherValue: args, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toBeCalledWithContext = (context: {}): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toBeCalledWithContext = (context: {}): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "not.toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "not.toBeCalledWithContext", expectedValue: aSpy, matcherValue: context, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toReturnValue = (value: any): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toReturnValue = (value: any): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "not.toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "not.toReturnValue", expectedValue: aSpy, matcherValue: value, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrow = (): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrow = (): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "not.toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "not.toThrow", expectedValue: aSpy, matcherValue: null, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrowWithName = (name: string): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrowWithName = (name: string): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "not.toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "not.toThrowWithName", expectedValue: aSpy, matcherValue: name, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.toThrowWithMessage = (message: string): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
     _mock.and.expect.it.not.toThrowWithMessage = (message: string): Mock => {
         apisToCall.push({
-            note: { it: currentIt, apiName: "not.toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
+            note: { it: getCurrentIt(), apiName: "not.toThrowWithMessage", expectedValue: aSpy, matcherValue: message, result: null, exception: null, stackTrace: st }
         });
         return _mock;
     };
@@ -298,16 +298,16 @@ export let mock: MockStatic = (...args: any[]): Mock => {
                     mockAPI.not[apiToCall.note.apiName](apiToCall.note.expectedValue) :
                     mockAPI[apiToCall.note.apiName](apiToCall.note.expectedValue);
             }
-            currentIt.passed = apiToCall.note.result && currentIt.passed || false;
-            currentIt.parent.passed = apiToCall.note.result && currentIt.passed || false;
-            currentIt.expectations.push(apiToCall.note);
+            getCurrentIt().passed = apiToCall.note.result && getCurrentIt().passed || false;
+            getCurrentIt().parent.passed = apiToCall.note.result && getCurrentIt().passed || false;
+            getCurrentIt().expectations.push(apiToCall.note);
             if (!apiToCall.note.result) {
                 if (apiToCall.note.matcherValue) {
                     reason = `mock().and.expect.it.${apiToCall.note.apiName}(${apiToCall.note.matcherValue}) failed!`;
                 } else {
                     reason = `mock().and.expect.it.${apiToCall.note.apiName}() failed!`;
                 }
-                currentIt.reasons.push({ reason: reason, stackTrace: apiToCall.note.stackTrace });
+                getCurrentIt().reasons.push({ reason: reason, stackTrace: apiToCall.note.stackTrace });
             }
         });
     };

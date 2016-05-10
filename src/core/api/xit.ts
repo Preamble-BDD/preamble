@@ -1,9 +1,3 @@
-/**
- * Callable api
- * xit("description", callback)
- * exlude test
- */
-
 import {It} from "../queue/It";
 import {callStack} from "./callstack";
 import {QueueManager} from "../queue/QueueManager";

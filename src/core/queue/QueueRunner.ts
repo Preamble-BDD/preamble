@@ -14,14 +14,17 @@ import {mix} from "./mix";
 import {IReportDispatch} from "../reporters/reportdispatch";
 import "../../polyfills/Object.assign"; // prevent eliding import
 
-export let currentIt: IIt;
+let currentIt: IIt;
+export let getCurrentIt = (): IIt => currentIt;
 
-// TODO(JS): Show .fails (i.e. timeouts) in the done???
 export class QueueRunner {
     private errors: string[];
+    private isShortCircuited: boolean;
     constructor(private queue: mix[], private configTimeoutInterval: number,
-        private queueManager: QueueManager, private reportDispatch: IReportDispatch,
-        private Q: typeof q) { }
+        private configShortCircuit: boolean, private queueManager: QueueManager,
+        private reportDispatch: IReportDispatch, private Q: typeof q) {
+        this.isShortCircuited = false;
+    }
     /**
      * Returns a function (closure) which must complete within a set amount of time
      * asynchronously. If the function fails to complete within its given time limit
@@ -56,9 +59,13 @@ export class QueueRunner {
 
             // a timer that expires after timeoutInterval miliseconds
             setTimeout(() => {
+                let errorMsg = `timed out after ${timeoutInterval}ms`;
+                if (this.isShortCircuited) {
+                    errorMsg += " and testing has been short circuited";
+                }
                 if (deferred.promise.isPending()) {
                     // timedOut = true;
-                    deferred.reject(new Error(`timed out after ${timeoutInterval}ms`));
+                    deferred.reject(new Error(errorMsg));
                 }
             }, timeoutInterval);
         }, 1);
@@ -67,10 +74,9 @@ export class QueueRunner {
         return deferred.promise;
     }
     /**
-     * runs ancestor hierarchy of BeforeEach with inherited contexts
+     * runs ancestor hierarchy of BeforeEach or AfterEach with inherited contexts
      */
-    // TODO(js): combine runBefores and runAfters into one routine using a callback to determine whether to run the before or after
-    private runBefores(hierarchy: IDescribe[]): Q.Promise<any> {
+    private runBeforesAfters(hierarchy: IDescribe[], runAs: string): Q.Promise<any> {
         let deferred = this.Q.defer<any>();
 
         let runner = (ndx) => {
@@ -81,64 +87,38 @@ export class QueueRunner {
                     if (ndx) {
                         // the current context is a result of applying its parent's context values to a blank object
                         hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
-                        // console.log("beforeEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
                     } else {
                         hierarchy[ndx].context = {};
                     }
-                    if (hierarchy[ndx].beforeEach) {
-                        let ms = hierarchy[ndx].beforeEach.timeoutInterval > 0
-                            && hierarchy[ndx].beforeEach.timeoutInterval || this.configTimeoutInterval;
+                    if (runAs === "beforeEach") {
+                        if (hierarchy[ndx].beforeEach) {
+                            let ms = hierarchy[ndx].beforeEach.timeoutInterval > 0
+                                && hierarchy[ndx].beforeEach.timeoutInterval || this.configTimeoutInterval;
 
-                        this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, hierarchy[ndx].context, ms)
-                            .then(() => runner(++ndx),
-                            (error: Error) => {
-                                deferred.reject(new Error(`beforeEach ${error.message}`));
-                            });
+                            this.runBeforeItAfter(hierarchy[ndx].beforeEach.callback, hierarchy[ndx].context, ms)
+                                .then(() => runner(++ndx),
+                                (error: Error) => {
+                                    deferred.reject(new Error(`beforeEach ${error.message}`));
+                                });
+                        } else {
+                            runner(++ndx);
+                        }
+                    } else if (runAs === "afterEach") {
+                        if (hierarchy[ndx].afterEach) {
+                            let ms = hierarchy[ndx].afterEach.timeoutInterval > 0
+                                && hierarchy[ndx].afterEach.timeoutInterval || this.configTimeoutInterval;
+
+                            this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, hierarchy[ndx].context, ms)
+                                .then(() => runner(++ndx),
+                                (error: Error) => {
+                                    deferred.reject(new Error(`afterEach ${error.message}`));
+                                });
+                        } else {
+                            runner(++ndx);
+                        }
                     } else {
-                        runner(++ndx);
-                    }
-                } else {
-                    if (deferred.promise.isPending()) {
-                        deferred.resolve();
-                    }
-                }
-            }, 1);
-        };
-
-        runner(0);
-
-        return deferred.promise;
-    }
-    /**
-     * runs ancestor hierarchy of AfterEach with inherited contexts
-     */
-    // TODO(js): combine runBefores and runAfters into one routine using a callback to determine whether to run the before or after
-    private runAfters(hierarchy: IDescribe[]): Q.Promise<any> {
-        let deferred = this.Q.defer<any>();
-
-        let runner = (ndx) => {
-            setTimeout(() => {
-                if (ndx < hierarchy.length && deferred.promise.isPending()) {
-                    // setup the context for calling BeforeEach.callback
-                    // if it is not the 1st ([0]) item in the array
-                    if (ndx) {
-                        // the current context is a result of applying its parent's context values to a blank object
-                        hierarchy[ndx].context = Object.assign({}, hierarchy[ndx - 1].context);
-                        // console.log("afterEach context for " + hierarchy[ndx].label, hierarchy[ndx].context);
-                    } else {
-                        hierarchy[ndx].context = {};
-                    }
-                    if (hierarchy[ndx].afterEach) {
-                        let ms = hierarchy[ndx].afterEach.timeoutInterval > 0
-                            && hierarchy[ndx].afterEach.timeoutInterval || this.configTimeoutInterval;
-
-                        this.runBeforeItAfter(hierarchy[ndx].afterEach.callback, hierarchy[ndx].context, ms)
-                            .then(() => runner(++ndx),
-                            (error: Error) => {
-                                deferred.reject(new Error(`afterEach ${error.message}`));
-                            });
-                    } else {
-                        runner(++ndx);
+                        throw new Error(`runAs expects a string whose value is either
+                            "beforeEach" or "afterEach" but instead found ${runAs}`);
                     }
                 } else {
                     if (deferred.promise.isPending()) {
@@ -175,25 +155,37 @@ export class QueueRunner {
      */
     private runBIA(it: IIt): Q.Promise<any> {
         let deferred = this.Q.defer<any>();
+        let shortCircuitMessage = (message: string): string => {
+            return this.configShortCircuit && message + " and testing has been short circuited!" || message;
+        };
 
         setTimeout(() => {
             currentIt = it;
-            this.runBefores(it.hierarchy).then(() => {
+            this.runBeforesAfters(it.hierarchy, "beforeEach").then(() => {
                 this.runIt(it).then(() => {
-                    this.runAfters(it.hierarchy).then(() => {
+                    this.runBeforesAfters(it.hierarchy, "afterEach").then(() => {
                         deferred.resolve();
                     }, (error: Error) => {
-                        it.reasons.push({ reason: error.message, stackTrace: it.parent.afterEach.callStack });
+                        it.reasons.push({
+                            reason: shortCircuitMessage(error.message),
+                            stackTrace: it.parent.afterEach.callStack
+                        });
                         it.passed = false;
                         deferred.reject(error);
                     });
                 }, (error: Error) => {
-                    it.reasons.push({ reason: error.message, stackTrace: it.callStack });
+                    it.reasons.push({
+                        reason: shortCircuitMessage(error.message),
+                        stackTrace: it.callStack
+                    });
                     it.passed = false;
                     deferred.reject(error);
                 });
             }, (error: Error) => {
-                it.reasons.push({ reason: error.message, stackTrace: it.parent.beforeEach.callStack });
+                it.reasons.push({
+                    reason: shortCircuitMessage(error.message),
+                    stackTrace: it.parent.beforeEach.callStack
+                });
                 it.passed = false;
                 deferred.reject(error);
             });
@@ -214,9 +206,8 @@ export class QueueRunner {
         // recursive iterator
         let runner = (i: number) => {
             setTimeout(() => {
-                if (i < its.length) {
+                if (!this.isShortCircuited && i < its.length) {
                     it = its[i];
-                    // TODO(js): is parent.excluded check really needed????
                     if (it.excluded || it.parent.excluded) {
                         this.reportDispatch.reportSpec(it);
                         runner(++i);
@@ -224,14 +215,21 @@ export class QueueRunner {
                         this.runBIA(it).then(() => {
                             if (!it.passed) {
                                 QueueManager.bumpTotFailedItsCount();
+                                if (this.configShortCircuit) {
+                                    this.isShortCircuited = true;
+                                }
                             }
                             this.reportDispatch.reportSummary();
                             this.reportDispatch.reportSpec(it);
                             runner(++i);
                         }).fail(() => {
                             // an it timed out or one or more expectations failed
+                            QueueManager.bumpTotFailedItsCount();
                             this.reportDispatch.reportSummary();
                             this.reportDispatch.reportSpec(it);
+                            if (this.configShortCircuit) {
+                                this.isShortCircuited = true;
+                            }
                             runner(++i);
                         });
                     }
