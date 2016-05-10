@@ -303,7 +303,6 @@ describe(`Calling spyOn.x(object, methodNames)`, function() {
             someFn: function() { },
             someOtherFn: function() { }
         };
-        // TODO(): expose spyOn.x functionality an a global function
         spyOnN(someObject, ["someFn", "someOtherFn"]);
         someObject.someFn();
         expect(someObject.someFn).toHaveBeenCalled();

@@ -208,7 +208,6 @@ export class QueueRunner {
             setTimeout(() => {
                 if (!this.isShortCircuited && i < its.length) {
                     it = its[i];
-                    // TODO(js): is parent.excluded check really needed????
                     if (it.excluded || it.parent.excluded) {
                         this.reportDispatch.reportSpec(it);
                         runner(++i);
