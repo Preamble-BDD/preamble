@@ -6,6 +6,7 @@ var vinylSource = require("vinyl-source-stream");
 var ts = require("gulp-typescript");
 var merge = require("merge2");
 var watchedFiles = ["src/**/*.ts", "spec/**/*.ts"];
+var destFolder = "./dist";
 var batch = require("gulp-batch");
 var spawn = require("child_process").spawnSync;
 
@@ -27,16 +28,25 @@ gulp.task("watch", function () {
 });
 
 /**
+ * delete the  dist/ folder
+ */
+gulp.task("clean", function () {
+  spawn ("rm", ["-rf", destFolder], {
+    stdio: "inherit"
+  });
+});
+
+/**
  * Compile the typescript project into dist/ to generate the .js and .d.ts files
  */
-gulp.task("typescript", function() {
+gulp.task("typescript", ["clean"], function() {
     var tsProject = ts.createProject("tsconfig.json", {
         declaration: true,
         typescript: require("typescript")
     });
     var tsResult = tsProject.src()
     .pipe(ts(tsProject));
-    merge([
+    return merge([
         tsResult.dts.pipe(gulp.dest("dist")),
         tsResult.js.pipe(gulp.dest("dist"))
     ]);
@@ -53,7 +63,7 @@ gulp.task("bundle", ["typescript"], function () {
     b.require("./dist/main.js", {expose: "main"});
 
     // and output bundle names preamble-ts.js to ./dist
-    b.bundle()
+    return b.bundle()
     .pipe(vinylSource("preamble-ts.js"))
     .pipe(gulp.dest("./dist/"));
 });
