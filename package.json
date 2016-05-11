@@ -1,6 +1,6 @@
 {
   "name": "@preamble/preamble-ts-core",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "An environment neutral JavaScript BDD testing framework written in TypeScript which supports writing test suites in TypeScript.",
   "main": "dist/main.js",
   "scripts": {
