@@ -72,7 +72,7 @@ gulp.task("bundle", ["typescript"], function () {
  * run the sanity test
  */
 gulp.task("test", ["bundle"], function () {
-  spawn ("preamble", ["-s", "./dist/test/sanitycheck.js"], {
+  spawn ("preamble", ["-s", "./dist/test/sanitycheck.js", "-n", "Sanity Check Suite"], {
     stdio: "inherit"
   });
 });
