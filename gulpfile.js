@@ -82,19 +82,21 @@ gulp.task("test", ["bundle"], function () {
 });
 
 /**
- * copyfiles
+ * copyFiles
  *  copy dist/preamble-ts.js to standalone
  */
- gulp.task("copyfiles", ["test"], function () {
+ gulp.task("copyFiles", ["test"], function () {
+   var copyFiles;
    if (!testExitCode) {
      // copy bundle to standaone
-     spawn ("cp", ["./dist/preamble-ts.js", "../preamble-ts-standalone/dist/core"], {
+     copyFiles = spawn ("cp", ["./dist/preamble-ts.js", "../preamble-ts-standalone/dist/core"], {
        stdio: "inherit"
      });
      console.log("copied ./dist/preamble-ts.js to ../preamble-ts-standalone/dist/core");
    } else {
-     console.log("prod not run due to test exit code!");
+     console.log("copyFiles task not run due to test exit code!");
    }
+   return copyFiles;
  });
 
 /**
@@ -123,4 +125,4 @@ gulp.task("default", ["watch"]);
 /**
  * prod task
  */
- gulp.task("prod", ["copyfiles"]);
+ gulp.task("prod", ["copyFiles"]);
