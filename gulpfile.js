@@ -70,10 +70,10 @@ gulp.task("bundle", ["typescript"], function () {
 });
 
 /**
- * run the sanity test
+ * run the sanity test in quiet mode
  */
 gulp.task("test", ["bundle"], function () {
-  var test = spawn ("preamble", ["-s", "./dist/test/sanitycheck.js", "-n", "Sanity Check Suite"], {
+  var test = spawn ("preamble", ["-Q", "-s", "./dist/test/sanitycheck.js", "-n", "Sanity Check Suite"], {
     stdio: "inherit"
   });
   testExitCode = test.status;
