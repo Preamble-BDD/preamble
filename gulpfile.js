@@ -9,6 +9,7 @@ var watchedFiles = ["src/**/*.ts", "spec/**/*.ts"];
 var destFolder = "./dist";
 var batch = require("gulp-batch");
 var spawn = require("child_process").spawnSync;
+var testExitCode = 0;
 
 /**
  * Watch files for changes
@@ -62,7 +63,7 @@ gulp.task("bundle", ["typescript"], function () {
     // generate a named external require
     b.require("./dist/main.js", {expose: "main"});
 
-    // and output bundle names preamble-ts.js to ./dist
+    // and output bundle preamble-ts.js to ./dist
     return b.bundle()
     .pipe(vinylSource("preamble-ts.js"))
     .pipe(gulp.dest("./dist/"));
@@ -72,10 +73,29 @@ gulp.task("bundle", ["typescript"], function () {
  * run the sanity test
  */
 gulp.task("test", ["bundle"], function () {
-  spawn ("preamble", ["-s", "./dist/test/sanitycheck.js", "-n", "Sanity Check Suite"], {
+  var test = spawn ("preamble", ["-s", "./dist/test/sanitycheck.js", "-n", "Sanity Check Suite"], {
     stdio: "inherit"
   });
+  testExitCode = test.status;
+  console.log("test exited with a code of", test.status);
+  return test;
 });
+
+/**
+ * copyfiles
+ *  copy dist/preamble-ts.js to standalone
+ */
+ gulp.task("copyfiles", ["test"], function () {
+   if (!testExitCode) {
+     // copy bundle to standaone
+     spawn ("cp", ["./dist/preamble-ts.js", "../preamble-ts-standalone/dist/core"], {
+       stdio: "inherit"
+     });
+     console.log("copied ./dist/preamble-ts.js to ../preamble-ts-standalone/dist/core");
+   } else {
+     console.log("prod not run due to test exit code!");
+   }
+ });
 
 /**
  * npm link this package
@@ -99,3 +119,8 @@ gulp.task("unlink", function () {
  * default task i.e. $ gulp
  */
 gulp.task("default", ["watch"]);
+
+/**
+ * prod task
+ */
+ gulp.task("prod", ["copyfiles"]);
