@@ -3,7 +3,6 @@
  * call this module's export to boot
  */
 
-// TODO(js): use default exports for these where possible
 import Q = require("q");
 import {QueueManager} from "./core/queue/QueueManager";
 import {QueueRunner} from "./core/queue/QueueRunner";
